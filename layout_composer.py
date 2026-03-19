@@ -6,8 +6,6 @@ import math
 import cv2
 import numpy as np
 
-from pattern_generators import get_pattern_generator
-
 
 LEGION_FRAME = "frame"
 LEGION_SYMBOL = "symbol"
@@ -291,20 +289,35 @@ def generate_spirit_control(slot, mask: np.ndarray, asset_path: str | None = Non
 
 
 def generate_flow_control(slot, mask: np.ndarray, asset_path: str | None = None, meta: dict | None = None) -> np.ndarray:
+    """底纹控制信号：素材整图极重度模糊，保留方向场，抹去物体感。
+
+    有素材时：整图 resize 到 mask bbox 大小，GaussianBlur(sigma=20) 后裁到 mask 区域。
+    无素材时：mask 区域填充均匀灰色 (128)，给 ControlNet 一个中性信号。
+    """
     h, w = mask.shape[:2]
     mask_u8 = (mask > 0).astype(np.uint8) * 255
-    meta = meta or {}
-    generator_name = slot.get("pattern_generator") or meta.get("pattern_generator")
-    if asset_path and generator_name == "wave":
-        asset_canvas = _fit_flow_asset(asset_path, mask_u8)
-        if asset_canvas is not None and np.any(asset_canvas):
-            return asset_canvas
-    generator = get_pattern_generator(generator_name)
-    pattern = generator.generate(w, h, meta.get("pattern_params", {}))
-    dist = cv2.distanceTransform(mask_u8, cv2.DIST_L2, 5)
-    feather = max(10, min(h, w) // 10)
-    alpha = np.clip(dist / float(feather), 0.0, 1.0)
-    return (pattern.astype(np.float32) * alpha).astype(np.uint8)
+
+    canvas = np.zeros((h, w), dtype=np.uint8)
+    bbox = mask_bbox(mask_u8)
+    if not bbox:
+        return canvas
+    bx, by, bw, bh = bbox
+
+    if asset_path:
+        # 读彩色素材，转灰度
+        img = cv2.imread(str(asset_path), cv2.IMREAD_GRAYSCALE)
+        if img is not None:
+            # resize 到 mask bbox 大小
+            resized = cv2.resize(img, (max(1, bw), max(1, bh)), interpolation=cv2.INTER_CUBIC)
+            # 极重度高斯模糊：抹去物体轮廓，只保留明暗方向场
+            k = _make_odd(max(51, min(bw, bh) // 3))
+            blurred = cv2.GaussianBlur(resized, (k, k), sigmaX=20, sigmaY=20)
+            canvas[by:by + bh, bx:bx + bw] = blurred
+            return cv2.bitwise_and(canvas, mask_u8)
+
+    # 无素材：均匀中性灰，给 ControlNet 一个弱引导信号
+    canvas[mask_u8 > 0] = 128
+    return canvas
 
 
 def generate_control_signal(slot_or_name, mask, asset_path=None, meta=None):

@@ -960,36 +960,41 @@ class PorcelainGenerationPipeline:
         return ", ".join(dedup_parts), ", ".join(negative_parts)
 
     def _merge_control_images(self, control_layers: list[dict], canvas: tuple[int, int]) -> np.ndarray:
+        """合成 lineart_map。
+
+        修复说明：
+        1. LEGION_FLOW（底纹）完全排除出 lineart_map——底纹靠 prompt 自由生成，
+           重度模糊的灰色团块混入控制图只会干扰 ControlNet 对主体线稿的识别。
+        2. secondary mask 面积过小（< 3%）时跳过，避免微小噪声块干扰主体。
+        3. base mask 可能超出 canvas，resize 前先 clip 到画布尺寸。
+        """
         w, h = canvas
         composite = np.zeros((h, w), dtype=np.uint8)
-        spirit_occupancy = np.zeros((h, w), dtype=np.uint8)
+        canvas_area = w * h
 
-        for layer in control_layers:
-            if layer["legion"] in {LEGION_SPIRIT, LEGION_SYMBOL}:
-                spirit_img = layer["control_image"]
-                if spirit_img is None:
-                    continue
-                spirit_img = (spirit_img > 0).astype(np.uint8) * 255
-                spirit_occupancy = np.maximum(spirit_occupancy, spirit_img)
-
-        if spirit_occupancy.any():
-            kernel_size = max(5, int(min(w, h) * 0.010))
-            kernel_size = kernel_size if kernel_size % 2 == 1 else kernel_size + 1
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
-            spirit_occupancy = cv2.dilate(spirit_occupancy, kernel)
-            spirit_occupancy = cv2.GaussianBlur(spirit_occupancy, (kernel_size, kernel_size), 0)
-
-        order = {LEGION_FLOW: 0, LEGION_SYMBOL: 1, LEGION_SPIRIT: 2, LEGION_FRAME: 3}
+        # 只合成 spirit(primary/secondary) 和 frame(border) 层
+        order = {LEGION_SYMBOL: 0, LEGION_SPIRIT: 1, LEGION_FRAME: 2}
         for layer in sorted(control_layers, key=lambda item: order.get(item["legion"], 99)):
+            # 完全跳过 flow 层（底纹）
+            if layer["legion"] == LEGION_FLOW:
+                continue
+
             img = layer["control_image"]
             if img is None:
                 continue
+
+            # secondary 掩码面积过小时跳过（< 3% 画布面积）
+            if layer["role"] == "secondary":
+                mask = layer.get("mask")
+                if mask is not None:
+                    area_pct = float((mask > 0).sum()) / canvas_area
+                    if area_pct < 0.03:
+                        continue
+
+            # clip 到画布尺寸再 resize
+            img = img[:h, :w]
             if img.shape[:2] != (h, w):
                 img = cv2.resize(img, (w, h), interpolation=cv2.INTER_AREA)
-
-            if layer["legion"] == LEGION_FLOW and spirit_occupancy.any():
-                alpha = 1.0 - (spirit_occupancy.astype(np.float32) / 255.0)
-                img = (img.astype(np.float32) * alpha).astype(np.uint8)
 
             composite = np.maximum(composite, img)
 
@@ -998,10 +1003,10 @@ class PorcelainGenerationPipeline:
     def _choose_lineart_weight(self, control_layers: list[dict]) -> float:
         if not control_layers:
             return 0.55
-        base = max((layer["controlnet_weight"] for layer in control_layers if layer["legion"] == LEGION_FLOW), default=0.52)
+        # flow 层不再进入 lineart_map，权重只取 spirit 和 frame
         spirit = max((layer["controlnet_weight"] for layer in control_layers if layer["legion"] == LEGION_SPIRIT), default=0.45)
         border = max((layer["controlnet_weight"] for layer in control_layers if layer["legion"] == LEGION_FRAME), default=0.0)
-        chosen = max(base, spirit, min(border, 0.72))
+        chosen = max(spirit, min(border, 0.72))
         return round(float(chosen), 3)
 
     def build_ip_adapter_inputs(self, layers_info: list[dict]) -> list[dict]:

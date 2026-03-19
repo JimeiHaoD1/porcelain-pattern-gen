@@ -6,6 +6,8 @@ import math
 import cv2
 import numpy as np
 
+from pattern_generators import get_pattern_generator
+
 
 LEGION_FRAME = "frame"
 LEGION_SYMBOL = "symbol"
@@ -289,10 +291,11 @@ def generate_spirit_control(slot, mask: np.ndarray, asset_path: str | None = Non
 
 
 def generate_flow_control(slot, mask: np.ndarray, asset_path: str | None = None, meta: dict | None = None) -> np.ndarray:
-    """底纹控制信号：素材整图极重度模糊，保留方向场，抹去物体感。
+    """底纹控制信号：S形骨架线，引导缠枝/卷草走势。
 
-    有素材时：整图 resize 到 mask bbox 大小，GaussianBlur(sigma=20) 后裁到 mask 区域。
-    无素材时：mask 区域填充均匀灰色 (128)，给 ControlNet 一个中性信号。
+    使用 spiral_vine 生成器在底纹区域画S形贝塞尔骨架线，
+    轻度模糊后裁到 mask 区域，以低权重送入 ControlNet。
+    SDXL 沿骨架幻觉卷草细节，不再用写实草图或模糊素材。
     """
     h, w = mask.shape[:2]
     mask_u8 = (mask > 0).astype(np.uint8) * 255
@@ -303,21 +306,15 @@ def generate_flow_control(slot, mask: np.ndarray, asset_path: str | None = None,
         return canvas
     bx, by, bw, bh = bbox
 
-    if asset_path:
-        # 读彩色素材，转灰度
-        img = cv2.imread(str(asset_path), cv2.IMREAD_GRAYSCALE)
-        if img is not None:
-            # resize 到 mask bbox 大小
-            resized = cv2.resize(img, (max(1, bw), max(1, bh)), interpolation=cv2.INTER_CUBIC)
-            # 极重度高斯模糊：抹去物体轮廓，只保留明暗方向场
-            k = _make_odd(max(51, min(bw, bh) // 3))
-            blurred = cv2.GaussianBlur(resized, (k, k), sigmaX=20, sigmaY=20)
-            canvas[by:by + bh, bx:bx + bw] = blurred
-            return cv2.bitwise_and(canvas, mask_u8)
-
-    # 无素材：均匀中性灰，给 ControlNet 一个弱引导信号
-    canvas[mask_u8 > 0] = 128
-    return canvas
+    # 生成S形骨架线，覆盖 bbox 区域
+    generator = get_pattern_generator("spiral_vine")
+    pattern = generator.generate(bw, bh, {
+        "n_waves": max(2, bh // 120),
+        "amplitude": 0.20,
+        "thickness": max(1, min(bw, bh) // 80),
+    })
+    canvas[by:by + bh, bx:bx + bw] = pattern
+    return cv2.bitwise_and(canvas, mask_u8)
 
 
 def generate_control_signal(slot_or_name, mask, asset_path=None, meta=None):

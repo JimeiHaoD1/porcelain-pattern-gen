@@ -963,22 +963,19 @@ class PorcelainGenerationPipeline:
         """合成 lineart_map。
 
         修复说明：
-        1. LEGION_FLOW（底纹）完全排除出 lineart_map——底纹靠 prompt 自由生成，
-           重度模糊的灰色团块混入控制图只会干扰 ControlNet 对主体线稿的识别。
+        1. LEGION_FLOW（底纹S形骨架线）以 0.25 权重叠入，提供缠枝走势引导。
         2. secondary mask 面积过小（< 3%）时跳过，避免微小噪声块干扰主体。
         3. base mask 可能超出 canvas，resize 前先 clip 到画布尺寸。
+        合成顺序：flow（最底）-> symbol -> spirit（主体）-> frame（边饰，最顶）
         """
         w, h = canvas
         composite = np.zeros((h, w), dtype=np.uint8)
         canvas_area = w * h
 
-        # 只合成 spirit(primary/secondary) 和 frame(border) 层
-        order = {LEGION_SYMBOL: 0, LEGION_SPIRIT: 1, LEGION_FRAME: 2}
-        for layer in sorted(control_layers, key=lambda item: order.get(item["legion"], 99)):
-            # 完全跳过 flow 层（底纹）
-            if layer["legion"] == LEGION_FLOW:
-                continue
+        FLOW_WEIGHT = 0.25  # 底纹骨架线叠入权重，低权重避免干扰主体
 
+        order = {LEGION_FLOW: 0, LEGION_SYMBOL: 1, LEGION_SPIRIT: 2, LEGION_FRAME: 3}
+        for layer in sorted(control_layers, key=lambda item: order.get(item["legion"], 99)):
             img = layer["control_image"]
             if img is None:
                 continue
@@ -995,6 +992,10 @@ class PorcelainGenerationPipeline:
             img = img[:h, :w]
             if img.shape[:2] != (h, w):
                 img = cv2.resize(img, (w, h), interpolation=cv2.INTER_AREA)
+
+            # flow 层（S形骨架）以低权重叠入，避免压制主体线稿
+            if layer["legion"] == LEGION_FLOW:
+                img = (img.astype(np.float32) * FLOW_WEIGHT).astype(np.uint8)
 
             composite = np.maximum(composite, img)
 

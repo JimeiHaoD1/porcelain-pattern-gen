@@ -321,6 +321,58 @@ class CloudGenerator:
 # ─────────────────────────────────────────────
 # NullGenerator
 # ─────────────────────────────────────────────
+# SpiralVineGenerator - S形/螺旋骨架线，用于缠枝纹引导
+# ─────────────────────────────────────────────
+
+class SpiralVineGenerator:
+    """生成程序化S形贝塞尔曲线骨架，作为缠枝纹ControlNet引导信号。
+
+    原理：在底纹区域内画若干条S形曲线（正弦骨架线），
+    轻度模糊后以低权重送入ControlNet，让SDXL沿骨架幻觉卷草细节。
+    不追求精确的纹样，只提供走势方向场。
+    """
+
+    def generate(self, w: int, h: int, params: dict) -> np.ndarray:
+        canvas = np.zeros((h, w), dtype=np.uint8)
+        n_waves     = int(params.get("n_waves", 3))       # S形曲线条数
+        amplitude   = float(params.get("amplitude", 0.18)) # 振幅比例（相对画布高）
+        thickness   = int(params.get("thickness", 2))
+        phase_shift = float(params.get("phase_shift", math.pi))  # 相邻线相位差
+
+        amp_px = max(8, int(h * amplitude))
+        row_gap = max(16, h // max(1, n_waves))
+
+        for i in range(n_waves):
+            y_center = int((i + 0.5) * row_gap)
+            if y_center >= h:
+                break
+            phase = i * phase_shift
+            pts = []
+            for x in range(0, w, 2):
+                # 正弦骨架线，形成S形走势
+                y = int(y_center + amp_px * math.sin(2 * math.pi * x / w + phase))
+                y = max(0, min(h - 1, y))
+                pts.append((x, y))
+            if len(pts) >= 2:
+                cv2.polylines(
+                    canvas,
+                    [np.array(pts, dtype=np.int32)],
+                    False, 200, thickness, cv2.LINE_AA
+                )
+            # 在波峰/波谷处加小圆圈，模拟卷头位置提示
+            for x in range(w // 6, w, w // 4):
+                y = int(y_center + amp_px * math.sin(2 * math.pi * x / w + phase))
+                y = max(4, min(h - 5, y))
+                curl_r = max(3, int(min(w, h) * 0.018))
+                cv2.circle(canvas, (x, y), curl_r, 180, max(1, thickness - 1), cv2.LINE_AA)
+
+        # 轻度模糊：软化骨架，让边界柔和，但保留走势
+        k = 9
+        canvas = cv2.GaussianBlur(canvas, (k, k), sigmaX=3, sigmaY=3)
+        return canvas
+
+
+# ─────────────────────────────────────────────
 
 class NullGenerator:
     """找不到生成器时的降级：返回全空画布"""
@@ -329,9 +381,10 @@ class NullGenerator:
 
 
 _REGISTRY: dict[str, object] = {
-    "wave":   WaveGenerator(),
-    "scroll": ScrollGenerator(),
-    "cloud":  CloudGenerator(),
+    "wave":         WaveGenerator(),
+    "scroll":       ScrollGenerator(),
+    "cloud":        CloudGenerator(),
+    "spiral_vine":  SpiralVineGenerator(),
 }
 
 

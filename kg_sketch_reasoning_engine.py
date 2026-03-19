@@ -394,13 +394,11 @@ class HybridGraphEngine:
             fill_log.append({"role": "border", "element": element, "source": "candidate_or_fallback"})
 
         symbol_pool = [elem for elem in pick_first("symbol") if elem not in chosen]
-        if symbol_pool and category in {"Love_Harmony", "Cosmic_Order"}:
-            element = symbol_pool[0]
-            chosen.append(element)
-            slots.append({"element": element, "role": "symbol"})
-            fill_log.append({"role": "symbol", "element": element, "source": "candidate_or_fallback"})
+        # symbol 元素完全禁用：SDXL 无法同时处理太多元素，symbol 贡献有限
+        # if symbol_pool and category in {"Love_Harmony", "Cosmic_Order"}: ...
 
-        secondary_budget = MAX_SECONDARY_BY_LAYOUT.get(layout_archetype, 4)
+        # secondary 最多 1 个，避免画面杂糅
+        secondary_budget = 1
         secondary_pool = []
         for element in ranked:
             if element in chosen:

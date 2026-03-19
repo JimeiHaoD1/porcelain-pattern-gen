@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+
+# 输出图像（不追踪生成结果，只追踪代码）
+outputs/
+old_img/
+
+# 模型权重（太大，不入库）
+*.safetensors
+*.bin
+*.ckpt
+*.pt
+*.pth
+*.onnx
+
+# ControlNet / IP-Adapter / Gaussian（子模块目录，不追踪内容）
+ControlNet/
+IP-Adapter/
+Gaussian/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# 日志
+*.log
+*.txt
+run_*.txt
+
+# 临时文件
+*.tmp
+*.bak
+Thumbs.db
+.DS_Store
+
+# pipe.docx（本地文档）
+pipe.docx

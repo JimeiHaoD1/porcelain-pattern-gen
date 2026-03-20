@@ -1,12 +1,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import json
 import math
+from pathlib import Path
 
 import cv2
 import numpy as np
 
 from pattern_generators import get_pattern_generator
+
+# 加载纹样库
+_PATTERN_LIB_PATH = Path(__file__).parent / "pattern_library.json"
+_PATTERN_LIBRARY = {}
+if _PATTERN_LIB_PATH.exists():
+    with open(_PATTERN_LIB_PATH, 'r', encoding='utf-8') as f:
+        _PATTERN_LIBRARY = json.load(f)
 
 
 LEGION_FRAME = "frame"
@@ -357,3 +366,81 @@ class LayoutComposer:
 
     def generate_control_signal(self, slot, mask, asset_path=None, meta=None):
         return generate_control_signal(slot, mask, asset_path, meta)
+
+    @staticmethod
+    def recommend_patterns(primary_element: str, secondary_elements: list[str]) -> dict:
+        """根据主体和配角元素推荐纹样。
+        
+        返回格式：
+        {
+            "border": "推荐的边饰纹样",
+            "base": "推荐的底纹纹样",
+            "category": "纹样类别（organic/geometric/landscape/mixed）"
+        }
+        """
+        if not _PATTERN_LIBRARY:
+            return {"border": "回纹", "base": "云纹", "category": "mixed"}
+        
+        recommendations = _PATTERN_LIBRARY.get("pattern_recommendations", {})
+        
+        # 判断元素类别
+        all_elements = [primary_element] + secondary_elements
+        
+        # 检查是否有有机元素（花朵、植物等）
+        organic_keywords = ["花", "牡丹", "梅", "莲", "叶", "草", "藤"]
+        has_organic = any(any(kw in elem for kw in organic_keywords) for elem in all_elements)
+        
+        # 检查是否有几何/龙凤元素
+        geometric_keywords = ["龙", "凤", "麒麟", "几何", "回纹"]
+        has_geometric = any(any(kw in elem for kw in geometric_keywords) for elem in all_elements)
+        
+        # 检查是否有山水元素
+        landscape_keywords = ["山", "石", "松", "竹", "水"]
+        has_landscape = any(any(kw in elem for kw in landscape_keywords) for elem in all_elements)
+        
+        # 选择推荐
+        if has_organic:
+            rec = recommendations.get("organic_elements", {})
+            return {
+                "border": rec.get("border", ["缠枝纹"])[0],
+                "base": rec.get("base", ["缠枝纹"])[0],
+                "category": "organic"
+            }
+        elif has_geometric:
+            rec = recommendations.get("geometric_elements", {})
+            return {
+                "border": rec.get("border", ["回纹"])[0],
+                "base": rec.get("base", ["云纹"])[0],
+                "category": "geometric"
+            }
+        elif has_landscape:
+            rec = recommendations.get("landscape_elements", {})
+            return {
+                "border": rec.get("border", ["云纹"])[0],
+                "base": rec.get("base", ["云纹"])[0],
+                "category": "landscape"
+            }
+        else:
+            rec = recommendations.get("mixed_elements", {})
+            return {
+                "border": rec.get("border", ["云纹"])[0],
+                "base": rec.get("base", ["云纹"])[0],
+                "category": "mixed"
+            }
+
+    @staticmethod
+    def get_pattern_variant(pattern_name: str, variant_index: int = 0) -> str:
+        """获取纹样的变体版本，支持轮换。
+        
+        例如：get_pattern_variant("缠枝纹", 0) -> "缠枝纹_v1"
+        """
+        if not _PATTERN_LIBRARY:
+            return pattern_name
+        
+        rotation = _PATTERN_LIBRARY.get("pattern_rotation", {})
+        variants = rotation.get(pattern_name, [pattern_name])
+        
+        # 轮换索引
+        idx = variant_index % len(variants)
+        return variants[idx]
+

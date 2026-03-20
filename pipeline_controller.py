@@ -27,6 +27,23 @@ try:
 except ImportError:
     lazy_pinyin = None
 
+# 布局类型定义
+LAYOUT_TYPES = {
+    "rectangle": ["full_width", "centered", "asymmetric", "horizontal_band"],
+    "circular": ["central", "satellite", "concentric", "radial"]
+}
+
+# 意图到布局类型的映射
+INTENT_TO_LAYOUT_TYPE = {
+    "Wealth_Career": "circular",
+    "Longevity_Health": "rectangle",
+    "Auspicious_Blessing": "circular",
+    "Family_Fertility": "circular",
+    "Love_Harmony": "circular",
+    "Character_Reclusion": "rectangle",
+    "Cosmic_Order": "circular",
+}
+
 
 ELEMENT_TRANSLATION = {
     "回纹": "meander pattern, greek key border, geometric band",

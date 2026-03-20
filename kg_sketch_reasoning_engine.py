@@ -20,6 +20,14 @@ try:
 except ImportError:
     SentenceTransformer = None
 
+# 加载兼容性规则
+_COMPAT_RULES_PATH = Path(__file__).parent / "compatibility_rules.json"
+_COMPATIBILITY_RULES = {}
+if _COMPAT_RULES_PATH.exists():
+    with open(_COMPAT_RULES_PATH, 'r', encoding='utf-8') as f:
+        _data = json.load(f)
+        _COMPATIBILITY_RULES = _data.get("compatibility_rules", {})
+
 
 INTENT_ANCHORS = {
     "Wealth_Career": {
@@ -352,11 +360,41 @@ class HybridGraphEngine:
                     pool.append(partner)
         return pool
 
-    def assign_slots(self, candidates: list[dict], layout_archetype: str, category: str) -> tuple[list[dict], list[dict]]:
+    def assign_slots(self, candidates: list[dict], layout_archetype: str, category: str, include_border: bool = True, include_base: bool = True) -> tuple[list[dict], list[dict]]:
+        """分配槽位，加入关联度调整逻辑和灵活布局支持。
+        
+        改进：
+        1. 不仅看相似度排序，还考虑已选元素与候选元素的兼容性
+        2. 支持灵活布局：可选是否包含 border 和 base 槽位
+        """
         ranked = [item["element"] for item in candidates]
         chosen: list[str] = []
         slots: list[dict] = []
         fill_log: list[dict] = []
+
+        def _apply_compatibility_boost(pool: list[str], chosen_elements: list[str]) -> list[str]:
+            """根据兼容性规则调整候选池的排序。"""
+            if not pool or not chosen_elements:
+                return pool
+            
+            # 计算每个候选元素的兼容性得分
+            scores = {}
+            for candidate in pool:
+                score = 0.0
+                compat_rules = _COMPATIBILITY_RULES.get(candidate, {})
+                compatible = compat_rules.get("compatible_with", [])
+                incompatible = compat_rules.get("incompatible_with", [])
+                
+                for chosen in chosen_elements:
+                    if chosen in compatible:
+                        score += 0.3  # 兼容性加分
+                    elif chosen in incompatible:
+                        score -= 0.5  # 冲突性减分
+                
+                scores[candidate] = score
+            
+            # 按兼容性得分排序（高分优先）
+            return sorted(pool, key=lambda x: scores.get(x, 0.0), reverse=True)
 
         def pick_first(role: str, allow_multiple: bool = False) -> list[str]:
             picks: list[str] = []
@@ -372,6 +410,7 @@ class HybridGraphEngine:
                 picks.extend(supplements)
             return picks
 
+        # Primary：主体元素，不调整（直接取排名第一）
         primary_pool = pick_first("primary")
         if primary_pool:
             element = primary_pool[0]
@@ -379,25 +418,31 @@ class HybridGraphEngine:
             slots.append({"element": element, "role": "primary"})
             fill_log.append({"role": "primary", "element": element, "source": "candidate"})
 
-        base_pool = [elem for elem in pick_first("base") if elem not in chosen]
-        if base_pool:
-            element = base_pool[0]
-            chosen.append(element)
-            slots.append({"element": element, "role": "base"})
-            fill_log.append({"role": "base", "element": element, "source": "candidate_or_fallback"})
+        # Base：底纹，应用兼容性调整，支持灵活布局
+        if include_base:
+            base_pool = [elem for elem in pick_first("base") if elem not in chosen]
+            base_pool = _apply_compatibility_boost(base_pool, chosen)
+            if base_pool:
+                element = base_pool[0]
+                chosen.append(element)
+                slots.append({"element": element, "role": "base"})
+                fill_log.append({"role": "base", "element": element, "source": "candidate_or_fallback"})
 
-        border_pool = [elem for elem in pick_first("border") if elem not in chosen]
-        if border_pool:
-            element = border_pool[0]
-            chosen.append(element)
-            slots.append({"element": element, "role": "border"})
-            fill_log.append({"role": "border", "element": element, "source": "candidate_or_fallback"})
+        # Border：边饰，应用兼容性调整，支持灵活布局
+        if include_border:
+            border_pool = [elem for elem in pick_first("border") if elem not in chosen]
+            border_pool = _apply_compatibility_boost(border_pool, chosen)
+            if border_pool:
+                element = border_pool[0]
+                chosen.append(element)
+                slots.append({"element": element, "role": "border"})
+                fill_log.append({"role": "border", "element": element, "source": "candidate_or_fallback"})
 
         symbol_pool = [elem for elem in pick_first("symbol") if elem not in chosen]
         # symbol 元素完全禁用：SDXL 无法同时处理太多元素，symbol 贡献有限
         # if symbol_pool and category in {"Love_Harmony", "Cosmic_Order"}: ...
 
-        # secondary 最多 1 个，避免画面杂糅
+        # Secondary：配角，应用兼容性调整，最多 1 个
         secondary_budget = 1
         secondary_pool = []
         for element in ranked:
@@ -409,6 +454,9 @@ class HybridGraphEngine:
             for element in self._supplement_pool(chosen, "secondary", category, slots[0]["element"] if slots else None):
                 if element not in chosen and element not in secondary_pool:
                     secondary_pool.append(element)
+        
+        # 应用兼容性调整
+        secondary_pool = _apply_compatibility_boost(secondary_pool, chosen)
 
         for idx, element in enumerate(secondary_pool[:secondary_budget]):
             chosen.append(element)
@@ -446,10 +494,10 @@ class HybridGraphEngine:
             "size_ratio": round(size_ratio, 3),
         }
 
-    def build_blueprint_v52(self, user_query: str, seed: int = 1234, canvas: tuple[int, int] = (1024, 768)) -> dict:
+    def build_blueprint_v52(self, user_query: str, seed: int = 1234, canvas: tuple[int, int] = (1024, 768), include_border: bool = True, include_base: bool = True) -> dict:
         stage0 = self.infer_candidate_elements(user_query)
         style, layout = self._assign_layout(stage0["intent_category"])
-        slots_raw, role_fill_log = self.assign_slots(stage0["candidate_elements"], layout, stage0["intent_category"])
+        slots_raw, role_fill_log = self.assign_slots(stage0["candidate_elements"], layout, stage0["intent_category"], include_border=include_border, include_base=include_base)
 
         slots = []
         pose_log = []
@@ -491,6 +539,8 @@ class HybridGraphEngine:
             "layout_archetype": layout,
             "structure_tags": LAYOUT_STRUCTURE_TAGS.get(layout, []),
             "slots": slots,
+            "include_border": True,  # 灵活布局：用户可选是否包含边饰
+            "include_base": True,    # 灵活布局：用户可选是否包含底纹
             "debug": {
                 "intent_category": stage0["intent_category"],
                 "target_meanings": stage0["target_meanings"],

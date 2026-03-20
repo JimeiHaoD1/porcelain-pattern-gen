@@ -1,0 +1,97 @@
+{
+  "compatibility_rules": {
+    "缠枝纹": {
+      "compatible_with": ["花朵", "叶片", "灵芝", "如意", "牡丹", "梅花"],
+      "incompatible_with": ["回纹", "几何纹"],
+      "category": "organic"
+    },
+    "回纹": {
+      "compatible_with": ["几何纹", "云纹", "如意"],
+      "incompatible_with": ["缠枝纹", "花朵", "卷草"],
+      "category": "geometric"
+    },
+    "卷草": {
+      "compatible_with": ["花朵", "叶片", "灵芝", "缠枝纹"],
+      "incompatible_with": ["回纹", "几何纹"],
+      "category": "organic"
+    },
+    "龙": {
+      "compatible_with": ["海水", "云纹", "如意", "珠子"],
+      "incompatible_with": ["花朵", "蝴蝶", "仕女"],
+      "category": "spirit"
+    },
+    "鹤": {
+      "compatible_with": ["松树", "云纹", "灵芝", "如意"],
+      "incompatible_with": ["海水", "龙"],
+      "category": "spirit"
+    },
+    "牡丹": {
+      "compatible_with": ["缠枝纹", "卷草", "叶片", "蝴蝶"],
+      "incompatible_with": ["回纹", "龙"],
+      "category": "flower"
+    },
+    "梅花": {
+      "compatible_with": ["缠枝纹", "卷草", "松树"],
+      "incompatible_with": ["回纹", "海水"],
+      "category": "flower"
+    },
+    "海水": {
+      "compatible_with": ["龙", "云纹", "珠子"],
+      "incompatible_with": ["花朵", "鹤", "缠枝纹"],
+      "category": "landscape"
+    },
+    "云纹": {
+      "compatible_with": ["龙", "鹤", "回纹", "海水", "如意"],
+      "incompatible_with": [],
+      "category": "pattern"
+    },
+    "灵芝": {
+      "compatible_with": ["缠枝纹", "卷草", "鹤", "如意"],
+      "incompatible_with": ["龙", "海水"],
+      "category": "auspicious"
+    },
+    "如意": {
+      "compatible_with": ["龙", "鹤", "云纹", "灵芝", "回纹"],
+      "incompatible_with": [],
+      "category": "auspicious"
+    },
+    "蝴蝶": {
+      "compatible_with": ["花朵", "牡丹", "梅花"],
+      "incompatible_with": ["龙", "海水"],
+      "category": "insect"
+    },
+    "松树": {
+      "compatible_with": ["鹤", "梅花", "灵芝"],
+      "incompatible_with": ["龙", "海水"],
+      "category": "plant"
+    }
+  },
+  "layout_intent_mapping": {
+    "婚礼": "circular",
+    "爱情": "circular",
+    "和谐": "circular",
+    "长寿": "rectangle",
+    "健康": "rectangle",
+    "稳定": "rectangle",
+    "财富": "satellite",
+    "事业": "satellite",
+    "权力": "satellite",
+    "祥和": "central",
+    "吉祥": "central",
+    "平安": "central"
+  },
+  "pattern_recommendations": {
+    "organic_elements": {
+      "border": ["缠枝纹", "卷草", "花卉纹"],
+      "base": ["缠枝纹", "卷草"]
+    },
+    "geometric_elements": {
+      "border": ["回纹", "几何纹", "云纹"],
+      "base": ["云纹", "海水"]
+    },
+    "mixed_elements": {
+      "border": ["云纹", "如意纹"],
+      "base": ["云纹"]
+    }
+  }
+}

@@ -175,8 +175,103 @@ def _hermite_segment(
     )
 
 
+def _motion_policy(contract: Mapping[str, Any]) -> Mapping[str, Any]:
+    policy = contract.get("motion_policy")
+    if policy is None:
+        return {"mode": "legacy_outward_v1"}
+    if not isinstance(policy, Mapping):
+        raise GlobalL1FlowError("motion_policy must be an object")
+    mode = str(policy.get("mode"))
+    if mode not in {"legacy_outward_v1", "tangent_led_v1"}:
+        raise GlobalL1FlowError(f"unsupported L1 motion mode: {mode}")
+    return policy
+
+
+def _tangent_led_segments(
+    *,
+    root: Point,
+    target: Point,
+    flow_direction: Point,
+    outward: Point,
+    terminal_direction: Point,
+    policy: Mapping[str, Any],
+) -> list[dict[str, list[float]]]:
+    """Build a G1 tangent-led departure followed by one deliberate turn."""
+
+    flow = _unit(flow_direction, "tangent_led_flow_direction")
+    outward_unit = _unit(outward, "tangent_led_outward")
+    chord = _distance(root, target)
+    departure_fraction = float(policy["departure_chord_fraction"])
+    departure_length = max(
+        float(policy["minimum_departure_length"]),
+        chord * departure_fraction,
+    )
+    clearance = min(
+        float(policy["maximum_departure_clearance"]),
+        max(
+            float(policy["minimum_departure_clearance"]),
+            chord * float(policy["departure_clearance_chord_fraction"]),
+        ),
+    )
+    departure = _add(
+        root,
+        _add(_mul(flow, departure_length), _mul(outward_unit, clearance)),
+    )
+    join_direction = _unit(
+        _add(
+            _mul(flow, float(policy["join_flow_weight"])),
+            _mul(outward_unit, float(policy["join_outward_weight"])),
+        ),
+        "tangent_led_join_direction",
+    )
+    first_chord = _distance(root, departure)
+    second_chord = _distance(departure, target)
+    return [
+        _hermite_segment(
+            root,
+            departure,
+            flow,
+            join_direction,
+            first_chord * float(policy["first_start_arm_fraction"]),
+            first_chord * float(policy["first_end_arm_fraction"]),
+        ),
+        _hermite_segment(
+            departure,
+            target,
+            join_direction,
+            terminal_direction,
+            second_chord * float(policy["second_start_arm_fraction"]),
+            second_chord * float(policy["second_end_arm_fraction"]),
+        ),
+    ]
+
+
 def _polyline_length(points: Sequence[Point]) -> float:
     return sum(_distance(points[index - 1], points[index]) for index in range(1, len(points)))
+
+
+def _polyline_cumulative_lengths(points: Sequence[Point]) -> list[float]:
+    lengths = [0.0]
+    for start, end in zip(points, points[1:]):
+        lengths.append(lengths[-1] + _distance(start, end))
+    return lengths
+
+
+def _point_at_arc_fraction(points: Sequence[Point], fraction: float) -> Point:
+    lengths = _polyline_cumulative_lengths(points)
+    target = lengths[-1] * fraction
+    for index in range(1, len(points)):
+        if lengths[index] + 1e-12 >= target:
+            span = lengths[index] - lengths[index - 1]
+            local = 0.0 if span <= 1e-12 else (target - lengths[index - 1]) / span
+            return _lerp(points[index - 1], points[index], local)
+    return points[-1]
+
+
+def _angle_degrees(first: Point, second: Point, *, unsigned_axis: bool = False) -> float:
+    cosine = _dot(_unit(first, "angle.first"), _unit(second, "angle.second"))
+    cosine = max(-1.0, min(1.0, abs(cosine) if unsigned_axis else cosine))
+    return math.degrees(math.acos(cosine))
 
 
 def _point_segment_distance(point: Point, start: Point, end: Point) -> float:
@@ -214,30 +309,87 @@ def _segment_distance(a0: Point, a1: Point, b0: Point, b1: Point) -> float:
     )
 
 
-def _polyline_distance(a: Sequence[Point], b: Sequence[Point], offset_b: float = 0.0) -> float:
-    a_min_x = min(point[0] for point in a)
-    a_max_x = max(point[0] for point in a)
-    a_min_y = min(point[1] for point in a)
-    a_max_y = max(point[1] for point in a)
-    b_min_x = min(point[0] + offset_b for point in b)
-    b_max_x = max(point[0] + offset_b for point in b)
-    b_min_y = min(point[1] for point in b)
-    b_max_y = max(point[1] for point in b)
+def _prepare_polyline_collision_geometry(
+    points: Sequence[Point],
+) -> dict[str, Any]:
+    normalized = tuple(points)
+    return {
+        "points": normalized,
+        "bounds": (
+            min(point[0] for point in normalized),
+            max(point[0] for point in normalized),
+            min(point[1] for point in normalized),
+            max(point[1] for point in normalized),
+        ),
+        "segments": tuple(
+            (
+                normalized[index - 1],
+                normalized[index],
+                min(normalized[index - 1][0], normalized[index][0]),
+                max(normalized[index - 1][0], normalized[index][0]),
+                min(normalized[index - 1][1], normalized[index][1]),
+                max(normalized[index - 1][1], normalized[index][1]),
+            )
+            for index in range(1, len(normalized))
+        ),
+    }
+
+
+def _prepared_polyline_distance(
+    a: Mapping[str, Any],
+    b: Mapping[str, Any],
+    offset_b: float = 0.0,
+    *,
+    stop_below: float | None = None,
+) -> float:
+    a_min_x, a_max_x, a_min_y, a_max_y = a["bounds"]
+    b_min_x, b_max_x, b_min_y, b_max_y = b["bounds"]
+    b_min_x += offset_b
+    b_max_x += offset_b
     gap_x = max(0.0, a_min_x - b_max_x, b_min_x - a_max_x)
     gap_y = max(0.0, a_min_y - b_max_y, b_min_y - a_max_y)
     box_gap = math.hypot(gap_x, gap_y)
     if box_gap > 0.18:
         return box_gap
     minimum = float("inf")
-    for index in range(1, len(a)):
-        a0, a1 = a[index - 1], a[index]
-        for other_index in range(1, len(b)):
-            b0 = b[other_index - 1][0] + offset_b, b[other_index - 1][1]
-            b1 = b[other_index][0] + offset_b, b[other_index][1]
+    for a0, a1, a0x, a1x, a0y, a1y in a["segments"]:
+        for (
+            b0_unshifted,
+            b1_unshifted,
+            b0x_unshifted,
+            b1x_unshifted,
+            b0y,
+            b1y,
+        ) in b["segments"]:
+            b0 = b0_unshifted[0] + offset_b, b0_unshifted[1]
+            b1 = b1_unshifted[0] + offset_b, b1_unshifted[1]
+            b0x = b0x_unshifted + offset_b
+            b1x = b1x_unshifted + offset_b
+            segment_gap_x = max(0.0, a0x - b1x, b0x - a1x)
+            segment_gap_y = max(0.0, a0y - b1y, b0y - a1y)
+            if segment_gap_x * segment_gap_x + segment_gap_y * segment_gap_y >= minimum * minimum:
+                continue
             minimum = min(minimum, _segment_distance(a0, a1, b0, b1))
             if minimum <= 0.0:
                 return 0.0
+            if stop_below is not None and minimum < stop_below:
+                return minimum
     return minimum
+
+
+def _polyline_distance(
+    a: Sequence[Point],
+    b: Sequence[Point],
+    offset_b: float = 0.0,
+    *,
+    stop_below: float | None = None,
+) -> float:
+    return _prepared_polyline_distance(
+        _prepare_polyline_collision_geometry(a),
+        _prepare_polyline_collision_geometry(b),
+        offset_b,
+        stop_below=stop_below,
+    )
 
 
 def _sample_at_s(analysis: Mapping[str, Any], s: float) -> tuple[Point, Point]:
@@ -325,13 +477,14 @@ def _candidate_regions(analysis: Mapping[str, Any]) -> list[Mapping[str, Any]]:
 def _region_s_values(
     region: Mapping[str, Any],
     phase: float,
+    fractions: Sequence[float] = (0.10, 0.30, 0.50, 0.70, 0.90),
 ) -> list[float]:
     values: list[float] = []
     for start, end in region["s_ranges"]:
         start_value = float(start)
         end_value = float(end)
         span = end_value - start_value
-        for fraction in (0.10, 0.30, 0.50, 0.70, 0.90):
+        for fraction in fractions:
             shifted = min(0.92, max(0.08, fraction + phase))
             values.append((start_value + span * shifted) % 1.0)
     return values
@@ -513,6 +666,7 @@ def _ordinary_candidates(
     analysis: Mapping[str, Any],
     prior: Mapping[str, Any],
     latents: Mapping[str, float],
+    motion_policy: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
     primary_stats = prior["statistics"]["primary_geometry"]["chord_length_repeat"]
     if slot.role == "frontier":
@@ -533,71 +687,142 @@ def _ordinary_candidates(
     index = 0
     for region in _candidate_regions(analysis):
         side_id = str(region["side_id"])
-        for root_s in _region_s_values(region, phase):
+        root_fractions = (
+            tuple(float(value) for value in motion_policy["region_sample_fractions"])
+            if motion_policy["mode"] == "tangent_led_v1"
+            else (0.10, 0.30, 0.50, 0.70, 0.90)
+        )
+        for root_s in _region_s_values(region, phase, root_fractions):
             root, tangent = _sample_at_s(analysis, root_s)
             outward = _normal(tangent, side_id)
             for along_sign in (-1.0, 1.0):
                 for length_scale in length_scales:
-                    index += 1
-                    planned = (
-                        base_length
-                        * length_scale
-                        * float(latents["openness"])
-                        * (1.08 if slot.role == "frontier" else 1.0)
-                    )
-                    radial = min(0.36, max(0.20, planned * 0.68))
-                    longitudinal = math.sqrt(max(planned * planned - radial * radial, 0.0144))
-                    longitudinal *= along_sign * float(latents["sweep_amplitude"])
-                    target = _add(
-                        root,
-                        _add(_mul(outward, radial), _mul(tangent, longitudinal)),
-                    )
-                    if not (0.035 <= target[1] <= canvas_height - 0.035):
-                        continue
-                    if not (-0.32 <= target[0] <= 1.32):
-                        continue
-                    start_direction = _unit(
-                        _add(_mul(outward, 0.91), _mul(tangent, 0.18 * along_sign)),
-                        "ordinary_start_direction",
-                    )
-                    terminal_direction = _unit(
-                        _add(_mul(tangent, 0.78 * along_sign), _mul(outward, 0.34)),
-                        "ordinary_terminal_direction",
-                    )
-                    chord = _distance(root, target)
-                    entry_arm = chord * (0.28 + 0.05 * float(latents["curl_energy"]))
-                    exit_arm = chord * (0.34 + 0.06 * float(latents["curl_energy"]))
-                    if (slot.index + (1 if along_sign > 0 else 0)) % 2 == 0:
-                        terminal_direction = _unit(
-                            _add(_mul(terminal_direction, 0.72), _mul(outward, -0.46)),
-                            "ordinary_s_terminal",
+                    radial_scales = (
+                        tuple(
+                            float(value)
+                            for value in motion_policy["ordinary_radial_scales"]
                         )
-                        signature = "S"
-                    else:
-                        signature = "C"
-                    segments = [
-                        _hermite_segment(
+                        if motion_policy["mode"] == "tangent_led_v1"
+                        else (1.0,)
+                    )
+                    for radial_scale in radial_scales:
+                        index += 1
+                        planned = (
+                            base_length
+                            * length_scale
+                            * float(latents["openness"])
+                            * (1.08 if slot.role == "frontier" else 1.0)
+                        )
+                        if motion_policy["mode"] == "tangent_led_v1":
+                            base_radial = min(
+                                float(motion_policy["ordinary_maximum_radial"]),
+                                max(
+                                    float(motion_policy["ordinary_minimum_radial"]),
+                                    planned
+                                    * float(
+                                        motion_policy[
+                                            "ordinary_radial_planned_length_fraction"
+                                        ]
+                                    ),
+                                ),
+                            )
+                            radial = base_radial * radial_scale
+                        else:
+                            radial = min(0.36, max(0.20, planned * 0.68))
+                        longitudinal = math.sqrt(
+                            max(planned * planned - radial * radial, 0.0144)
+                        )
+                        longitudinal *= (
+                            along_sign * float(latents["sweep_amplitude"])
+                        )
+                        target = _add(
                             root,
-                            target,
-                            start_direction,
-                            terminal_direction,
-                            entry_arm,
-                            exit_arm,
+                            _add(
+                                _mul(outward, radial),
+                                _mul(tangent, longitudinal),
+                            ),
                         )
-                    ]
-                    root_preference = 1.0 - min(
-                        1.0, _periodic_delta(root_s, slot.preferred_s) / max(root_gap_median * 2.5, 0.20)
-                    )
-                    vertical_side = "upper" if target[1] < root[1] else "lower"
-                    vertical_match = 1.0 if vertical_side == slot.preferred_vertical_side else 0.0
-                    individual_score = (
-                        3.0 * root_preference
-                        + 1.4 * vertical_match
-                        + 1.0 * float(region["mean_clearance"]) / 0.38
-                        + (0.7 if signature == "S" else 0.45)
-                    )
-                    candidates.append(
-                        _candidate_base(
+                        if not (0.035 <= target[1] <= canvas_height - 0.035):
+                            continue
+                        if not (-0.32 <= target[0] <= 1.32):
+                            continue
+                        start_direction = (
+                            _mul(tangent, along_sign)
+                            if motion_policy["mode"] == "tangent_led_v1"
+                            else _unit(
+                                _add(
+                                    _mul(outward, 0.91),
+                                    _mul(tangent, 0.18 * along_sign),
+                                ),
+                                "ordinary_start_direction",
+                            )
+                        )
+                        terminal_direction = _unit(
+                            _add(
+                                _mul(tangent, 0.78 * along_sign),
+                                _mul(outward, 0.34),
+                            ),
+                            "ordinary_terminal_direction",
+                        )
+                        chord = _distance(root, target)
+                        entry_arm = chord * (
+                            0.28 + 0.05 * float(latents["curl_energy"])
+                        )
+                        exit_arm = chord * (
+                            0.34 + 0.06 * float(latents["curl_energy"])
+                        )
+                        if (slot.index + (1 if along_sign > 0 else 0)) % 2 == 0:
+                            terminal_direction = _unit(
+                                _add(
+                                    _mul(terminal_direction, 0.72),
+                                    _mul(outward, -0.46),
+                                ),
+                                "ordinary_s_terminal",
+                            )
+                            signature = "S"
+                        else:
+                            signature = "C"
+                        segments = (
+                            _tangent_led_segments(
+                                root=root,
+                                target=target,
+                                flow_direction=start_direction,
+                                outward=outward,
+                                terminal_direction=terminal_direction,
+                                policy=motion_policy,
+                            )
+                            if motion_policy["mode"] == "tangent_led_v1"
+                            else [
+                                _hermite_segment(
+                                    root,
+                                    target,
+                                    start_direction,
+                                    terminal_direction,
+                                    entry_arm,
+                                    exit_arm,
+                                )
+                            ]
+                        )
+                        root_preference = 1.0 - min(
+                            1.0,
+                            _periodic_delta(root_s, slot.preferred_s)
+                            / max(root_gap_median * 2.5, 0.20),
+                        )
+                        vertical_side = (
+                            "upper" if target[1] < root[1] else "lower"
+                        )
+                        vertical_match = (
+                            1.0
+                            if vertical_side == slot.preferred_vertical_side
+                            else 0.0
+                        )
+                        individual_score = (
+                            3.0 * root_preference
+                            + 1.4 * vertical_match
+                            + 1.0 * float(region["mean_clearance"]) / 0.38
+                            + (0.7 if signature == "S" else 0.45)
+                        )
+                        candidate = _candidate_base(
                             candidate_id=f"{slot.slot_id}_dynamic_{index:03d}",
                             slot=slot,
                             source_channel="dynamic_prior_conditioned",
@@ -613,10 +838,17 @@ def _ordinary_candidates(
                                 "root_preference": root_preference,
                                 "vertical_match": vertical_match,
                                 "planned_chord": chord,
+                                "radial_scale": radial_scale,
                             },
                             individual_score=individual_score,
                         )
-                    )
+                        if motion_policy["mode"] == "tangent_led_v1":
+                            _annotate_motion_candidate(
+                                candidate,
+                                analysis,
+                                motion_policy,
+                            )
+                        candidates.append(candidate)
     return candidates
 
 
@@ -635,6 +867,7 @@ def _sw1_support_candidates(
     slot: Slot,
     analysis: Mapping[str, Any],
     latents: Mapping[str, float],
+    motion_policy: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
     if slot.flower_id is None:
         raise GlobalL1FlowError("SW-1 support slot has no flower id")
@@ -644,37 +877,122 @@ def _sw1_support_candidates(
         troughs,
         key=lambda value: _periodic_delta(value, float(flower["nearest_backbone_s"])),
     )
-    offsets = (-0.105, -0.075, -0.045, 0.045, 0.075, 0.105)
+    offsets = (
+        tuple(float(value) for value in motion_policy["sw1_trough_offsets"])
+        if motion_policy["mode"] == "tangent_led_v1"
+        else (-0.105, -0.075, -0.045, 0.045, 0.075, 0.105)
+    )
     candidates: list[dict[str, Any]] = []
-    for index, offset in enumerate(offsets, start=1):
+    candidate_index = 0
+    for offset in offsets:
         signed_offset = offset + float(latents["flow_phase"]) * 0.35
         root_s = (base_trough + signed_offset) % 1.0
         root, tangent = _sample_at_s(analysis, root_s)
         target = _flower_boundary_toward(flower, root)
-        direction = _unit(_sub(target, root), "sw1_support_direction")
-        side_id, outward = _closest_side(tangent, direction)
-        start_direction = _unit(
-            _add(_mul(outward, 0.86), _mul(direction, 0.40)),
-            "sw1_support_start",
-        )
         center = _flower_center_near(flower, root[0])
-        radial = _unit(_sub(target, center), "sw1_flower_radial")
-        terminal_direction = _mul(radial, -1.0)
-        chord = _distance(root, target)
-        segments = [
-            _hermite_segment(
-                root,
-                target,
-                start_direction,
-                terminal_direction,
-                chord * 0.31,
-                chord * 0.24,
+        if motion_policy["mode"] == "tangent_led_v1":
+            horizontal_sign = -1.0 if root[0] <= center[0] else 1.0
+            waypoint = (
+                center[0]
+                + horizontal_sign
+                * (
+                    float(motion_policy["sw1_waypoint_rx_fraction"])
+                    * float(flower["rx"])
+                    + float(motion_policy["sw1_waypoint_horizontal_margin"])
+                ),
+                center[1]
+                + float(flower["ry"])
+                + float(motion_policy["sw1_waypoint_vertical_margin"]),
             )
-        ]
-        trough_distance = _periodic_delta(root_s, base_trough)
-        candidates.append(
-            _candidate_base(
-                candidate_id=f"{slot.slot_id}_sw1_{index:02d}",
+            direction = _unit(_sub(waypoint, root), "sw1_support_direction")
+        else:
+            waypoint = None
+            direction = _unit(_sub(target, root), "sw1_support_direction")
+        side_id, outward = _closest_side(tangent, direction)
+        preferred_along_sign = (
+            1.0 if _dot(tangent, direction) >= 0.0 else -1.0
+        )
+        flow_options = (
+            (preferred_along_sign, -preferred_along_sign)
+            if motion_policy["mode"] == "tangent_led_v1"
+            else (preferred_along_sign,)
+        )
+        for flow_index, along_sign in enumerate(flow_options):
+            candidate_index += 1
+            if motion_policy["mode"] == "tangent_led_v1":
+                start_direction = _mul(tangent, along_sign)
+            else:
+                start_direction = _unit(
+                    _add(_mul(outward, 0.86), _mul(direction, 0.40)),
+                    "sw1_support_start",
+                )
+            radial = _unit(_sub(target, center), "sw1_flower_radial")
+            terminal_direction = _mul(radial, -1.0)
+            chord = _distance(root, target)
+            if motion_policy["mode"] == "tangent_led_v1":
+                assert waypoint is not None
+                waypoint_exit = _unit(
+                    _sub(target, waypoint),
+                    "sw1_waypoint_exit",
+                )
+                sw1_departure_policy = dict(motion_policy)
+                sw1_departure_policy["departure_chord_fraction"] = (
+                    float(motion_policy["departure_chord_fraction"])
+                    * float(motion_policy["sw1_departure_fraction_multiplier"])
+                )
+                sw1_departure_policy["minimum_departure_length"] = float(
+                    motion_policy["sw1_minimum_departure_length"]
+                )
+                sw1_departure_policy["minimum_departure_clearance"] = float(
+                    motion_policy["sw1_minimum_departure_clearance"]
+                )
+                sw1_departure_policy["maximum_departure_clearance"] = float(
+                    motion_policy["sw1_maximum_departure_clearance"]
+                )
+                first_segments = _tangent_led_segments(
+                    root=root,
+                    target=waypoint,
+                    flow_direction=start_direction,
+                    outward=outward,
+                    terminal_direction=waypoint_exit,
+                    policy=sw1_departure_policy,
+                )
+                waypoint_chord = _distance(waypoint, target)
+                segments = [
+                    *first_segments,
+                    _hermite_segment(
+                        waypoint,
+                        target,
+                        waypoint_exit,
+                        terminal_direction,
+                        waypoint_chord
+                        * float(
+                            motion_policy[
+                                "sw1_waypoint_exit_start_arm_fraction"
+                            ]
+                        ),
+                        waypoint_chord
+                        * float(
+                            motion_policy[
+                                "sw1_waypoint_exit_end_arm_fraction"
+                            ]
+                        ),
+                    ),
+                ]
+            else:
+                segments = [
+                    _hermite_segment(
+                        root,
+                        target,
+                        start_direction,
+                        terminal_direction,
+                        chord * 0.31,
+                        chord * 0.24,
+                    )
+                ]
+            trough_distance = _periodic_delta(root_s, base_trough)
+            candidate = _candidate_base(
+                candidate_id=f"{slot.slot_id}_sw1_{candidate_index:02d}",
                 slot=slot,
                 source_channel="prototype_morphology_rule",
                 side_id=side_id,
@@ -693,10 +1011,24 @@ def _sw1_support_candidates(
                         float(flower["rx"]),
                         float(flower["ry"]),
                     ),
+                    "below_flower_waypoint_margin": (
+                        waypoint[1] - (center[1] + float(flower["ry"]))
+                        if waypoint is not None
+                        else 0.0
+                    ),
+                    "preferred_flow_direction": (
+                        1.0 if flow_index == 0 else 0.0
+                    ),
                 },
-                individual_score=6.0 - 7.0 * trough_distance,
+                individual_score=(
+                    6.0
+                    - 7.0 * trough_distance
+                    + (0.15 if flow_index == 0 else 0.0)
+                ),
             )
-        )
+            if motion_policy["mode"] == "tangent_led_v1":
+                _annotate_motion_candidate(candidate, analysis, motion_policy)
+            candidates.append(candidate)
     return candidates
 
 
@@ -704,18 +1036,50 @@ def _sw3_support_candidates(
     slot: Slot,
     analysis: Mapping[str, Any],
     latents: Mapping[str, float],
+    motion_policy: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
     if slot.flower_id is None:
         raise GlobalL1FlowError("SW-3 support slot has no flower id")
     flower = _flower_by_id(analysis, slot.flower_id)
     nearest_s = float(flower["nearest_backbone_s"])
-    distances = (0.335, 0.375, 0.415, 0.455)
+    tangent_led = motion_policy["mode"] == "tangent_led_v1"
+    distances = (
+        tuple(
+            float(value)
+            for value in motion_policy["sw3_remote_mount_distances"]
+        )
+        if tangent_led
+        else (0.335, 0.375, 0.415, 0.455)
+    )
+    waypoint_variants = (
+        [
+            (
+                float(rx_fraction),
+                float(horizontal_margin),
+                float(vertical_margin),
+            )
+            for rx_fraction in motion_policy["sw3_waypoint_rx_fractions"]
+            for horizontal_margin in motion_policy[
+                "sw3_waypoint_horizontal_margins"
+            ]
+            for vertical_margin in motion_policy[
+                "sw3_waypoint_vertical_margins"
+            ]
+        ]
+        if tangent_led
+        else [(0.62, 0.035, 0.055)]
+    )
     candidates: list[dict[str, Any]] = []
     index = 0
     for arc_direction in (-1.0, 1.0):
         for distance in distances:
-            index += 1
-            remote_distance = distance + float(latents["flow_phase"]) * 0.20
+            remote_distance = distance + float(
+                latents["flow_phase"]
+            ) * (
+                float(motion_policy["sw3_remote_phase_scale"])
+                if tangent_led
+                else 0.20
+            )
             root_s = (nearest_s + arc_direction * remote_distance) % 1.0
             root, tangent = _sample_at_s(analysis, root_s)
             center = _flower_center_near(flower, root[0])
@@ -723,37 +1087,120 @@ def _sw3_support_candidates(
             ry = float(flower["ry"])
             target = center[0], center[1] + ry
             horizontal_sign = -1.0 if root[0] <= center[0] else 1.0
-            waypoint = (
-                center[0] + horizontal_sign * (0.62 * rx + 0.035),
-                center[1] + ry + 0.055,
-            )
-            toward_waypoint = _unit(_sub(waypoint, root), "sw3_waypoint_direction")
-            side_id, outward = _closest_side(tangent, toward_waypoint)
-            start_direction = _unit(
-                _add(_mul(toward_waypoint, 0.92), _mul(outward, 0.16)),
-                "sw3_support_start",
-            )
-            first_chord = _distance(root, waypoint)
-            second_chord = _distance(waypoint, target)
-            first = _hermite_segment(
-                root,
-                waypoint,
-                start_direction,
-                _unit(_sub(target, waypoint), "sw3_waypoint_exit"),
-                first_chord * 0.33,
-                first_chord * 0.12,
-            )
-            tangent_at_waypoint = _unit(_sub(target, waypoint), "sw3_second_start")
-            second = _hermite_segment(
-                waypoint,
-                target,
-                tangent_at_waypoint,
-                (0.0, -1.0),
-                max(0.035, second_chord * 0.42),
-                max(0.025, second_chord * 0.28),
-            )
-            candidates.append(
-                _candidate_base(
+            for (
+                waypoint_rx_fraction,
+                waypoint_horizontal_margin,
+                waypoint_vertical_margin,
+            ) in waypoint_variants:
+                index += 1
+                waypoint = (
+                    center[0]
+                    + horizontal_sign
+                    * (
+                        waypoint_rx_fraction * rx
+                        + waypoint_horizontal_margin
+                    ),
+                    center[1] + ry + waypoint_vertical_margin,
+                )
+                toward_waypoint = _unit(
+                    _sub(waypoint, root),
+                    "sw3_waypoint_direction",
+                )
+                side_id, outward = _closest_side(
+                    tangent,
+                    toward_waypoint,
+                )
+                if tangent_led:
+                    along_sign = (
+                        1.0
+                        if _dot(tangent, toward_waypoint) >= 0.0
+                        else -1.0
+                    )
+                    start_direction = _mul(tangent, along_sign)
+                else:
+                    start_direction = _unit(
+                        _add(
+                            _mul(toward_waypoint, 0.92),
+                            _mul(outward, 0.16),
+                        ),
+                        "sw3_support_start",
+                    )
+                first_chord = _distance(root, waypoint)
+                second_chord = _distance(waypoint, target)
+                tangent_at_waypoint = _unit(
+                    _sub(target, waypoint),
+                    "sw3_second_start",
+                )
+                first_segments = (
+                    _tangent_led_segments(
+                        root=root,
+                        target=waypoint,
+                        flow_direction=start_direction,
+                        outward=outward,
+                        terminal_direction=tangent_at_waypoint,
+                        policy=motion_policy,
+                    )
+                    if tangent_led
+                    else [
+                        _hermite_segment(
+                            root,
+                            waypoint,
+                            start_direction,
+                            tangent_at_waypoint,
+                            first_chord * 0.33,
+                            first_chord * 0.12,
+                        )
+                    ]
+                )
+                second = _hermite_segment(
+                    waypoint,
+                    target,
+                    tangent_at_waypoint,
+                    (0.0, -1.0),
+                    max(
+                        (
+                            float(
+                                motion_policy[
+                                    "sw3_second_minimum_start_arm"
+                                ]
+                            )
+                            if tangent_led
+                            else 0.035
+                        ),
+                        second_chord
+                        * (
+                            float(
+                                motion_policy[
+                                    "sw3_second_start_arm_fraction"
+                                ]
+                            )
+                            if tangent_led
+                            else 0.42
+                        ),
+                    ),
+                    max(
+                        (
+                            float(
+                                motion_policy[
+                                    "sw3_second_minimum_end_arm"
+                                ]
+                            )
+                            if tangent_led
+                            else 0.025
+                        ),
+                        second_chord
+                        * (
+                            float(
+                                motion_policy[
+                                    "sw3_second_end_arm_fraction"
+                                ]
+                            )
+                            if tangent_led
+                            else 0.28
+                        ),
+                    ),
+                )
+                candidate = _candidate_base(
                     candidate_id=f"{slot.slot_id}_sw3_{index:02d}",
                     slot=slot,
                     source_channel="prototype_morphology_rule",
@@ -761,7 +1208,7 @@ def _sw3_support_candidates(
                     root_s=root_s,
                     root=root,
                     target=target,
-                    segments=[first, second],
+                    segments=[*first_segments, second],
                     flower_id=slot.flower_id,
                     curvature_signature="SC" if arc_direction < 0 else "CS",
                     features={
@@ -770,11 +1217,20 @@ def _sw3_support_candidates(
                         "below_flower_waypoint_margin": waypoint[1] - (center[1] + ry),
                         "underside_contact_dx": abs(target[0] - center[0]),
                         "underside_contact_dy": abs(target[1] - (center[1] + ry)),
+                        "waypoint_rx_fraction": waypoint_rx_fraction,
+                        "waypoint_horizontal_margin": waypoint_horizontal_margin,
+                        "waypoint_vertical_margin": waypoint_vertical_margin,
                     },
                     individual_score=8.0
                     - abs(_periodic_delta(root_s, nearest_s) - 0.395) * 8.0,
                 )
-            )
+                if tangent_led:
+                    _annotate_motion_candidate(
+                        candidate,
+                        analysis,
+                        motion_policy,
+                    )
+                candidates.append(candidate)
     return candidates
 
 
@@ -783,6 +1239,7 @@ def _fixed_warp_candidates(
     analysis: Mapping[str, Any],
     prior: Mapping[str, Any],
     seed: int,
+    motion_policy: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
     if analysis["prototype_id"] != "proto_sw_1_3":
         return []
@@ -813,20 +1270,41 @@ def _fixed_warp_candidates(
         side_id, outward = _closest_side(tangent, direction)
         source_p1 = _point(source_segments[0]["p1"], "fixed_template.p1")
         source_arm = max(0.065, _distance(root, source_p1))
-        corrected_start = _unit(
-            _add(_mul(outward, 0.90), _mul(direction, 0.24)),
-            "fixed_warp_corrected_start",
-        )
-        segments = [
-            {
-                key: list(values)
-                for key, values in source_segment.items()
-            }
-            for source_segment in source_segments
-        ]
-        segments[0]["p1"] = _round_point(_add(root, _mul(corrected_start, source_arm)))
-        candidates.append(
-            _candidate_base(
+        if motion_policy["mode"] == "tangent_led_v1":
+            along_sign = 1.0 if _dot(tangent, direction) >= 0.0 else -1.0
+            corrected_start = _mul(tangent, along_sign)
+            source_end = source_segments[-1]
+            terminal_direction = _unit(
+                _sub(
+                    _point(source_end["p3"], "fixed_template.last.p3"),
+                    _point(source_end["p2"], "fixed_template.last.p2"),
+                ),
+                "fixed_template_terminal_direction",
+            )
+            segments = _tangent_led_segments(
+                root=root,
+                target=target,
+                flow_direction=corrected_start,
+                outward=outward,
+                terminal_direction=terminal_direction,
+                policy=motion_policy,
+            )
+        else:
+            corrected_start = _unit(
+                _add(_mul(outward, 0.90), _mul(direction, 0.24)),
+                "fixed_warp_corrected_start",
+            )
+            segments = [
+                {
+                    key: list(values)
+                    for key, values in source_segment.items()
+                }
+                for source_segment in source_segments
+            ]
+            segments[0]["p1"] = _round_point(
+                _add(root, _mul(corrected_start, source_arm))
+            )
+        candidate = _candidate_base(
                 candidate_id=f'{slot.slot_id}_fixed_warp_{template["curve_id"]}',
                 slot=slot,
                 source_channel="fixed_warp_visual_prior",
@@ -840,16 +1318,237 @@ def _fixed_warp_candidates(
                 features={
                     "outward_alignment": _dot(corrected_start, outward),
                     "source_template_mount_s": root_s,
-                    "initial_handle_changed_only": 1.0,
+                    "initial_handle_changed_only": (
+                        0.0
+                        if motion_policy["mode"] == "tangent_led_v1"
+                        else 1.0
+                    ),
+                    "fixed_endpoint_and_terminal_preserved": (
+                        1.0
+                        if motion_policy["mode"] == "tangent_led_v1"
+                        else 0.0
+                    ),
                 },
                 individual_score=7.0,
             )
-        )
+        if motion_policy["mode"] == "tangent_led_v1":
+            _annotate_motion_candidate(candidate, analysis, motion_policy)
+        candidates.append(candidate)
     return candidates
 
 
 def _backbone_points(analysis: Mapping[str, Any]) -> list[Point]:
     return [_point(row["point"], "backbone.point") for row in analysis["backbone"]["samples"]]
+
+
+def _point_backbone_clearance(
+    point: Point,
+    backbone: Sequence[Point],
+) -> float:
+    minimum = float("inf")
+    for offset in (-1.0, 0.0, 1.0):
+        shifted = [(row[0] + offset, row[1]) for row in backbone]
+        for index in range(1, len(shifted)):
+            minimum = min(
+                minimum,
+                _point_segment_distance(point, shifted[index - 1], shifted[index]),
+            )
+    return minimum
+
+
+def _polyline_tail_after_fraction(
+    points: Sequence[Point],
+    fraction: float,
+) -> list[Point]:
+    lengths = _polyline_cumulative_lengths(points)
+    if not lengths or lengths[-1] <= 1e-12:
+        return list(points)
+    target = lengths[-1] * fraction
+    for index in range(1, len(points)):
+        if lengths[index] + 1e-12 < target:
+            continue
+        span = lengths[index] - lengths[index - 1]
+        local = (
+            0.0
+            if span <= 1e-12
+            else (target - lengths[index - 1]) / span
+        )
+        return [
+            _lerp(points[index - 1], points[index], local),
+            *points[index:],
+        ]
+    return [points[-1]]
+
+
+def _prepare_backbone_collision_geometry(
+    backbone: Sequence[Point],
+    bin_width: float,
+) -> dict[str, Any]:
+    segments: list[
+        tuple[Point, Point, float, float, float, float]
+    ] = []
+    bins: dict[int, list[int]] = {}
+    for offset in (-1.0, 0.0, 1.0):
+        shifted = [(row[0] + offset, row[1]) for row in backbone]
+        for start, end in zip(shifted, shifted[1:]):
+            min_x = min(start[0], end[0])
+            max_x = max(start[0], end[0])
+            segment_index = len(segments)
+            segments.append(
+                (
+                    start,
+                    end,
+                    min_x,
+                    max_x,
+                    min(start[1], end[1]),
+                    max(start[1], end[1]),
+                )
+            )
+            first_bin = math.floor(min_x / bin_width)
+            last_bin = math.floor(max_x / bin_width)
+            for bin_index in range(first_bin, last_bin + 1):
+                bins.setdefault(bin_index, []).append(segment_index)
+    return {
+        "bin_width": bin_width,
+        "segments": tuple(segments),
+        "bins": {
+            key: tuple(value)
+            for key, value in bins.items()
+        },
+    }
+
+
+def _backbone_non_root_crossing_count(
+    centerline: Sequence[Point],
+    backbone_collision: Mapping[str, Any],
+    start_fraction: float,
+) -> int:
+    tail = _polyline_tail_after_fraction(centerline, start_fraction)
+    bin_width = float(backbone_collision["bin_width"])
+    segments = backbone_collision["segments"]
+    bins = backbone_collision["bins"]
+    count = 0
+    for lane_start, lane_end in zip(tail, tail[1:]):
+        lane_min_x = min(lane_start[0], lane_end[0])
+        lane_max_x = max(lane_start[0], lane_end[0])
+        lane_min_y = min(lane_start[1], lane_end[1])
+        lane_max_y = max(lane_start[1], lane_end[1])
+        candidate_indices: set[int] = set()
+        for bin_index in range(
+            math.floor(lane_min_x / bin_width),
+            math.floor(lane_max_x / bin_width) + 1,
+        ):
+            candidate_indices.update(bins.get(bin_index, ()))
+        for segment_index in candidate_indices:
+            (
+                backbone_start,
+                backbone_end,
+                backbone_min_x,
+                backbone_max_x,
+                backbone_min_y,
+                backbone_max_y,
+            ) = segments[segment_index]
+            if (
+                lane_max_x < backbone_min_x
+                or backbone_max_x < lane_min_x
+                or lane_max_y < backbone_min_y
+                or backbone_max_y < lane_min_y
+            ):
+                continue
+            if _segments_intersect(
+                lane_start,
+                lane_end,
+                backbone_start,
+                backbone_end,
+            ):
+                count += 1
+    return count
+
+
+def _candidate_motion_features(
+    candidate: Mapping[str, Any],
+    analysis: Mapping[str, Any],
+    policy: Mapping[str, Any],
+) -> dict[str, float]:
+    centerline = [
+        _point(point, "candidate.centerline")
+        for point in candidate["centerline"]
+    ]
+    _, tangent = _sample_at_s(analysis, float(candidate["root_s"]))
+    initial = _unit(_sub(centerline[1], centerline[0]), "candidate.initial")
+    selected_flow = tangent if _dot(initial, tangent) >= 0.0 else _mul(tangent, -1.0)
+    cumulative = _polyline_cumulative_lengths(centerline)
+    total = cumulative[-1]
+    initial_errors: list[float] = []
+    initial_fraction = float(policy["initial_flow_arc_fraction"])
+    for index in range(1, len(centerline)):
+        midpoint_length = 0.5 * (cumulative[index - 1] + cumulative[index])
+        if total > 1e-12 and midpoint_length / total > initial_fraction:
+            break
+        direction = _sub(centerline[index], centerline[index - 1])
+        initial_errors.append(_angle_degrees(direction, selected_flow))
+    y_min = float(analysis["coordinate_system"]["canvas_bounds"][1])
+    y_max = float(analysis["coordinate_system"]["canvas_bounds"][3])
+    outside_length = 0.0
+    for start, end in zip(centerline, centerline[1:]):
+        midpoint_y = 0.5 * (start[1] + end[1])
+        if midpoint_y < y_min or midpoint_y > y_max:
+            outside_length += _distance(start, end)
+    point_25 = _point_at_arc_fraction(
+        centerline,
+        float(policy["clearance_measure_arc_fraction"]),
+    )
+    return {
+        "root_tangent_error_deg": _angle_degrees(
+            initial,
+            tangent,
+            unsigned_axis=True,
+        ),
+        "selected_flow_sign": 1.0 if _dot(initial, tangent) >= 0.0 else -1.0,
+        "maximum_tangent_error_first_15pct": max(initial_errors, default=0.0),
+        "backbone_clearance_at_25pct": _point_backbone_clearance(
+            point_25,
+            _backbone_points(analysis),
+        ),
+        "horizontal_progress_ratio": (
+            abs(centerline[-1][0] - centerline[0][0]) / total
+            if total > 1e-12
+            else 0.0
+        ),
+        "out_of_bounds_length": outside_length,
+    }
+
+
+def _annotate_motion_candidate(
+    candidate: dict[str, Any],
+    analysis: Mapping[str, Any],
+    policy: Mapping[str, Any],
+) -> dict[str, Any]:
+    features = _candidate_motion_features(candidate, analysis, policy)
+    candidate["features"].update(
+        {key: round(value, 9) for key, value in features.items()}
+    )
+    scoring = policy["scoring"]
+    candidate["individual_score"] = round(
+        float(candidate["individual_score"])
+        + float(scoring["horizontal_progress_weight"])
+        * features["horizontal_progress_ratio"]
+        + float(scoring["clearance_at_25pct_weight"])
+        * min(
+            1.0,
+            features["backbone_clearance_at_25pct"]
+            / float(policy["minimum_backbone_clearance_at_25pct"]),
+        )
+        + float(scoring["initial_flow_weight"])
+        * max(
+            0.0,
+            1.0
+            - features["maximum_tangent_error_first_15pct"]
+            / float(policy["maximum_initial_flow_error_deg"]),
+        ),
+        9,
+    )
+    return candidate
 
 
 def _ordinary_flower_intrusion(
@@ -885,8 +1584,9 @@ def _support_flower_intrusion(
 def _backbone_non_root_clearance(
     centerline: Sequence[Point],
     backbone: Sequence[Point],
+    start_fraction: float = 0.16,
 ) -> float:
-    start = max(4, int(len(centerline) * 0.16))
+    start = max(4, int(len(centerline) * start_fraction))
     minimum = float("inf")
     for point in centerline[start:]:
         for offset in (-1.0, 0.0, 1.0):
@@ -904,16 +1604,59 @@ def _candidate_rejections(
     analysis: Mapping[str, Any],
     family_id: str,
     prior: Mapping[str, Any],
+    motion_policy: Mapping[str, Any],
+    backbone: Sequence[Point],
+    backbone_collision: Mapping[str, Any],
 ) -> list[str]:
     reasons: list[str] = []
     centerline = [_point(point, "candidate.centerline") for point in candidate["centerline"]]
     root = _point(candidate["root"], "candidate.root")
     target = _point(candidate["target"], "candidate.target")
     _, tangent = _sample_at_s(analysis, float(candidate["root_s"]))
-    outward = _normal(tangent, str(candidate["side_id"]))
     initial = _unit(_sub(centerline[1], centerline[0]), "candidate.initial")
-    if _dot(initial, outward) < 0.72:
-        reasons.append("ordinary_or_support_initial_departure_not_outward")
+    if motion_policy["mode"] == "tangent_led_v1":
+        features = candidate["features"]
+        if float(features["root_tangent_error_deg"]) > float(
+            motion_policy["maximum_root_tangent_error_deg"]
+        ):
+            reasons.append("root_tangent_error_exceeds_limit")
+        if float(features["maximum_tangent_error_first_15pct"]) > float(
+            motion_policy["maximum_initial_flow_error_deg"]
+        ):
+            reasons.append("initial_flow_turns_before_delay_window")
+        if float(features["backbone_clearance_at_25pct"]) < float(
+            motion_policy["minimum_backbone_clearance_at_25pct"]
+        ):
+            reasons.append("insufficient_backbone_clearance_at_25pct")
+        minimum_horizontal = (
+            float(motion_policy["minimum_support_horizontal_progress_ratio"])
+            if candidate["role"] in {"flower_support", "terminal_flower_support"}
+            else float(motion_policy["minimum_ordinary_horizontal_progress_ratio"])
+        )
+        if float(features["horizontal_progress_ratio"]) < minimum_horizontal:
+            reasons.append("insufficient_horizontal_progress")
+        if float(features["out_of_bounds_length"]) > float(
+            motion_policy["out_of_bounds_length_tolerance"]
+        ):
+            reasons.append("curve_exits_vertical_canvas")
+        crossing_count = _backbone_non_root_crossing_count(
+            centerline,
+            backbone_collision,
+            float(
+                motion_policy[
+                    "non_root_crossing_exclusion_fraction"
+                ]
+            ),
+        )
+        candidate["features"]["non_root_backbone_crossing_count"] = float(
+            crossing_count
+        )
+        if crossing_count > 0:
+            reasons.append("non_root_backbone_crossing")
+    else:
+        outward = _normal(tangent, str(candidate["side_id"]))
+        if _dot(initial, outward) < 0.72:
+            reasons.append("ordinary_or_support_initial_departure_not_outward")
 
     canvas_height = float(analysis["coordinate_system"]["canvas_bounds"][3])
     if not (0.0 <= target[1] <= canvas_height):
@@ -923,9 +1666,19 @@ def _candidate_rejections(
 
     backbone_clearance = _backbone_non_root_clearance(
         centerline,
-        _backbone_points(analysis),
+        backbone,
+        (
+            float(motion_policy["non_root_clearance_start_fraction"])
+            if motion_policy["mode"] == "tangent_led_v1"
+            else 0.16
+        ),
     )
-    if backbone_clearance < 0.012:
+    minimum_non_root_clearance = (
+        float(motion_policy["minimum_non_root_backbone_clearance"])
+        if motion_policy["mode"] == "tangent_led_v1"
+        else 0.012
+    )
+    if backbone_clearance < minimum_non_root_clearance:
         reasons.append("non_root_backbone_crossing_or_contact")
 
     role = str(candidate["role"])
@@ -972,16 +1725,42 @@ def _pair_metrics(
     b: Mapping[str, Any],
     root_spacing: float,
     lane_clearance: float,
+    collision_cache: dict[str, dict[str, Any]] | None = None,
 ) -> tuple[bool, float, dict[str, float]]:
     root_gap = _periodic_delta(float(a["root_s"]), float(b["root_s"]))
     if root_gap < root_spacing:
         return False, 0.0, {"root_gap": root_gap, "minimum_clearance": 0.0}
-    points_a = [_point(point, "lane_a.centerline") for point in a["centerline"]]
-    points_b = [_point(point, "lane_b.centerline") for point in b["centerline"]]
-    minimum = min(
-        _polyline_distance(points_a, points_b, offset)
-        for offset in (-1.0, 0.0, 1.0)
-    )
+    def collision_geometry(
+        candidate: Mapping[str, Any],
+        label: str,
+    ) -> dict[str, Any]:
+        candidate_id = str(candidate["candidate_id"])
+        if collision_cache is not None and candidate_id in collision_cache:
+            return collision_cache[candidate_id]
+        geometry = _prepare_polyline_collision_geometry(
+            [_point(point, label) for point in candidate["centerline"]]
+        )
+        if collision_cache is not None:
+            collision_cache[candidate_id] = geometry
+        return geometry
+
+    geometry_a = collision_geometry(a, "lane_a.centerline")
+    geometry_b = collision_geometry(b, "lane_b.centerline")
+    points_a = geometry_a["points"]
+    points_b = geometry_b["points"]
+    minimum = float("inf")
+    for offset in (-1.0, 0.0, 1.0):
+        minimum = min(
+            minimum,
+            _prepared_polyline_distance(
+                geometry_a,
+                geometry_b,
+                offset,
+                stop_below=lane_clearance,
+            ),
+        )
+        if minimum < lane_clearance:
+            break
     if minimum < lane_clearance:
         return False, 0.0, {"root_gap": root_gap, "minimum_clearance": minimum}
 
@@ -1001,7 +1780,31 @@ def _pair_metrics(
     }
 
 
-def _global_score(lanes: Sequence[Mapping[str, Any]]) -> tuple[float, dict[str, float]]:
+def _maximum_root_count_in_window(
+    roots: Sequence[float],
+    window: float,
+) -> int:
+    values = sorted(value % 1.0 for value in roots)
+    if not values:
+        return 0
+    extended = values + [value + 1.0 for value in values]
+    maximum = 0
+    for index, start in enumerate(values):
+        maximum = max(
+            maximum,
+            sum(
+                1
+                for value in extended[index : index + len(values)]
+                if value - start <= window + 1e-12
+            ),
+        )
+    return maximum
+
+
+def _global_score(
+    lanes: Sequence[Mapping[str, Any]],
+    motion_policy: Mapping[str, Any],
+) -> tuple[float, dict[str, float]]:
     roots = sorted(float(lane["root_s"]) for lane in lanes)
     root_gaps = [
         roots[index] - roots[index - 1]
@@ -1032,38 +1835,206 @@ def _global_score(lanes: Sequence[Mapping[str, Any]]) -> tuple[float, dict[str, 
         + 0.8 * fixed_prior_presence
         + min(1.0, math.sqrt(root_gap_variance) / 0.055)
     )
-    return score, {
+    features = {
         "root_coverage": root_coverage,
         "target_zone_coverage": target_coverage,
         "length_rhythm": length_rhythm,
         "root_gap_variation": math.sqrt(root_gap_variance),
         "fixed_prior_channel_present": fixed_prior_presence,
     }
+    if motion_policy["mode"] == "tangent_led_v1":
+        horizontal_mean = sum(
+            float(lane["features"]["horizontal_progress_ratio"])
+            for lane in lanes
+        ) / len(lanes)
+        initial_flow_mean = sum(
+            max(
+                0.0,
+                1.0
+                - float(
+                    lane["features"]["maximum_tangent_error_first_15pct"]
+                )
+                / float(motion_policy["maximum_initial_flow_error_deg"]),
+            )
+            for lane in lanes
+        ) / len(lanes)
+        motion_weight = float(
+            motion_policy["scoring"]["global_motion_quality_weight"]
+        )
+        score += motion_weight * (horizontal_mean + initial_flow_mean)
+        features.update(
+            {
+                "horizontal_progress_mean": horizontal_mean,
+                "initial_flow_quality_mean": initial_flow_mean,
+            }
+        )
+    return score, features
+
+
+def _diverse_candidate_subset(
+    pool: Sequence[Mapping[str, Any]],
+    cap: int,
+    root_bin_width: float,
+) -> list[Mapping[str, Any]]:
+    ranked = sorted(
+        pool,
+        key=lambda row: (
+            -float(row["individual_score"]),
+            str(row["candidate_id"]),
+        ),
+    )
+    groups: dict[tuple[int, str, int], list[Mapping[str, Any]]] = {}
+    for row in ranked:
+        key = (
+            int(math.floor((float(row["root_s"]) % 1.0) / root_bin_width)),
+            str(row["side_id"]),
+            int(round(float(row["features"].get("selected_flow_sign", 0.0)))),
+        )
+        groups.setdefault(key, []).append(row)
+    group_keys = sorted(
+        groups,
+        key=lambda key: (
+            -float(groups[key][0]["individual_score"]),
+            key,
+        ),
+    )
+    selected: list[Mapping[str, Any]] = []
+    depth = 0
+    while len(selected) < cap:
+        added = False
+        for key in group_keys:
+            rows = groups[key]
+            if depth < len(rows):
+                selected.append(rows[depth])
+                added = True
+                if len(selected) >= cap:
+                    break
+        if not added:
+            break
+        depth += 1
+    return selected
+
+
+def _diverse_state_subset(
+    states: Sequence[BeamState],
+    cap: int,
+    root_bin_width: float,
+) -> list[BeamState]:
+    ranked = sorted(
+        states,
+        key=lambda state: (
+            -state.score,
+            tuple(str(row["candidate_id"]) for row in state.lanes),
+        ),
+    )
+    groups: dict[tuple[int, ...], list[BeamState]] = {}
+    for state in ranked:
+        signature = tuple(
+            sorted(
+                int(
+                    math.floor(
+                        (float(row["root_s"]) % 1.0) / root_bin_width
+                    )
+                )
+                for row in state.lanes
+            )
+        )
+        groups.setdefault(signature, []).append(state)
+    group_keys = sorted(
+        groups,
+        key=lambda key: (
+            -groups[key][0].score,
+            key,
+        ),
+    )
+    selected: list[BeamState] = []
+    depth = 0
+    while len(selected) < cap:
+        added = False
+        for key in group_keys:
+            rows = groups[key]
+            if depth < len(rows):
+                selected.append(rows[depth])
+                added = True
+                if len(selected) >= cap:
+                    break
+        if not added:
+            break
+        depth += 1
+    return selected
 
 
 def _solve(
     slots: Sequence[Slot],
     candidate_pools: Mapping[str, Sequence[Mapping[str, Any]]],
     prior: Mapping[str, Any],
+    motion_policy: Mapping[str, Any],
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     root_stats = prior["statistics"]["primary_root_rhythm"]["consecutive_mount_gap"]
     root_spacing = max(0.05, float(root_stats["min"]) * 0.78)
     lane_clearance = max(0.032, root_spacing * 0.58)
-    beam_capacity = 36 * len(slots) ** 2
-    expansion_cap = 4 * len(slots) + 4
+    if motion_policy["mode"] == "tangent_led_v1":
+        beam_capacity = (
+            int(motion_policy["solver_beam_capacity_per_slot_squared"])
+            * len(slots) ** 2
+        )
+        expansion_cap = (
+            int(motion_policy["solver_expansion_cap_per_slot"])
+            * len(slots)
+            + int(motion_policy["solver_expansion_cap_constant"])
+        )
+    else:
+        beam_capacity = 36 * len(slots) ** 2
+        expansion_cap = 4 * len(slots) + 4
+    solve_slots = (
+        sorted(
+            slots,
+            key=lambda slot: (
+                len(candidate_pools[slot.slot_id]),
+                slot.slot_id,
+            ),
+        )
+        if motion_policy["mode"] == "tangent_led_v1"
+        and motion_policy["solver_slot_order"] == "minimum_remaining_values"
+        else list(slots)
+    )
     states = [BeamState(lanes=[], score=0.0)]
     pair_cache: dict[tuple[str, str], tuple[bool, float, dict[str, float]]] = {}
+    collision_cache: dict[str, dict[str, Any]] = {}
 
-    for slot in slots:
-        pool = sorted(
-            candidate_pools[slot.slot_id],
-            key=lambda row: (-float(row["individual_score"]), str(row["candidate_id"])),
-        )[:expansion_cap]
+    for slot in solve_slots:
+        pool = (
+            _diverse_candidate_subset(
+                candidate_pools[slot.slot_id],
+                expansion_cap,
+                float(motion_policy["solver_candidate_root_bin_width"]),
+            )
+            if motion_policy["mode"] == "tangent_led_v1"
+            else sorted(
+                candidate_pools[slot.slot_id],
+                key=lambda row: (
+                    -float(row["individual_score"]),
+                    str(row["candidate_id"]),
+                ),
+            )[:expansion_cap]
+        )
         if not pool:
             raise GlobalL1FlowError(f"slot {slot.slot_id} has no feasible candidates")
         expanded: list[BeamState] = []
         for state in states:
             for candidate in pool:
+                if (
+                    motion_policy["mode"] == "tangent_led_v1"
+                    and _maximum_root_count_in_window(
+                        [
+                            *(float(row["root_s"]) for row in state.lanes),
+                            float(candidate["root_s"]),
+                        ],
+                        float(motion_policy["root_density_window"]),
+                    )
+                    > int(motion_policy["maximum_roots_per_density_window"])
+                ):
+                    continue
                 pair_score = 0.0
                 compatible = True
                 for existing in state.lanes:
@@ -1074,6 +2045,7 @@ def _solve(
                             existing,
                             root_spacing,
                             lane_clearance,
+                            collision_cache,
                         )
                     valid, score, _ = pair_cache[key]
                     if not valid:
@@ -1093,17 +2065,28 @@ def _solve(
             raise GlobalL1FlowError(
                 f"single forward global solve became infeasible at slot {slot.slot_id}"
             )
-        expanded.sort(
-            key=lambda state: (
-                -state.score,
-                tuple(str(row["candidate_id"]) for row in state.lanes),
+        states = (
+            _diverse_state_subset(
+                expanded,
+                beam_capacity,
+                float(motion_policy["solver_candidate_root_bin_width"]),
             )
+            if motion_policy["mode"] == "tangent_led_v1"
+            else sorted(
+                expanded,
+                key=lambda state: (
+                    -state.score,
+                    tuple(str(row["candidate_id"]) for row in state.lanes),
+                ),
+            )[:beam_capacity]
         )
-        states = expanded[:beam_capacity]
 
     ranked: list[tuple[float, BeamState, dict[str, float]]] = []
     for state in states:
-        global_value, global_features = _global_score(state.lanes)
+        global_value, global_features = _global_score(
+            state.lanes,
+            motion_policy,
+        )
         ranked.append((state.score + global_value, state, global_features))
     ranked.sort(
         key=lambda row: (
@@ -1118,10 +2101,16 @@ def _solve(
     for index, lane in enumerate(selected):
         for other in selected[index + 1 :]:
             key = tuple(sorted((str(lane["candidate_id"]), str(other["candidate_id"]))))
-            valid, score, metrics = pair_cache.get(
-                key,
-                _pair_metrics(lane, other, root_spacing, lane_clearance),
-            )
+            pair_result = pair_cache.get(key)
+            if pair_result is None:
+                pair_result = _pair_metrics(
+                    lane,
+                    other,
+                    root_spacing,
+                    lane_clearance,
+                    collision_cache,
+                )
+            valid, score, metrics = pair_result
             if not valid:
                 raise GlobalL1FlowError("selected global state contains a hard pair conflict")
             pair_rows.append(
@@ -1141,6 +2130,16 @@ def _solve(
         "selected_total_score": round(total_score, 9),
         "global_features": {key: round(value, 9) for key, value in global_features.items()},
         "selected_pair_metrics": pair_rows,
+        "slot_solve_order": [slot.slot_id for slot in solve_slots],
+        "motion_policy": str(motion_policy["mode"]),
+        "maximum_root_count_in_density_window": _maximum_root_count_in_window(
+            [float(row["root_s"]) for row in selected],
+            (
+                float(motion_policy["root_density_window"])
+                if motion_policy["mode"] == "tangent_led_v1"
+                else 0.10
+            ),
+        ),
     }
 
 
@@ -1194,26 +2193,74 @@ def generate_global_l1_flow_plan(
         contract,
         seed,
     )
+    motion_policy = _motion_policy(contract)
     latents = _global_latents(prototype_id, seed)
     count_derivation = _derive_lane_count(prototype_id, analysis, morphology, prior)
     slots = _make_slots(analysis, morphology, count_derivation, latents, seed)
     pools: dict[str, list[dict[str, Any]]] = {}
     inventory_rows: list[dict[str, Any]] = []
     rejection_counts: Counter[str] = Counter()
+    backbone = _backbone_points(analysis)
+    backbone_collision = _prepare_backbone_collision_geometry(
+        backbone,
+        (
+            float(motion_policy["backbone_crossing_spatial_bin_width"])
+            if motion_policy["mode"] == "tangent_led_v1"
+            else 0.05
+        ),
+    )
 
     for slot in slots:
         candidates: list[dict[str, Any]] = []
         if slot.role == "flower_support":
-            candidates.extend(_sw1_support_candidates(slot, analysis, latents))
+            candidates.extend(
+                _sw1_support_candidates(
+                    slot,
+                    analysis,
+                    latents,
+                    motion_policy,
+                )
+            )
         elif slot.role == "terminal_flower_support":
-            candidates.extend(_sw3_support_candidates(slot, analysis, latents))
+            candidates.extend(
+                _sw3_support_candidates(
+                    slot,
+                    analysis,
+                    latents,
+                    motion_policy,
+                )
+            )
         else:
-            candidates.extend(_ordinary_candidates(slot, analysis, prior, latents))
-        candidates.extend(_fixed_warp_candidates(slot, analysis, prior, seed))
+            candidates.extend(
+                _ordinary_candidates(
+                    slot,
+                    analysis,
+                    prior,
+                    latents,
+                    motion_policy,
+                )
+            )
+        candidates.extend(
+            _fixed_warp_candidates(
+                slot,
+                analysis,
+                prior,
+                seed,
+                motion_policy,
+            )
+        )
 
         feasible: list[dict[str, Any]] = []
         for candidate in candidates:
-            reasons = _candidate_rejections(candidate, analysis, family_id, prior)
+            reasons = _candidate_rejections(
+                candidate,
+                analysis,
+                family_id,
+                prior,
+                motion_policy,
+                backbone,
+                backbone_collision,
+            )
             inventory_row = dict(candidate)
             inventory_row["hard_rejections"] = reasons
             inventory_rows.append(inventory_row)
@@ -1226,7 +2273,7 @@ def generate_global_l1_flow_plan(
             )
         pools[slot.slot_id] = feasible
 
-    selected, solver = _solve(slots, pools, prior)
+    selected, solver = _solve(slots, pools, prior, motion_policy)
     selected_ids = {str(row["candidate_id"]) for row in selected}
     for row in inventory_rows:
         row["selected"] = str(row["candidate_id"]) in selected_ids
@@ -1255,6 +2302,7 @@ def generate_global_l1_flow_plan(
             "old_stage4_geometry_consumed": False,
         },
         "global_latents": latents,
+        "motion_policy": str(motion_policy["mode"]),
         "count_derivation": count_derivation,
         "slots": [
             {

@@ -11,6 +11,7 @@ from typing import Any, Mapping
 
 from fixed_visual_prior import file_sha256, validate_fixed_visual_prior
 from global_l1_flow import (
+    GlobalL1FlowError,
     PROTOTYPE_IDS,
     SEEDS,
     generate_global_l1_flow_plan,
@@ -72,7 +73,7 @@ def _verified_file(root: Path, relative: object, sha256: object, label: str) -> 
     return path
 
 
-def _load_inputs() -> tuple[
+def _load_inputs(contract_path: Path = CONTRACT_PATH) -> tuple[
     dict[str, dict[str, Any]],
     dict[str, Any],
     dict[str, Any],
@@ -87,7 +88,7 @@ def _load_inputs() -> tuple[
         stage2_manifest_path,
         stage25_manifest_path,
         stage3a_manifest_path,
-        CONTRACT_PATH,
+        contract_path,
     ):
         if not path.is_file():
             raise Stage3BRunError(f"required stage-3B input is missing: {path}")
@@ -96,7 +97,7 @@ def _load_inputs() -> tuple[
     stage2 = _read_json(stage2_manifest_path)
     stage25 = _read_json(stage25_manifest_path)
     stage3a = _read_json(stage3a_manifest_path)
-    contract = _read_json(CONTRACT_PATH)
+    contract = _read_json(contract_path)
     if stage1.get("schema") != "dynamic_branch_stage1_input_manifest_v1":
         raise Stage3BRunError("stage-1 manifest schema mismatch")
     if stage2.get("schema") != "dynamic_branch_stage2_analysis_manifest_v1":
@@ -171,7 +172,7 @@ def _load_inputs() -> tuple[
         "stage2_manifest_sha256": file_sha256(stage2_manifest_path),
         "stage25_manifest_sha256": file_sha256(stage25_manifest_path),
         "stage3a_manifest_sha256": file_sha256(stage3a_manifest_path),
-        "stage3b_contract_sha256": file_sha256(CONTRACT_PATH),
+        "stage3b_contract_sha256": file_sha256(contract_path),
         "fixed_visual_prior_sha256": file_sha256(prior_path),
     }
     return inputs, prior, contract, provenance
@@ -190,10 +191,10 @@ def _write_readme(output: Path) -> None:
     output.write_text(text, encoding="utf-8", newline="\n")
 
 
-def run(output: Path) -> None:
+def run(output: Path, contract_path: Path = CONTRACT_PATH) -> None:
     if output.exists():
         raise Stage3BRunError(f"formal stage-3B output already exists: {output}")
-    inputs, prior, contract, provenance = _load_inputs()
+    inputs, prior, contract, provenance = _load_inputs(contract_path)
     output.parent.mkdir(parents=True, exist_ok=True)
 
     with tempfile.TemporaryDirectory(prefix="stage3b_", dir=str(output.parent)) as directory:
@@ -209,14 +210,19 @@ def run(output: Path) -> None:
             for seed in SEEDS:
                 case = temporary / prototype_id / f"seed_{seed}"
                 case.mkdir(parents=True)
-                plan, inventory = generate_global_l1_flow_plan(
-                    payload["strict"],
-                    payload["analysis"],
-                    payload["morphology"],
-                    prior,
-                    contract,
-                    seed,
-                )
+                try:
+                    plan, inventory = generate_global_l1_flow_plan(
+                        payload["strict"],
+                        payload["analysis"],
+                        payload["morphology"],
+                        prior,
+                        contract,
+                        seed,
+                    )
+                except GlobalL1FlowError as exc:
+                    raise Stage3BRunError(
+                        f"{prototype_id} seed {seed} L1 solve failed: {exc}"
+                    ) from exc
                 validate_global_l1_flow_plan(plan)
                 plan_path = case / "global_l1_flow_plan.json"
                 inventory_path = case / "global_l1_candidate_inventory.json"
@@ -342,8 +348,9 @@ def run(output: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--contract", type=Path, default=CONTRACT_PATH)
     args = parser.parse_args()
-    run(args.output.resolve())
+    run(args.output.resolve(), args.contract.resolve())
     print(args.output.resolve())
     return 0
 

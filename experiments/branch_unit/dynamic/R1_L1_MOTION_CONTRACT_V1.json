@@ -1,0 +1,239 @@
+{
+  "schema": "dynamic_branch_stage3b_l1_flow_contract_v1",
+  "contract_id": "tangent_led_global_l1_flow_v1",
+  "r_stage": "R1",
+  "acceptance": {
+    "root_tangent_error_deg_max": 15.0,
+    "maximum_tangent_error_to_selected_flow_deg_max": 20.0,
+    "backbone_clearance_at_25pct_min": 0.012,
+    "ordinary_horizontal_progress_ratio_min": 0.3,
+    "support_horizontal_progress_ratio_min": 0.2,
+    "out_of_bounds_length_max": 0.0,
+    "root_density_window": 0.1,
+    "root_count_per_window_max": 2,
+    "L1_L1_crossing_count_max": 0,
+    "periodic_L1_crossing_count_max": 0,
+    "non_root_backbone_crossing_count_max": 0,
+    "proto_sw_3_2_vertical_long_lane_count_max": 0
+  },
+  "measurement": {
+    "curve_samples_per_cubic": 64,
+    "non_root_crossing_exclusion_fraction": 0.08,
+    "intersection_epsilon": 1e-07,
+    "periodic_shifts": [
+      -1.0,
+      1.0
+    ]
+  },
+  "required_artifacts": [
+    "acceptance_report.json",
+    "iteration_history.json",
+    "metrics.json",
+    "failures.json",
+    "before_after_contact_sheet.png",
+    "debug_overlay.svg",
+    "run_manifest.json",
+    "stage_summary.md"
+  ],
+  "scope": {
+    "prototype_ids": [
+      "proto_sw_1_1",
+      "proto_sw_1_3",
+      "proto_sw_2_3",
+      "proto_sw_3_1",
+      "proto_sw_3_2"
+    ],
+    "seeds": [
+      4101,
+      4102,
+      4103
+    ],
+    "branch_skeleton_only": true,
+    "l1_only": true,
+    "l2_present": false,
+    "l3_present": false,
+    "leaves_present": false,
+    "buds_present": false,
+    "curl_heads_present": false
+  },
+  "input_policy": {
+    "strict_p0_consumed": true,
+    "prototype_analysis_consumed": true,
+    "morphology_profile_consumed": true,
+    "fixed_visual_prior_consumed": true,
+    "old_stage3_selected_layout_consumed": false,
+    "old_stage4_curve_geometry_consumed": false
+  },
+  "planning_policy": {
+    "one_forward_global_solve_per_task": true,
+    "validation_guided_retry_allowed": false,
+    "validation_guided_resample_allowed": false,
+    "automatic_repair_allowed": false,
+    "automatic_lane_deletion_allowed": false,
+    "silent_fallback_allowed": false,
+    "candidate_enumeration_is_part_of_the_single_global_solve": true,
+    "selected_layout_count_per_task": 1
+  },
+  "motion_policy": {
+    "mode": "tangent_led_v1",
+    "departure_chord_fraction": 0.22,
+    "minimum_departure_length": 0.045,
+    "departure_clearance_chord_fraction": 0.045,
+    "minimum_departure_clearance": 0.013,
+    "maximum_departure_clearance": 0.026,
+    "join_flow_weight": 0.96,
+    "join_outward_weight": 0.2,
+    "first_start_arm_fraction": 0.34,
+    "first_end_arm_fraction": 0.28,
+    "second_start_arm_fraction": 0.3,
+    "second_end_arm_fraction": 0.3,
+    "ordinary_radial_planned_length_fraction": 0.48,
+    "ordinary_minimum_radial": 0.14,
+    "ordinary_maximum_radial": 0.26,
+    "ordinary_radial_scales": [
+      0.78,
+      1.0,
+      1.18
+    ],
+    "region_sample_fractions": [
+      0.05,
+      0.15,
+      0.25,
+      0.35,
+      0.45,
+      0.55,
+      0.65,
+      0.75,
+      0.85,
+      0.95
+    ],
+    "sw1_waypoint_rx_fraction": 0.68,
+    "sw1_trough_offsets": [
+      -0.135,
+      -0.12,
+      -0.105,
+      -0.09,
+      -0.075,
+      -0.06,
+      -0.045,
+      0.045,
+      0.06,
+      0.075,
+      0.09,
+      0.105,
+      0.12,
+      0.135
+    ],
+    "sw1_waypoint_horizontal_margin": 0.025,
+    "sw1_waypoint_vertical_margin": 0.04,
+    "sw1_waypoint_exit_start_arm_fraction": 0.35,
+    "sw1_waypoint_exit_end_arm_fraction": 0.25,
+    "sw1_departure_fraction_multiplier": 1.45,
+    "sw1_minimum_departure_length": 0.068,
+    "sw1_minimum_departure_clearance": 0.018,
+    "sw1_maximum_departure_clearance": 0.032,
+    "sw3_remote_mount_distances": [
+      0.335,
+      0.375,
+      0.415,
+      0.455
+    ],
+    "sw3_remote_phase_scale": 0.2,
+    "sw3_waypoint_rx_fractions": [
+      0.52,
+      0.8
+    ],
+    "sw3_waypoint_horizontal_margins": [
+      0.025,
+      0.045
+    ],
+    "sw3_waypoint_vertical_margins": [
+      0.045,
+      0.065,
+      0.085
+    ],
+    "sw3_second_start_arm_fraction": 0.42,
+    "sw3_second_end_arm_fraction": 0.28,
+    "sw3_second_minimum_start_arm": 0.035,
+    "sw3_second_minimum_end_arm": 0.025,
+    "initial_flow_arc_fraction": 0.15,
+    "clearance_measure_arc_fraction": 0.25,
+    "maximum_root_tangent_error_deg": 15.0,
+    "maximum_initial_flow_error_deg": 20.0,
+    "minimum_backbone_clearance_at_25pct": 0.012,
+    "minimum_non_root_backbone_clearance": 0.002,
+    "non_root_clearance_start_fraction": 0.25,
+    "non_root_crossing_exclusion_fraction": 0.08,
+    "backbone_crossing_spatial_bin_width": 0.05,
+    "minimum_ordinary_horizontal_progress_ratio": 0.3,
+    "minimum_support_horizontal_progress_ratio": 0.2,
+    "out_of_bounds_length_tolerance": 0.0,
+    "root_density_window": 0.1,
+    "maximum_roots_per_density_window": 2,
+    "solver_beam_capacity_per_slot_squared": 48,
+    "solver_expansion_cap_per_slot": 14,
+    "solver_expansion_cap_constant": 14,
+    "solver_candidate_root_bin_width": 0.04,
+    "solver_slot_order": "minimum_remaining_values",
+    "vertical_long_lane_minimum_length": 0.2,
+    "vertical_long_lane_horizontal_progress_threshold": 0.3,
+    "scoring": {
+      "horizontal_progress_weight": 1.4,
+      "clearance_at_25pct_weight": 0.9,
+      "initial_flow_weight": 0.8,
+      "global_motion_quality_weight": 1.2
+    }
+  },
+  "lane_roles": [
+    "primary_sweep",
+    "balance",
+    "frontier",
+    "flower_support",
+    "terminal_flower_support"
+  ],
+  "hard_constraints": [
+    "root_on_backbone",
+    "root_tangent_error_at_most_15_degrees",
+    "initial_15_percent_follows_selected_backbone_flow",
+    "turn_is_delayed_until_after_initial_flow",
+    "backbone_clearance_at_25_percent",
+    "ordinary_horizontal_progress_at_least_0_30",
+    "support_horizontal_progress_at_least_0_20",
+    "complete_path_inside_vertical_canvas",
+    "no_non_root_backbone_crossing",
+    "no_lane_crossing",
+    "no_periodic_lane_crossing",
+    "maximum_two_roots_per_0_10_periodic_window",
+    "minimum_root_spacing",
+    "minimum_lane_clearance",
+    "ordinary_lane_outside_flower_reserves",
+    "required_flower_support_count",
+    "sw1_support_originates_at_trough_or_trough_flank",
+    "sw3_support_mount_is_remote",
+    "sw3_support_routes_below_flower",
+    "sw3_support_contacts_flower_underside"
+  ],
+  "soft_objectives": [
+    "fixed_prior_endpoint_and_terminal_fidelity",
+    "root_arc_coverage",
+    "target_zone_coverage",
+    "parallel_glide",
+    "lane_nesting",
+    "long_short_rhythm",
+    "dense_open_rhythm",
+    "flower_breathing_space",
+    "prototype_identity",
+    "seed_diversity_without_identity_drift",
+    "tangent_led_motion_quality",
+    "horizontal_flow_quality"
+  ],
+  "output": {
+    "geometry_semantics": "planning_flow_lane_not_final_branch_curve",
+    "selected_l1_layout_only": true,
+    "internal_candidate_inventory_preserved": true,
+    "structural_diagnostics_present": true,
+    "visual_review_required": true,
+    "numeric_checks_can_approve_visual_gate": false,
+    "initial_review_state": "l1_flow_pending_visual_review"
+  }
+}

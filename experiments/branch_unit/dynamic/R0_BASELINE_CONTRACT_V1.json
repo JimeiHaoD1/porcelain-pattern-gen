@@ -1,0 +1,67 @@
+{
+  "acceptance": {
+    "baseline_geometry_changed": false,
+    "baseline_selection_changed": false,
+    "case_count": 15,
+    "missing_case_count": 0,
+    "required_artifact_missing_count": 0,
+    "required_metric_missing_count": 0,
+    "unresolved_failure_reference_count": 0
+  },
+  "baseline_roots": {
+    "stage2": "artifacts/runs/dynamic_branch_stage2_analysis_v1",
+    "stage3b": "artifacts/runs/dynamic_branch_stage3b_global_l1_flow_v1",
+    "stage4": "artifacts/runs/dynamic_branch_stage4_unit_candidates_v1",
+    "stage5": "artifacts/runs/dynamic_branch_stage5_global_unit_selection_v1"
+  },
+  "contract_id": "dynamic_branch_R0_baseline_contract_v1",
+  "measurement": {
+    "backbone_root_exclusion_fraction": 0.08,
+    "curve_samples_per_cubic": 64,
+    "intersection_epsilon": 1e-07,
+    "periodic_shifts": [
+      -1.0,
+      1.0
+    ],
+    "root_density_window": 0.1,
+    "vertical_long_lane_horizontal_progress_threshold": 0.3
+  },
+  "prototype_ids": [
+    "proto_sw_1_1",
+    "proto_sw_1_3",
+    "proto_sw_2_3",
+    "proto_sw_3_1",
+    "proto_sw_3_2"
+  ],
+  "required_artifacts": [
+    "acceptance_report.json",
+    "iteration_history.json",
+    "metrics.json",
+    "failures.json",
+    "before_after_contact_sheet.png",
+    "debug_overlay.svg",
+    "run_manifest.json",
+    "stage_summary.md"
+  ],
+  "required_metric_names": [
+    "root_tangent_error_deg",
+    "horizontal_progress_ratio",
+    "L2_L1_length_ratio",
+    "L3_L2_length_ratio",
+    "out_of_bounds_length",
+    "flower_core_branch_count",
+    "Y2C_usage_rate",
+    "curve_crossing_count",
+    "support_contact_error",
+    "wrap_span_deg",
+    "non_root_backbone_min_distance",
+    "root_local_density"
+  ],
+  "schema": "dynamic_branch_R_stage_contract_v1",
+  "seeds": [
+    4101,
+    4102,
+    4103
+  ],
+  "stage": "R0"
+}

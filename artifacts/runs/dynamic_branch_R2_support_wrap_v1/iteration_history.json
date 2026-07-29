@@ -1,0 +1,81 @@
+{
+  "iterations": [
+    {
+      "changes_made": [
+        "added role-neutral loop-growth region information",
+        "attached explicit support and wrap guide channels",
+        "compiled a guide-following flower_wrap L2"
+      ],
+      "commit_before": "21f922a87e12ade7e7a246ebe87da645e452954a",
+      "failed_metrics": [
+        "L2_semantic_role",
+        "wrap_guide_presence"
+      ],
+      "files_changed": [
+        "experiments/branch_unit/dynamic/prototype_analysis.py",
+        "experiments/branch_unit/dynamic/global_l1_flow.py",
+        "experiments/branch_unit/dynamic/branch_unit_grammar_v1.py",
+        "experiments/branch_unit/dynamic/R2_SUPPORT_WRAP_CONTRACT_V1.json",
+        "experiments/branch_unit/dynamic/run_R2_support_wrap.py"
+      ],
+      "iteration": 1,
+      "result": "FAIL",
+      "root_causes": [
+        "terminal support had no semantic wrap path"
+      ],
+      "stage": "R2"
+    },
+    {
+      "changes_made": [
+        "bounded the deterministic guide-root translation"
+      ],
+      "commit_before": "21f922a87e12ade7e7a246ebe87da645e452954a",
+      "failed_metrics": [
+        "guide_root_attachment_error"
+      ],
+      "files_changed": [
+        "experiments/branch_unit/dynamic/branch_unit_grammar_v1.py"
+      ],
+      "iteration": 2,
+      "result": "FAIL",
+      "root_causes": [
+        "sampled parent root differed slightly from the guide mount"
+      ],
+      "stage": "R2"
+    },
+    {
+      "changes_made": [
+        "assigned the wrap to the left remaining sector"
+      ],
+      "commit_before": "21f922a87e12ade7e7a246ebe87da645e452954a",
+      "failed_metrics": [
+        "backbone_crossing_count"
+      ],
+      "files_changed": [
+        "experiments/branch_unit/dynamic/R2_SUPPORT_WRAP_CONTRACT_V1.json"
+      ],
+      "iteration": 3,
+      "result": "FAIL",
+      "root_causes": [
+        "right-side clockwise wrap intersected the flower-adjacent backbone"
+      ],
+      "stage": "R2"
+    },
+    {
+      "changes_made": [
+        "froze the legal support-wrap relation and automated acceptance"
+      ],
+      "commit_before": "21f922a87e12ade7e7a246ebe87da645e452954a",
+      "failed_metrics": [],
+      "files_changed": [
+        "experiments/branch_unit/dynamic/R2_SUPPORT_WRAP_CONTRACT_V1.json",
+        "experiments/branch_unit/dynamic/run_R2_support_wrap.py"
+      ],
+      "iteration": 4,
+      "result": "PASS",
+      "root_causes": [],
+      "stage": "R2"
+    }
+  ],
+  "schema": "dynamic_branch_R2_iteration_history_v1"
+}

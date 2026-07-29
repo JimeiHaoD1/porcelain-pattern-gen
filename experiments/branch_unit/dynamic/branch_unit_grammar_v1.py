@@ -325,6 +325,16 @@ def _candidate_strata(
             for stratum in coverage["flower_support_strata"]
         ]
     if role == "terminal_flower_support":
+        if (
+            "flower_wrap_channel" in lane
+            and "TerminalSupport-Wrap" in contract["grammar"]
+        ):
+            return [
+                ("TerminalSupport-Wrap", str(stratum), False)
+                for stratum in coverage[
+                    "terminal_support_wrap_strata"
+                ]
+            ]
         return [
             ("TerminalSupport-C", str(stratum), False)
             for stratum in coverage["terminal_support_strata"]
@@ -552,6 +562,133 @@ def _child_length_ratio(
     return max(float(bounds[0]), min(float(bounds[1]), value))
 
 
+def _compile_guide_following_child_curve(
+    *,
+    curve_id: str,
+    branch_unit_id: str,
+    parent_curve: Mapping[str, Any],
+    mount_fraction: float,
+    semantic_role: str,
+    guide_channel: Mapping[str, Any],
+    contract: Mapping[str, Any],
+) -> dict[str, Any]:
+    parent_points = [
+        _point(value, f"{parent_curve['curve_id']}.centerline")
+        for value in parent_curve["centerline"]
+    ]
+    root, parent_tangent = _sample_polyline(
+        parent_points,
+        mount_fraction,
+    )
+    guide_points = [
+        _point(value, f"{curve_id}.guide_centerline")
+        for value in guide_channel["guide_centerline"]
+    ]
+    guide_tangents = [
+        _unit(
+            _point(value, f"{curve_id}.guide_tangent"),
+            "guided wrap tangent",
+        )
+        for value in guide_channel["guide_tangents"]
+    ]
+    if len(guide_points) < 3 or len(guide_points) != len(
+        guide_tangents
+    ):
+        raise UnitGrammarError(
+            f"{curve_id} guide centerline/tangent mismatch"
+        )
+    guide_root_translation = _sub(root, guide_points[0])
+    if _length(guide_root_translation) > float(
+        contract["guided_support_wrap"][
+            "maximum_guide_root_translation"
+        ]
+    ):
+        raise UnitGrammarError(
+            f"{curve_id} guide root does not match parent mount"
+        )
+    guide_points = [
+        _add(point, guide_root_translation)
+        for point in guide_points
+    ]
+    guide_points[0] = root
+    guide_tangents[0] = parent_tangent
+    handle_fraction = float(
+        contract["guided_support_wrap"]["guide_handle_fraction"]
+    )
+    segments: list[dict[str, list[float]]] = []
+    for start, end, start_tangent, end_tangent in zip(
+        guide_points,
+        guide_points[1:],
+        guide_tangents,
+        guide_tangents[1:],
+    ):
+        chord = _distance(start, end)
+        segments.append(
+            _cubic(
+                start,
+                _add(
+                    start,
+                    _mul(start_tangent, chord * handle_fraction),
+                ),
+                _sub(
+                    end,
+                    _mul(end_tangent, chord * handle_fraction),
+                ),
+                end,
+            )
+        )
+    centerline = _sample_segments(
+        segments,
+        int(
+            contract["guided_support_wrap"][
+                "samples_per_guide_segment"
+            ]
+        ),
+    )
+    actual_length = _polyline_length(centerline)
+    parent_length = _polyline_length(parent_points)
+    entry_error = _angle_degrees(
+        parent_tangent,
+        _unit(
+            _sub(
+                _point(segments[0]["p1"]),
+                _point(segments[0]["p0"]),
+            )
+        ),
+    )
+    return {
+        "curve_id": curve_id,
+        "branch_unit_id": branch_unit_id,
+        "level": "L2",
+        "hierarchy_level": 2,
+        "parent_curve_id": parent_curve["curve_id"],
+        "mount_fraction": _round(mount_fraction),
+        "semantic_role": semantic_role,
+        "shape_signature": "guided_flower_wrap",
+        "turn_sign": int(guide_channel["wrap_direction"]),
+        "entry_opening_degrees": _round(entry_error),
+        "intended_parent_length_ratio": _round(
+            actual_length / parent_length
+        ),
+        "actual_length": _round(actual_length),
+        "cubic_segments": segments,
+        "centerline": [
+            _round_point(point) for point in centerline
+        ],
+        "guide_channel": dict(guide_channel),
+        "sampling_trace": {
+            "source": "global_l1_role_guide_channel",
+            "guide_digest": canonical_digest(guide_channel),
+            "guide_root_translation": _round_point(
+                guide_root_translation
+            ),
+            "generated_once": True,
+            "validation_guided_retry_count": 0,
+            "validation_guided_resample_count": 0,
+        },
+    }
+
+
 def _compile_child_curve(
     *,
     curve_id: str,
@@ -568,12 +705,23 @@ def _compile_child_curve(
     density_scale: float,
     shape_signature: str,
     target_flower: Mapping[str, Any] | None,
+    guide_channel: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     parent_points = [
         _point(value, f"{parent_curve['curve_id']}.centerline")
         for value in parent_curve["centerline"]
     ]
     root, parent_tangent = _sample_polyline(parent_points, mount_fraction)
+    if guide_channel is not None:
+        return _compile_guide_following_child_curve(
+            curve_id=curve_id,
+            branch_unit_id=branch_unit_id,
+            parent_curve=parent_curve,
+            mount_fraction=mount_fraction,
+            semantic_role=semantic_role,
+            guide_channel=guide_channel,
+            contract=contract,
+        )
     parent_length = _polyline_length(parent_points)
     role_condition = _role_condition(role, level)
     empirical_opening = _quantile(
@@ -989,7 +1137,13 @@ def _diagnose_candidate(
         )
         opening = _angle_degrees(parent_tangent, entry)
         openings.append(opening)
-        opening_bounds = contract["geometry"]["entry_opening_degrees_range"]
+        opening_bounds = (
+            contract["guided_support_wrap"][
+                "root_tangent_error_deg_range"
+            ]
+            if candidate["grammar_id"] == "TerminalSupport-Wrap"
+            else contract["geometry"]["entry_opening_degrees_range"]
+        )
         if not float(opening_bounds[0]) - 0.5 <= opening <= float(opening_bounds[1]) + 0.5:
             issues.append(
                 {
@@ -1023,7 +1177,14 @@ def _diagnose_candidate(
             )
         parent_length = float(parent["actual_length"])
         ratio = float(curve["actual_length"]) / parent_length
-        if curve["level"] == "L3":
+        if (
+            candidate["grammar_id"] == "TerminalSupport-Wrap"
+            and curve["level"] == "L2"
+        ):
+            bounds = contract["guided_support_wrap"][
+                "child_parent_length_ratio_range"
+            ]
+        elif curve["level"] == "L3":
             bounds = bounds_by_role["tertiary"]
         else:
             bounds = bounds_by_role.get(
@@ -1114,14 +1275,14 @@ def _diagnose_candidate(
         for point in [_point(value) for value in curve["centerline"]][1:]:
             enters = False
             for flower in analysis["flowers"]:
-                is_sw1_wrap_target = (
-                    candidate["role"] == "flower_support"
+                is_wrap_target = (
+                    curve["semantic_role"] == "flower_wrap"
                     and flower["flower_id"] == target_flower_id
                 )
                 if _ellipse_value(
                     point,
                     flower,
-                    protection=not is_sw1_wrap_target,
+                    protection=not is_wrap_target,
                 ) < 1.0:
                     enters = True
                     break
@@ -1228,29 +1389,38 @@ def _build_candidate(
     l2_count = int(grammar["l2_count"])
     role = str(lane["role"])
     role_condition = _role_condition(role, 2)
-    preferred_mounts = _mounts(
-        prior,
-        role_condition,
-        l2_count,
-        quantiles,
-        contract,
-    )
     l1_points = [_point(value) for value in l1["centerline"]]
-    mounts = _contextual_mounts(
-        l1_points,
-        preferred_mounts,
-        lane,
-        analysis,
-        contract,
-        quantiles[7],
+    guide_channel = (
+        lane.get("flower_wrap_channel")
+        if grammar_id == "TerminalSupport-Wrap"
+        else None
     )
-    signs = _child_signs(
-        l1_points,
-        mounts,
-        analysis,
-        lane,
-        float(plan["global_latents"]["asymmetry"]),
-    )
+    if guide_channel is not None:
+        mounts = [float(guide_channel["mount_fraction"])]
+        signs = [int(guide_channel["wrap_direction"])]
+    else:
+        preferred_mounts = _mounts(
+            prior,
+            role_condition,
+            l2_count,
+            quantiles,
+            contract,
+        )
+        mounts = _contextual_mounts(
+            l1_points,
+            preferred_mounts,
+            lane,
+            analysis,
+            contract,
+            quantiles[7],
+        )
+        signs = _child_signs(
+            l1_points,
+            mounts,
+            analysis,
+            lane,
+            float(plan["global_latents"]["asymmetry"]),
+        )
     target_flower = next(
         (
             flower
@@ -1280,6 +1450,7 @@ def _build_candidate(
             semantic_role=(
                 "flower_wrap"
                 if role == "flower_support"
+                or guide_channel is not None
                 else "terminal_subordinate"
                 if role == "terminal_flower_support"
                 else "frontier_extension"
@@ -1293,6 +1464,7 @@ def _build_candidate(
             density_scale=density_scale,
             shape_signature=shape,
             target_flower=target_flower,
+            guide_channel=guide_channel,
         )
         curves.append(child)
 
@@ -1331,6 +1503,8 @@ def _build_candidate(
         "policy": (
             "sw1_trough_support_with_single_wrap"
             if role == "flower_support"
+            else "sw3_remote_support_with_guided_flower_wrap"
+            if guide_channel is not None
             else "sw3_remote_below_flower_underside_support"
             if role == "terminal_flower_support"
             else "ordinary_descendants_exclude_all_flower_reserves"
@@ -1350,6 +1524,17 @@ def _build_candidate(
         "role": role,
         "grammar_id": grammar_id,
         "parameter_stratum": stratum,
+        "guide_consumption": (
+            {
+                "guide_digest": lane["guide_digest"],
+                "service_flower_id": lane["service_flower_id"],
+                "target_relation": lane["target_relation"],
+                "support_channel_consumed": True,
+                "flower_wrap_channel_consumed": True,
+            }
+            if guide_channel is not None
+            else None
+        ),
         "hierarchy": {
             "l1_count": 1,
             "l2_count": l2_count,

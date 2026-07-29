@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from typing import Any, Iterable, Mapping, Sequence
 
 from fixed_visual_prior import canonical_digest, validate_fixed_visual_prior
+from prototype_analysis import derive_loop_growth_region
 
 
 SCHEMA = "dynamic_branch_global_l1_flow_plan_v1"
@@ -126,6 +127,25 @@ def _cubic_point(segment: Mapping[str, Sequence[float]], t: float) -> Point:
     return (
         u**3 * p0[0] + 3.0 * u * u * t * p1[0] + 3.0 * u * t * t * p2[0] + t**3 * p3[0],
         u**3 * p0[1] + 3.0 * u * u * t * p1[1] + 3.0 * u * t * t * p2[1] + t**3 * p3[1],
+    )
+
+
+def _cubic_derivative(
+    segment: Mapping[str, Sequence[float]],
+    t: float,
+) -> Point:
+    p0 = _point(segment["p0"], "segment.p0")
+    p1 = _point(segment["p1"], "segment.p1")
+    p2 = _point(segment["p2"], "segment.p2")
+    p3 = _point(segment["p3"], "segment.p3")
+    u = 1.0 - t
+    return (
+        3.0 * u * u * (p1[0] - p0[0])
+        + 6.0 * u * t * (p2[0] - p1[0])
+        + 3.0 * t * t * (p3[0] - p2[0]),
+        3.0 * u * u * (p1[1] - p0[1])
+        + 6.0 * u * t * (p2[1] - p1[1])
+        + 3.0 * t * t * (p3[1] - p2[1]),
     )
 
 
@@ -266,6 +286,48 @@ def _point_at_arc_fraction(points: Sequence[Point], fraction: float) -> Point:
             local = 0.0 if span <= 1e-12 else (target - lengths[index - 1]) / span
             return _lerp(points[index - 1], points[index], local)
     return points[-1]
+
+
+def _point_and_tangent_at_arc_fraction(
+    points: Sequence[Point],
+    fraction: float,
+) -> tuple[Point, Point]:
+    lengths = _polyline_cumulative_lengths(points)
+    target = lengths[-1] * fraction
+    for index in range(1, len(points)):
+        if lengths[index] + 1e-12 >= target:
+            span = lengths[index] - lengths[index - 1]
+            local = (
+                0.0
+                if span <= 1e-12
+                else (target - lengths[index - 1]) / span
+            )
+            return (
+                _lerp(points[index - 1], points[index], local),
+                _unit(
+                    _sub(points[index], points[index - 1]),
+                    "polyline arc tangent",
+                ),
+            )
+    return (
+        points[-1],
+        _unit(_sub(points[-1], points[-2]), "polyline end tangent"),
+    )
+
+
+def _polyline_tangents(points: Sequence[Point]) -> list[Point]:
+    if len(points) < 2:
+        raise GlobalL1FlowError("guide centerline needs two points")
+    tangents: list[Point] = []
+    for index in range(len(points)):
+        if index == 0:
+            direction = _sub(points[1], points[0])
+        elif index == len(points) - 1:
+            direction = _sub(points[-1], points[-2])
+        else:
+            direction = _sub(points[index + 1], points[index - 1])
+        tangents.append(_unit(direction, "guide tangent"))
+    return tangents
 
 
 def _angle_degrees(first: Point, second: Point, *, unsigned_axis: bool = False) -> float:
@@ -2365,6 +2427,208 @@ def generate_global_l1_flow_plan(
     }
     inventory["inventory_digest"] = canonical_digest(inventory)
     return plan, inventory
+
+
+def attach_loop_growth_guide(
+    lane: Mapping[str, Any],
+    analysis: Mapping[str, Any],
+    guide_contract: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Attach support and flower-wrap guide channels to one existing L1 lane."""
+
+    if lane.get("role") != "terminal_flower_support":
+        raise GlobalL1FlowError(
+            "loop-growth guide requires terminal_flower_support"
+        )
+    flower_id = str(lane.get("flower_id") or "")
+    flower = _flower_by_id(analysis, flower_id)
+    region = derive_loop_growth_region(
+        analysis,
+        flower_id,
+        entry_distance_range=guide_contract["entry_distance_range"],
+        boundary_sample_count=int(
+            guide_contract["analysis_boundary_sample_count"]
+        ),
+    )
+    support_points = [
+        _point(point, "lane.centerline")
+        for point in lane["centerline"]
+    ]
+    support_tangents = _polyline_tangents(support_points)
+    support_width_start = float(
+        guide_contract["support_half_width_start"]
+    )
+    support_width_end = float(
+        guide_contract["support_half_width_end"]
+    )
+    support_width_profile = [
+        {
+            "fraction": round(index / 4.0, 9),
+            "half_width": round(
+                support_width_start
+                + (support_width_end - support_width_start)
+                * index
+                / 4.0,
+                9,
+            ),
+        }
+        for index in range(5)
+    ]
+
+    mount_fraction = float(guide_contract["wrap_mount_fraction"])
+    mount_root, mount_tangent = _point_and_tangent_at_arc_fraction(
+        support_points,
+        mount_fraction,
+    )
+    center = _flower_center_near(flower, mount_root[0])
+    rx = float(flower["rx"])
+    ry = float(flower["ry"])
+    outer_rho = float(guide_contract["wrap_outer_rho"])
+    start_angle = math.radians(
+        float(guide_contract["wrap_start_angle_deg"])
+    )
+    signed_span = (
+        float(guide_contract["wrap_span_deg"])
+        * float(guide_contract["wrap_direction"])
+    )
+    join = (
+        center[0] + outer_rho * rx * math.cos(start_angle),
+        center[1] + outer_rho * ry * math.sin(start_angle),
+    )
+    progress_sign = 1.0 if signed_span >= 0.0 else -1.0
+    ellipse_start_tangent = _unit(
+        (
+            -progress_sign * rx * math.sin(start_angle),
+            progress_sign * ry * math.cos(start_angle),
+        ),
+        "wrap ellipse start tangent",
+    )
+    approach_chord = _distance(mount_root, join)
+    approach = _hermite_segment(
+        mount_root,
+        join,
+        mount_tangent,
+        ellipse_start_tangent,
+        approach_chord
+        * float(guide_contract["approach_root_arm_fraction"]),
+        approach_chord
+        * float(guide_contract["approach_join_arm_fraction"]),
+    )
+    approach_sample_count = int(
+        guide_contract["approach_sample_count"]
+    )
+    wrap_points = [
+        _cubic_point(approach, index / approach_sample_count)
+        for index in range(approach_sample_count + 1)
+    ]
+    wrap_tangents = [
+        _unit(
+            _cubic_derivative(approach, index / approach_sample_count),
+            "wrap approach tangent",
+        )
+        for index in range(approach_sample_count + 1)
+    ]
+    ellipse_sample_count = int(
+        guide_contract["ellipse_sample_count"]
+    )
+    for index in range(1, ellipse_sample_count + 1):
+        fraction = index / ellipse_sample_count
+        angle = start_angle + math.radians(signed_span) * fraction
+        wrap_points.append(
+            (
+                center[0] + outer_rho * rx * math.cos(angle),
+                center[1] + outer_rho * ry * math.sin(angle),
+            )
+        )
+        wrap_tangents.append(
+            _unit(
+                (
+                    -progress_sign * rx * math.sin(angle),
+                    progress_sign * ry * math.cos(angle),
+                ),
+                "wrap ellipse tangent",
+            )
+        )
+    wrap_half_width = float(guide_contract["wrap_half_width"])
+    wrap_width_profile = [
+        {
+            "fraction": round(index / 4.0, 9),
+            "half_width": round(wrap_half_width, 9),
+        }
+        for index in range(5)
+    ]
+    guided = dict(lane)
+    guided.update(
+        {
+            "service_flower_id": flower_id,
+            "target_relation": (
+                "remote_mount_below_flower_to_underside"
+            ),
+            "guide_centerline": [
+                _round_point(point) for point in support_points
+            ],
+            "guide_tangents": [
+                _round_point(tangent) for tangent in support_tangents
+            ],
+            "width_profile": support_width_profile,
+            "exit_direction": _round_point(support_tangents[-1]),
+            "guide_channel": {
+                "schema": "dynamic_branch_role_guide_channel_v1",
+                "semantic_role": "terminal_flower_support",
+                "service_flower_id": flower_id,
+                "guide_centerline": [
+                    _round_point(point) for point in support_points
+                ],
+                "guide_tangents": [
+                    _round_point(tangent)
+                    for tangent in support_tangents
+                ],
+                "width_profile": support_width_profile,
+                "exit_direction": _round_point(
+                    support_tangents[-1]
+                ),
+            },
+            "flower_wrap_channel": {
+                "schema": "dynamic_branch_role_guide_channel_v1",
+                "semantic_role": "flower_wrap",
+                "service_flower_id": flower_id,
+                "target_relation": "outside_flower_boundary_arc",
+                "mount_fraction": round(mount_fraction, 9),
+                "guide_centerline": [
+                    _round_point(point) for point in wrap_points
+                ],
+                "guide_tangents": [
+                    _round_point(tangent)
+                    for tangent in wrap_tangents
+                ],
+                "width_profile": wrap_width_profile,
+                "exit_direction": _round_point(wrap_tangents[-1]),
+                "wrap_outer_rho": round(outer_rho, 9),
+                "wrap_start_angle_deg": round(
+                    math.degrees(start_angle),
+                    9,
+                ),
+                "wrap_span_deg": round(abs(signed_span), 9),
+                "wrap_direction": int(progress_sign),
+            },
+            "loop_growth_region": region,
+        }
+    )
+    guide_source = {
+        key: guided[key]
+        for key in (
+            "service_flower_id",
+            "target_relation",
+            "guide_centerline",
+            "guide_tangents",
+            "width_profile",
+            "exit_direction",
+            "flower_wrap_channel",
+            "loop_growth_region",
+        )
+    }
+    guided["guide_digest"] = canonical_digest(guide_source)
+    return guided
 
 
 def validate_global_l1_flow_plan(plan: Mapping[str, Any]) -> None:

@@ -1,0 +1,112 @@
+{
+  "schema": "dynamic_branch_R2_support_wrap_contract_v1",
+  "contract_id": "guided_single_support_wrap_branch_unit_v1",
+  "stage": "R2",
+  "scope": {
+    "prototype_id": "proto_sw_3_1",
+    "seed": 4101,
+    "lane_id": "support_1",
+    "enabled_l1_count": 1,
+    "enabled_l2_count": 1,
+    "enabled_l3_count": 0,
+    "other_l1_enabled": false,
+    "balance_enabled": false,
+    "ordinary_enabled": false,
+    "terminal_content_enabled": false,
+    "leaves_present": false,
+    "buds_present": false,
+    "curl_heads_present": false
+  },
+  "inputs": {
+    "r1_plan_root": "artifacts/runs/dynamic_branch_R1_l1_motion_v1/plans",
+    "analysis_root": "artifacts/runs/dynamic_branch_stage2_analysis_v1",
+    "fixed_visual_prior": "artifacts/runs/dynamic_branch_stage3a_fixed_visual_prior_v1/fixed_visual_prior.json",
+    "base_grammar_contract": "experiments/branch_unit/dynamic/STAGE4_UNIT_GRAMMAR_CONTRACT_V1.json"
+  },
+  "guide": {
+    "entry_distance_range": [
+      0.3,
+      0.48
+    ],
+    "analysis_boundary_sample_count": 48,
+    "support_half_width_start": 0.024,
+    "support_half_width_end": 0.018,
+    "wrap_mount_fraction": 0.72,
+    "wrap_outer_rho": 1.18,
+    "wrap_start_angle_deg": 110.0,
+    "wrap_span_deg": 120.0,
+    "wrap_direction": 1,
+    "approach_root_arm_fraction": 0.28,
+    "approach_join_arm_fraction": 0.3,
+    "approach_sample_count": 4,
+    "ellipse_sample_count": 8,
+    "wrap_half_width": 0.022
+  },
+  "grammar_extension": {
+    "grammar_id": "TerminalSupport-Wrap",
+    "parameter_strata": [
+      "guided_outer_wrap"
+    ],
+    "l2_count": 1,
+    "l3_count_options": [
+      0
+    ]
+  },
+  "guided_support_wrap": {
+    "guide_handle_fraction": 0.333333333,
+    "samples_per_guide_segment": 8,
+    "maximum_guide_root_translation": 0.003,
+    "root_tangent_error_deg_range": [
+      0.0,
+      15.0
+    ],
+    "child_parent_length_ratio_range": [
+      0.25,
+      1.5
+    ]
+  },
+  "measurement": {
+    "curve_samples_per_cubic": 64,
+    "guide_distance_sample_count": 128,
+    "intersection_epsilon": 1e-07
+  },
+  "acceptance": {
+    "remote_mount_arc_distance_range": [
+      0.3,
+      0.48
+    ],
+    "below_flower_waypoint_margin_min": 0.035,
+    "support_contact_error_max": 0.01,
+    "support_channel_coverage_min": 0.85,
+    "support_mean_guide_alignment_min": 0.7,
+    "support_contact_normalized_dx_max": 0.15,
+    "support_contact_normalized_dy_max": 0.1,
+    "wrap_span_deg_range": [
+      90.0,
+      180.0
+    ],
+    "minimum_rho_min": 1.0,
+    "mean_rho_range": [
+      1.05,
+      1.45
+    ],
+    "rho_cv_max": 0.2,
+    "wrap_channel_coverage_min": 0.85,
+    "wrap_mean_guide_alignment_min": 0.7,
+    "unit_self_crossing_count_max": 0,
+    "flower_core_intrusion_count_max": 0,
+    "out_of_bounds_length_max": 0.0,
+    "backbone_crossing_count_max": 0,
+    "geometry_role_classifier_accuracy": 1.0
+  },
+  "required_artifacts": [
+    "acceptance_report.json",
+    "iteration_history.json",
+    "metrics.json",
+    "failures.json",
+    "before_after_contact_sheet.png",
+    "debug_overlay.svg",
+    "run_manifest.json",
+    "stage_summary.md"
+  ]
+}

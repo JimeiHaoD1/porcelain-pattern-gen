@@ -1,0 +1,39 @@
+{
+  "resolved_failures": [
+    {
+      "failed_metrics": [
+        "L2_semantic_role",
+        "wrap_guide_presence"
+      ],
+      "iteration": 1,
+      "resolution": "route TerminalSupport-Wrap through the lane guide channel",
+      "root_causes": [
+        "terminal support previously compiled only a generic subordinate child"
+      ]
+    },
+    {
+      "failed_metrics": [
+        "guide_root_attachment_error"
+      ],
+      "iteration": 2,
+      "resolution": "translate the guide by the bounded sampled-root delta before compilation",
+      "root_causes": [
+        "guide and parent used different deterministic sampling densities"
+      ]
+    },
+    {
+      "failed_metrics": [
+        "backbone_crossing_count"
+      ],
+      "iteration": 3,
+      "resolution": "use the remaining left outer sector and preserve the 120-degree wrap",
+      "root_causes": [
+        "clockwise wrap occupied the flower side already crossed by the backbone"
+      ]
+    }
+  ],
+  "schema": "dynamic_branch_R2_failures_v1",
+  "stage": "R2",
+  "unresolved_failure_count": 0,
+  "unresolved_failures": []
+}

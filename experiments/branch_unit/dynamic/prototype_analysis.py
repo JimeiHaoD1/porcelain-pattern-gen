@@ -842,6 +842,128 @@ def analyze_prototype(p0: StrictP0V2) -> dict[str, object]:
     return result
 
 
+def derive_loop_growth_region(
+    analysis: Mapping[str, object],
+    flower_id: str,
+    *,
+    entry_distance_range: Sequence[float],
+    boundary_sample_count: int,
+) -> dict[str, object]:
+    """Derive role-neutral flower-edge space for an existing analysis."""
+
+    if analysis.get("schema") != SCHEMA:
+        raise ValueError("loop-growth region requires prototype analysis v1")
+    if (
+        len(entry_distance_range) != 2
+        or float(entry_distance_range[0]) < 0.0
+        or float(entry_distance_range[1])
+        <= float(entry_distance_range[0])
+    ):
+        raise ValueError("entry_distance_range must be increasing")
+    if boundary_sample_count < 12:
+        raise ValueError("boundary_sample_count must be at least 12")
+    flower = next(
+        (
+            row
+            for row in analysis["flowers"]
+            if row["flower_id"] == flower_id
+        ),
+        None,
+    )
+    if flower is None:
+        raise ValueError(f"unknown flower id: {flower_id}")
+    center = (
+        float(flower["center"][0]),
+        float(flower["center"][1]),
+    )
+    rx = float(flower["rx"])
+    ry = float(flower["ry"])
+    protection_rx = float(flower["protection_rx"])
+    protection_ry = float(flower["protection_ry"])
+    nearest_s = float(flower["nearest_backbone_s"])
+    minimum_entry = float(entry_distance_range[0])
+    maximum_entry = float(entry_distance_range[1])
+    entry_ranges = [
+        {
+            "direction": direction,
+            "start_s": _round(
+                (nearest_s + direction * minimum_entry) % 1.0
+            ),
+            "end_s": _round(
+                (nearest_s + direction * maximum_entry) % 1.0
+            ),
+        }
+        for direction in (-1, 1)
+    ]
+    backbone = [
+        (
+            float(row["point"][0]),
+            float(row["point"][1]),
+        )
+        for row in analysis["backbone"]["samples"]
+    ]
+    boundary_samples: list[dict[str, object]] = []
+    clearance_samples: list[dict[str, object]] = []
+    width_samples: list[dict[str, object]] = []
+    protection_gap = min(protection_rx - rx, protection_ry - ry)
+    for index in range(boundary_sample_count):
+        angle = 2.0 * math.pi * index / boundary_sample_count
+        point = (
+            center[0] + rx * math.cos(angle),
+            center[1] + ry * math.sin(angle),
+        )
+        clearance = min(
+            _point_segment_distance(
+                point,
+                (start[0] + offset, start[1]),
+                (end[0] + offset, end[1]),
+            )
+            for offset in (-1.0, 0.0, 1.0)
+            for start, end in zip(backbone, backbone[1:])
+        )
+        angle_degrees = _round(math.degrees(angle))
+        boundary_samples.append(
+            {
+                "angle_degrees": angle_degrees,
+                "point": _round_point(point),
+            }
+        )
+        clearance_samples.append(
+            {
+                "angle_degrees": angle_degrees,
+                "backbone_clearance": _round(clearance),
+            }
+        )
+        width_samples.append(
+            {
+                "angle_degrees": angle_degrees,
+                "available_half_width": _round(
+                    max(
+                        0.0,
+                        min(
+                            protection_gap,
+                            clearance * 0.25,
+                        ),
+                    )
+                ),
+            }
+        )
+    result: dict[str, object] = {
+        "schema": "dynamic_branch_loop_growth_region_v1",
+        "prototype_id": analysis["prototype_id"],
+        "flower_id": flower_id,
+        "entry_s_range": entry_ranges,
+        "clearance_samples": clearance_samples,
+        "flower_boundary_samples": boundary_samples,
+        "available_width_profile": width_samples,
+        "role_neutral": True,
+        "planner_decisions_present": False,
+        "curve_geometry_present": False,
+    }
+    result["region_digest"] = _canonical_digest(result)
+    return result
+
+
 def analysis_summary(analysis: Mapping[str, object]) -> dict[str, object]:
     backbone = analysis["backbone"]
     space = analysis["space_analysis"]

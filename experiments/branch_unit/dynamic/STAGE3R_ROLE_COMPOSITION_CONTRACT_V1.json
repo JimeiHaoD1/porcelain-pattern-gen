@@ -1,0 +1,173 @@
+{
+  "schema": "dynamic_branch_stage3r_role_composition_contract_v1",
+  "contract_id": "role_target_settlement_first_global_vine_plan_v1",
+  "stage": "3R",
+  "purpose": "Replace generic branch slots with role-readable continuous-scroll vine organization before curve compilation.",
+  "required_inputs": {
+    "strict_p0_v2": true,
+    "approved_prototype_analysis": true,
+    "stage5_visual_rejection_required": true,
+    "rejected_stage3b_l1_geometry_consumed": false,
+    "rejected_stage4_unit_geometry_consumed": false,
+    "fixed_backbone_and_flower_geometry_immutable": true
+  },
+  "scope": {
+    "branch_skeleton_only": true,
+    "leaves_present": false,
+    "buds_present": false,
+    "curl_heads_present": false,
+    "maximum_hierarchy_level": 3,
+    "default_terminal_fork_present": false
+  },
+  "planning_order": [
+    "assign_one_support_relation_per_flower",
+    "assign_one_wrap_relation_per_flower",
+    "assign_one_short_balance_relation_per_flower",
+    "reserve_horizontal_flow_and_composition_envelope",
+    "add_optional_ordinary_fill_only_in_remaining_space",
+    "freeze_role_parent_target_and_settlement_graph",
+    "compile_curves"
+  ],
+  "mandatory_branch_questions": [
+    "where_does_it_grow_from",
+    "which_object_does_it_serve",
+    "where_does_it_settle"
+  ],
+  "root_connection": {
+    "attachment_derivative_parent_tangent_degrees_range": [
+      0.0,
+      8.0
+    ],
+    "root_phase_length_ratio_range": [
+      0.15,
+      0.25
+    ],
+    "post_root_departure_degrees_range": [
+      20.0,
+      55.0
+    ],
+    "first_control_point_follows_parent_tangent": true,
+    "immediate_reverse_allowed": false,
+    "maximum_l1_roots_per_local_backbone_interval": 1,
+    "local_backbone_interval_arc_fraction": 0.08
+  },
+  "direction_and_envelope": {
+    "minimum_absolute_horizontal_displacement_to_length_ratio": 0.30,
+    "ordinary_near_vertical_growth_allowed": false,
+    "near_vertical_threshold_degrees_from_horizontal": 68.0,
+    "non_seam_branch_vertical_canvas_exit_allowed": false,
+    "vertical_margin_normalized": 0.04,
+    "long_branch_requires_declared_settlement_target": true,
+    "allowed_long_branch_settlement_targets": [
+      "flower_underside",
+      "flower_perimeter",
+      "future_leaf_interface",
+      "future_curl_interface",
+      "return_guard_region"
+    ]
+  },
+  "flower_core_relations": {
+    "relation_count_per_flower": 3,
+    "roles": {
+      "flower_support": {
+        "count_per_flower": 1,
+        "root_region": "preceding_or_lower_backbone_trough",
+        "target": "flower_underside_contact_region",
+        "settlement": "curvature_decreases_near_flower_underside",
+        "must_visibly_support_flower": true
+      },
+      "flower_wrap": {
+        "count_per_flower": 1,
+        "root_region": "one_flower_side_with_open_perimeter",
+        "target": "flower_outer_perimeter_corridor",
+        "perimeter_coverage_fraction_range": [
+          0.25,
+          0.50
+        ],
+        "stable_clearance_required": true,
+        "settlement": "turn_outward_or_return_toward_backbone"
+      },
+      "flower_balance": {
+        "count_per_flower": 1,
+        "root_region": "opposite_visual_side_of_support_or_wrap",
+        "target": "declared_local_blank_region",
+        "length_to_primary_organizing_branch_ratio_range": [
+          0.50,
+          0.75
+        ],
+        "may_compete_for_flower_center": false
+      }
+    },
+    "additional_flower_adjacent_ordinary_branches_allowed": false
+  },
+  "ordinary_branch": {
+    "required": false,
+    "purpose": "local_blank_fill_only",
+    "must_be_shorter_than_organizing_branches": true,
+    "may_create_new_visual_center": false,
+    "requires_remaining_space_after_flower_relations": true
+  },
+  "hierarchy": {
+    "l1_purpose": "composition_and_flower_relation",
+    "l2_parent_length_ratio_range": [
+      0.25,
+      0.45
+    ],
+    "l2_mount_parent_arc_fraction_range": [
+      0.35,
+      0.80
+    ],
+    "l2_attachment_derivative_parent_tangent_degrees_range": [
+      0.0,
+      8.0
+    ],
+    "l2_post_root_departure_degrees_range": [
+      25.0,
+      50.0
+    ],
+    "maximum_l2_per_l1": 2,
+    "l3_default_present": false,
+    "l3_requires_declared_terminal_interface": true,
+    "symmetric_terminal_y_fork_allowed": false
+  },
+  "curve_compilation": {
+    "cubic_segment_count_per_l1": 3,
+    "segments": {
+      "root": "follow_parent_tangent_and_depart_gradually",
+      "bend": "perform_the_single_primary_direction_change",
+      "settle": "reduce_curvature_and_arrive_at_declared_target"
+    },
+    "primary_curvature_peak_count": 1,
+    "small_repeated_wiggles_allowed": false,
+    "straight_then_sharp_bend_allowed": false,
+    "root_bend_settle_tangent_continuity_required": true
+  },
+  "density": {
+    "planned_around_backbone_peak_trough_flower_and_blank_regions": true,
+    "generate_many_then_delete_by_collision": false,
+    "parallel_vertical_fence_pattern_allowed": false,
+    "same_size_same_angle_terminal_cluster_allowed": false
+  },
+  "generation_policy": {
+    "seed_selects_only_within_role_legal_ranges": true,
+    "validation_guided_retry_used": false,
+    "validation_guided_resample_used": false,
+    "automatic_repair_used": false,
+    "automatic_deletion_used": false,
+    "silent_fallback_used": false,
+    "best_of_n_visual_selection_used": false,
+    "experimental_variants_created": false
+  },
+  "review": {
+    "planning_preview_before_curve_compilation": true,
+    "numeric_checks_cannot_auto_approve_visual_gate": true,
+    "required_visual_checks": [
+      "role_is_readable_from_geometry_without_label",
+      "flowers_are_supported_wrapped_and_balanced",
+      "horizontal_repeat_flow_remains_dominant",
+      "hierarchy_decreases_clearly",
+      "branches_remain_inside_composition_envelope",
+      "each_branch_has_root_service_object_and_settlement"
+    ]
+  }
+}

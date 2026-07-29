@@ -1,0 +1,1186 @@
+{
+  "schema": "chanzhi_region_graph_v1",
+  "coordinate_system": {
+    "backbone_position": "normalized_arc_length",
+    "side_reference": "canvas_vertical_side",
+    "absolute_svg_path_indices_required": false
+  },
+  "nodes": [
+    {
+      "graph_node_id": "repeat_start",
+      "kind": "repeat_boundary",
+      "s": 0.0,
+      "point": [
+        0.0,
+        120.543
+      ]
+    },
+    {
+      "graph_node_id": "trough_1",
+      "kind": "trough",
+      "s": 0.3875,
+      "point": [
+        89.603052,
+        248.397368
+      ]
+    },
+    {
+      "graph_node_id": "peak_1",
+      "kind": "peak",
+      "s": 0.875,
+      "point": [
+        211.520434,
+        95.540867
+      ]
+    },
+    {
+      "graph_node_id": "repeat_end",
+      "kind": "repeat_boundary",
+      "s": 1.0,
+      "point": [
+        256.0,
+        120.543
+      ]
+    }
+  ],
+  "backbone_edges": [
+    {
+      "graph_edge_id": "backbone_edge_1",
+      "segment_id": "segment_1",
+      "from_node": "repeat_start",
+      "to_node": "trough_1",
+      "start_s": 0.0,
+      "end_s": 0.3875,
+      "flow": "falling",
+      "mean_abs_curvature": 0.010469
+    },
+    {
+      "graph_edge_id": "backbone_edge_2",
+      "segment_id": "segment_2",
+      "from_node": "trough_1",
+      "to_node": "peak_1",
+      "start_s": 0.3875,
+      "end_s": 0.875,
+      "flow": "rising",
+      "mean_abs_curvature": 0.013418
+    },
+    {
+      "graph_edge_id": "backbone_edge_3",
+      "segment_id": "segment_3",
+      "from_node": "peak_1",
+      "to_node": "repeat_end",
+      "start_s": 0.875,
+      "end_s": 1.0,
+      "flow": "falling",
+      "mean_abs_curvature": 0.021995
+    }
+  ],
+  "guide_edges": [
+    {
+      "guide_id": "guide_1",
+      "source_index": 5,
+      "source_role": "primary_branch",
+      "semantic_role": "structural_guide",
+      "connector_flower_id": null,
+      "parent_kind": "backbone",
+      "parent_id": "backbone_edge_1",
+      "parent_fraction": 0.105727,
+      "mount_distance": 0.926963,
+      "generation": 1,
+      "root": [
+        20.876,
+        160.724
+      ],
+      "tip": [
+        22.095,
+        75.579
+      ],
+      "vertical_side": "upper",
+      "length": 85.687515,
+      "reproductive": true,
+      "points": [
+        [
+          20.876,
+          160.724
+        ],
+        [
+          20.912043,
+          160.527735
+        ],
+        [
+          21.015062,
+          159.951928
+        ],
+        [
+          21.177393,
+          159.016058
+        ],
+        [
+          21.391373,
+          157.739606
+        ],
+        [
+          21.649337,
+          156.142053
+        ],
+        [
+          21.943622,
+          154.242878
+        ],
+        [
+          22.266563,
+          152.061562
+        ],
+        [
+          22.610496,
+          149.617586
+        ],
+        [
+          22.967757,
+          146.930429
+        ],
+        [
+          23.330683,
+          144.019572
+        ],
+        [
+          23.691609,
+          140.904495
+        ],
+        [
+          24.042872,
+          137.604679
+        ],
+        [
+          24.376807,
+          134.139604
+        ],
+        [
+          24.68575,
+          130.52875
+        ],
+        [
+          24.962038,
+          126.791597
+        ],
+        [
+          25.198006,
+          122.947627
+        ],
+        [
+          25.38599,
+          119.016318
+        ],
+        [
+          25.518327,
+          115.017152
+        ],
+        [
+          25.587353,
+          110.969609
+        ],
+        [
+          25.585402,
+          106.893169
+        ],
+        [
+          25.504812,
+          102.807312
+        ],
+        [
+          25.337919,
+          98.73152
+        ],
+        [
+          25.077058,
+          94.685271
+        ],
+        [
+          24.714566,
+          90.688047
+        ],
+        [
+          24.242778,
+          86.759327
+        ],
+        [
+          23.65403,
+          82.918593
+        ],
+        [
+          22.940659,
+          79.185323
+        ],
+        [
+          22.095,
+          75.579
+        ]
+      ],
+      "backbone_s": 0.105764
+    },
+    {
+      "guide_id": "guide_2",
+      "source_index": 7,
+      "source_role": "primary_branch",
+      "semantic_role": "structural_guide",
+      "connector_flower_id": null,
+      "parent_kind": "backbone",
+      "parent_id": "backbone_edge_1",
+      "parent_fraction": 0.270111,
+      "mount_distance": 2.078284,
+      "generation": 1,
+      "root": [
+        45.257,
+        227.214
+      ],
+      "tip": [
+        6.857,
+        254.958
+      ],
+      "vertical_side": "lower",
+      "length": 58.481974,
+      "reproductive": true,
+      "points": [
+        [
+          45.257,
+          227.214
+        ],
+        [
+          44.922478,
+          226.890976
+        ],
+        [
+          44.51632,
+          226.5274
+        ],
+        [
+          43.96156,
+          226.064851
+        ],
+        [
+          43.266193,
+          225.530132
+        ],
+        [
+          42.438216,
+          224.950044
+        ],
+        [
+          41.485625,
+          224.351391
+        ],
+        [
+          40.416417,
+          223.760974
+        ],
+        [
+          39.238588,
+          223.205596
+        ],
+        [
+          37.960134,
+          222.712059
+        ],
+        [
+          36.589052,
+          222.307167
+        ],
+        [
+          35.133338,
+          222.01772
+        ],
+        [
+          33.600989,
+          221.870522
+        ],
+        [
+          32.0,
+          221.892375
+        ],
+        [
+          30.338368,
+          222.110081
+        ],
+        [
+          28.62409,
+          222.550443
+        ],
+        [
+          26.865162,
+          223.240263
+        ],
+        [
+          25.06958,
+          224.206344
+        ],
+        [
+          23.245341,
+          225.475487
+        ],
+        [
+          21.40044,
+          227.074496
+        ],
+        [
+          19.542875,
+          229.030172
+        ],
+        [
+          17.680641,
+          231.369318
+        ],
+        [
+          15.821736,
+          234.118737
+        ],
+        [
+          13.974155,
+          237.30523
+        ],
+        [
+          12.145894,
+          240.955601
+        ],
+        [
+          10.34495,
+          245.096651
+        ],
+        [
+          8.57932,
+          249.755183
+        ],
+        [
+          6.857,
+          254.958
+        ]
+      ],
+      "backbone_s": 0.270176
+    },
+    {
+      "guide_id": "guide_3",
+      "source_index": 11,
+      "source_role": "structural_branch",
+      "semantic_role": "flower_connector",
+      "connector_flower_id": "flower_1",
+      "parent_kind": "backbone",
+      "parent_id": "backbone_edge_1",
+      "parent_fraction": 0.343954,
+      "mount_distance": 0.310142,
+      "generation": 1,
+      "root": [
+        71.162,
+        245.87
+      ],
+      "tip": [
+        90.058,
+        216.691
+      ],
+      "vertical_side": "upper",
+      "length": 36.613692,
+      "reproductive": false,
+      "points": [
+        [
+          71.162,
+          245.87
+        ],
+        [
+          71.433117,
+          245.743788
+        ],
+        [
+          71.756894,
+          245.584061
+        ],
+        [
+          72.192711,
+          245.358178
+        ],
+        [
+          72.730489,
+          245.064831
+        ],
+        [
+          73.360148,
+          244.702712
+        ],
+        [
+          74.071609,
+          244.270516
+        ],
+        [
+          74.854793,
+          243.766933
+        ],
+        [
+          75.69962,
+          243.190657
+        ],
+        [
+          76.596011,
+          242.540381
+        ],
+        [
+          77.533886,
+          241.814797
+        ],
+        [
+          78.503166,
+          241.012598
+        ],
+        [
+          79.493772,
+          240.132476
+        ],
+        [
+          80.495625,
+          239.173125
+        ],
+        [
+          81.498645,
+          238.133237
+        ],
+        [
+          82.492752,
+          237.011504
+        ],
+        [
+          83.467868,
+          235.80662
+        ],
+        [
+          84.413913,
+          234.517277
+        ],
+        [
+          85.320807,
+          233.142168
+        ],
+        [
+          86.178472,
+          231.679985
+        ],
+        [
+          86.976828,
+          230.129422
+        ],
+        [
+          87.705796,
+          228.48917
+        ],
+        [
+          88.355295,
+          226.757923
+        ],
+        [
+          88.915248,
+          224.934373
+        ],
+        [
+          89.375574,
+          223.017213
+        ],
+        [
+          89.726194,
+          221.005136
+        ],
+        [
+          89.957029,
+          218.896834
+        ],
+        [
+          90.058,
+          216.691
+        ]
+      ],
+      "backbone_s": 0.344017
+    },
+    {
+      "guide_id": "guide_4",
+      "source_index": 12,
+      "source_role": "structural_branch",
+      "semantic_role": "structural_guide",
+      "connector_flower_id": null,
+      "parent_kind": "backbone",
+      "parent_id": "backbone_edge_2",
+      "parent_fraction": 0.535544,
+      "mount_distance": 3.43217,
+      "generation": 1,
+      "root": [
+        138.21,
+        210.951
+      ],
+      "tip": [
+        169.296,
+        236.781
+      ],
+      "vertical_side": "lower",
+      "length": 59.811174,
+      "reproductive": true,
+      "points": [
+        [
+          138.21,
+          210.951
+        ],
+        [
+          138.314873,
+          210.832153
+        ],
+        [
+          138.619828,
+          210.498098
+        ],
+        [
+          139.110372,
+          209.982569
+        ],
+        [
+          139.772012,
+          209.319297
+        ],
+        [
+          140.590252,
+          208.542014
+        ],
+        [
+          141.550601,
+          207.684453
+        ],
+        [
+          142.638563,
+          206.780344
+        ],
+        [
+          143.839644,
+          205.86342
+        ],
+        [
+          145.139352,
+          204.967413
+        ],
+        [
+          146.523192,
+          204.126055
+        ],
+        [
+          147.976671,
+          203.373077
+        ],
+        [
+          149.485294,
+          202.742213
+        ],
+        [
+          151.034569,
+          202.267193
+        ],
+        [
+          152.61,
+          201.98175
+        ],
+        [
+          154.197095,
+          201.919616
+        ],
+        [
+          155.781359,
+          202.114522
+        ],
+        [
+          157.348298,
+          202.600201
+        ],
+        [
+          158.88342,
+          203.410384
+        ],
+        [
+          160.372229,
+          204.578804
+        ],
+        [
+          161.800233,
+          206.139192
+        ],
+        [
+          163.152938,
+          208.125281
+        ],
+        [
+          164.415848,
+          210.570802
+        ],
+        [
+          165.574472,
+          213.509488
+        ],
+        [
+          166.614315,
+          216.97507
+        ],
+        [
+          167.520883,
+          221.00128
+        ],
+        [
+          168.279682,
+          225.621851
+        ],
+        [
+          168.876219,
+          230.870513
+        ],
+        [
+          169.296,
+          236.781
+        ]
+      ],
+      "backbone_s": 0.53555
+    },
+    {
+      "guide_id": "guide_5",
+      "source_index": 6,
+      "source_role": "primary_branch",
+      "semantic_role": "structural_guide",
+      "connector_flower_id": null,
+      "parent_kind": "backbone",
+      "parent_id": "backbone_edge_2",
+      "parent_fraction": 0.687995,
+      "mount_distance": 0.073191,
+      "generation": 1,
+      "root": [
+        154.972,
+        147.331
+      ],
+      "tip": [
+        131.81,
+        62.663
+      ],
+      "vertical_side": "upper",
+      "length": 95.524752,
+      "reproductive": true,
+      "points": [
+        [
+          154.972,
+          147.331
+        ],
+        [
+          155.036167,
+          147.07121
+        ],
+        [
+          155.214785,
+          146.314328
+        ],
+        [
+          155.487029,
+          145.094087
+        ],
+        [
+          155.832076,
+          143.444219
+        ],
+        [
+          156.2291,
+          141.398455
+        ],
+        [
+          156.657276,
+          138.990529
+        ],
+        [
+          157.095781,
+          136.254172
+        ],
+        [
+          157.52379,
+          133.223117
+        ],
+        [
+          157.920478,
+          129.931095
+        ],
+        [
+          158.265021,
+          126.41184
+        ],
+        [
+          158.536594,
+          122.699083
+        ],
+        [
+          158.714373,
+          118.826557
+        ],
+        [
+          158.777533,
+          114.827993
+        ],
+        [
+          158.70525,
+          110.737125
+        ],
+        [
+          158.476699,
+          106.587684
+        ],
+        [
+          158.071055,
+          102.413402
+        ],
+        [
+          157.467495,
+          98.248013
+        ],
+        [
+          156.645193,
+          94.125247
+        ],
+        [
+          155.583325,
+          90.078837
+        ],
+        [
+          154.261067,
+          86.142516
+        ],
+        [
+          152.657594,
+          82.350016
+        ],
+        [
+          150.752081,
+          78.735068
+        ],
+        [
+          148.523704,
+          75.331406
+        ],
+        [
+          145.951638,
+          72.172761
+        ],
+        [
+          143.01506,
+          69.292866
+        ],
+        [
+          139.693144,
+          66.725452
+        ],
+        [
+          135.965065,
+          64.504253
+        ],
+        [
+          131.81,
+          62.663
+        ]
+      ],
+      "backbone_s": 0.688001
+    },
+    {
+      "guide_id": "guide_6",
+      "source_index": 8,
+      "source_role": "leaf_guide",
+      "semantic_role": "terminal_hint",
+      "connector_flower_id": null,
+      "parent_kind": "guide",
+      "parent_id": "guide_1",
+      "parent_fraction": 0.444953,
+      "mount_distance": 1.466715,
+      "generation": 2,
+      "root": [
+        26.667,
+        122.935
+      ],
+      "tip": [
+        41.905,
+        103.801
+      ],
+      "vertical_side": "upper",
+      "length": 24.460307,
+      "reproductive": false,
+      "points": [
+        [
+          26.667,
+          122.935
+        ],
+        [
+          41.905,
+          103.801
+        ]
+      ]
+    },
+    {
+      "guide_id": "guide_7",
+      "source_index": 9,
+      "source_role": "leaf_guide",
+      "semantic_role": "structural_guide",
+      "connector_flower_id": null,
+      "parent_kind": "guide",
+      "parent_id": "guide_5",
+      "parent_fraction": 0.318799,
+      "mount_distance": 1.717641,
+      "generation": 2,
+      "root": [
+        160.458,
+        117.195
+      ],
+      "tip": [
+        171.429,
+        81.797
+      ],
+      "vertical_side": "upper",
+      "length": 37.059159,
+      "reproductive": false,
+      "points": [
+        [
+          160.458,
+          117.195
+        ],
+        [
+          171.429,
+          81.797
+        ]
+      ]
+    },
+    {
+      "guide_id": "guide_8",
+      "source_index": 10,
+      "source_role": "leaf_guide",
+      "semantic_role": "terminal_hint",
+      "connector_flower_id": null,
+      "parent_kind": "guide",
+      "parent_id": "guide_4",
+      "parent_fraction": 0.990223,
+      "mount_distance": 1.486307,
+      "generation": 2,
+      "root": [
+        167.772,
+        236.303
+      ],
+      "tip": [
+        152.839,
+        264.525
+      ],
+      "vertical_side": "lower",
+      "length": 31.929231,
+      "reproductive": false,
+      "points": [
+        [
+          167.772,
+          236.303
+        ],
+        [
+          152.839,
+          264.525
+        ]
+      ]
+    },
+    {
+      "guide_id": "guide_9",
+      "source_index": 13,
+      "source_role": "structural_branch",
+      "semantic_role": "structural_guide",
+      "connector_flower_id": null,
+      "parent_kind": "guide",
+      "parent_id": "guide_4",
+      "parent_fraction": 1.0,
+      "mount_distance": 0.0,
+      "generation": 2,
+      "root": [
+        169.296,
+        236.781
+      ],
+      "tip": [
+        214.401,
+        243.956
+      ],
+      "vertical_side": "lower",
+      "length": 74.39003,
+      "reproductive": true,
+      "points": [
+        [
+          169.296,
+          236.781
+        ],
+        [
+          169.382394,
+          237.019608
+        ],
+        [
+          169.6373,
+          237.701437
+        ],
+        [
+          170.054305,
+          238.775497
+        ],
+        [
+          170.626994,
+          240.190799
+        ],
+        [
+          171.348954,
+          241.896352
+        ],
+        [
+          172.213771,
+          243.841165
+        ],
+        [
+          173.215031,
+          245.97425
+        ],
+        [
+          174.346321,
+          248.244615
+        ],
+        [
+          175.601226,
+          250.601271
+        ],
+        [
+          176.973332,
+          252.993227
+        ],
+        [
+          178.456227,
+          255.369493
+        ],
+        [
+          180.043496,
+          257.679079
+        ],
+        [
+          181.728725,
+          259.870995
+        ],
+        [
+          183.5055,
+          261.89425
+        ],
+        [
+          185.367408,
+          263.697855
+        ],
+        [
+          187.308035,
+          265.230819
+        ],
+        [
+          189.320967,
+          266.442153
+        ],
+        [
+          191.39979,
+          267.280865
+        ],
+        [
+          193.538091,
+          267.695966
+        ],
+        [
+          195.729455,
+          267.636466
+        ],
+        [
+          197.967469,
+          267.051375
+        ],
+        [
+          200.245719,
+          265.889702
+        ],
+        [
+          202.557791,
+          264.100457
+        ],
+        [
+          204.897271,
+          261.63265
+        ],
+        [
+          207.257746,
+          258.435291
+        ],
+        [
+          209.632802,
+          254.45739
+        ],
+        [
+          212.016024,
+          249.647956
+        ],
+        [
+          214.401,
+          243.956
+        ]
+      ]
+    }
+  ],
+  "attachments": [
+    {
+      "attachment_id": "flower_1_context",
+      "kind": "flower_context",
+      "semantic_id": "flower_1",
+      "edge_id": "backbone_edge_2",
+      "s": 0.59375,
+      "vertical_relation": "above_backbone",
+      "forbidden_vertical_side": "upper",
+      "clearance_radius": 49.921
+    },
+    {
+      "attachment_id": "flower_2_context",
+      "kind": "flower_context",
+      "semantic_id": "flower_2",
+      "edge_id": "backbone_edge_2",
+      "s": 0.6375,
+      "vertical_relation": "below_backbone",
+      "forbidden_vertical_side": "lower",
+      "clearance_radius": 49.921
+    },
+    {
+      "attachment_id": "growth_region_1_anchor",
+      "kind": "growth_anchor",
+      "semantic_id": "growth_region_1",
+      "edge_id": "backbone_edge_2",
+      "s": 0.4375,
+      "vertical_side": "lower",
+      "flower_relation": "away",
+      "capacity": "single_long",
+      "max_clearance": 61.0
+    },
+    {
+      "attachment_id": "growth_region_2_anchor",
+      "kind": "growth_anchor",
+      "semantic_id": "growth_region_2",
+      "edge_id": "backbone_edge_2",
+      "s": 0.8375,
+      "vertical_side": "upper",
+      "flower_relation": "away",
+      "capacity": "single_long",
+      "max_clearance": 86.0
+    },
+    {
+      "attachment_id": "guide_1_mount",
+      "kind": "existing_guide_mount",
+      "semantic_id": "guide_1",
+      "parent_kind": "backbone",
+      "parent_id": "backbone_edge_1",
+      "generation": 1,
+      "reproductive": true
+    },
+    {
+      "attachment_id": "guide_2_mount",
+      "kind": "existing_guide_mount",
+      "semantic_id": "guide_2",
+      "parent_kind": "backbone",
+      "parent_id": "backbone_edge_1",
+      "generation": 1,
+      "reproductive": true
+    },
+    {
+      "attachment_id": "guide_3_mount",
+      "kind": "existing_guide_mount",
+      "semantic_id": "guide_3",
+      "parent_kind": "backbone",
+      "parent_id": "backbone_edge_1",
+      "generation": 1,
+      "reproductive": false
+    },
+    {
+      "attachment_id": "guide_4_mount",
+      "kind": "existing_guide_mount",
+      "semantic_id": "guide_4",
+      "parent_kind": "backbone",
+      "parent_id": "backbone_edge_2",
+      "generation": 1,
+      "reproductive": true
+    },
+    {
+      "attachment_id": "guide_5_mount",
+      "kind": "existing_guide_mount",
+      "semantic_id": "guide_5",
+      "parent_kind": "backbone",
+      "parent_id": "backbone_edge_2",
+      "generation": 1,
+      "reproductive": true
+    },
+    {
+      "attachment_id": "guide_6_mount",
+      "kind": "existing_guide_mount",
+      "semantic_id": "guide_6",
+      "parent_kind": "guide",
+      "parent_id": "guide_1",
+      "generation": 2,
+      "reproductive": false
+    },
+    {
+      "attachment_id": "guide_7_mount",
+      "kind": "existing_guide_mount",
+      "semantic_id": "guide_7",
+      "parent_kind": "guide",
+      "parent_id": "guide_5",
+      "generation": 2,
+      "reproductive": false
+    },
+    {
+      "attachment_id": "guide_8_mount",
+      "kind": "existing_guide_mount",
+      "semantic_id": "guide_8",
+      "parent_kind": "guide",
+      "parent_id": "guide_4",
+      "generation": 2,
+      "reproductive": false
+    },
+    {
+      "attachment_id": "guide_9_mount",
+      "kind": "existing_guide_mount",
+      "semantic_id": "guide_9",
+      "parent_kind": "guide",
+      "parent_id": "guide_4",
+      "generation": 2,
+      "reproductive": true
+    }
+  ],
+  "adjacency": {
+    "repeat_start": [
+      "backbone_edge_1"
+    ],
+    "trough_1": [
+      "backbone_edge_1",
+      "backbone_edge_2"
+    ],
+    "peak_1": [
+      "backbone_edge_2",
+      "backbone_edge_3"
+    ],
+    "repeat_end": [
+      "backbone_edge_3"
+    ]
+  },
+  "grammar_inputs": {
+    "long_branch_anchors": [
+      "growth_region_1_anchor",
+      "growth_region_2_anchor"
+    ],
+    "flower_constraints": [
+      "flower_1_context",
+      "flower_2_context"
+    ],
+    "reproductive_guides": [
+      "guide_1",
+      "guide_2",
+      "guide_4",
+      "guide_5",
+      "guide_9"
+    ],
+    "minimum_anchor_spacing_s": 0.11,
+    "prohibited_growth_relation": "toward"
+  },
+  "qa": {
+    "valid": true,
+    "errors": []
+  }
+}

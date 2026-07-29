@@ -1,0 +1,166 @@
+{
+  "schema": "dynamic_branch_stage4_intertwined_unit_contract_v3",
+  "contract_id": "dynamic_branchunit_long_sweep_intertwined_compilation_stage4_v3",
+  "supersedes": {
+    "contract_id": "dynamic_branchunit_hierarchical_curve_compilation_stage4_v2",
+    "reason": "v2 restored hierarchy but shortened the hierarchy into tangent-continuous one-cubic claws and constrained primary bow to a narrow corridor"
+  },
+  "required_input": {
+    "plan_schema": "dynamic_branch_plan_v4",
+    "analysis_schema": "dynamic_branch_prototype_analysis_v1"
+  },
+  "primary_curve_compilation": {
+    "cubic_count": 2,
+    "sw1_minimum_primary_chord_by_density": {
+      "dense": 0.34,
+      "sparse": 0.38
+    },
+    "flower_support_minimum_handle_length_basis": 0.19,
+    "entry_opening_degrees": [
+      42.0,
+      66.0
+    ],
+    "start_arm_ratio": [
+      0.3,
+      0.44
+    ],
+    "end_arm_ratio": [
+      0.32,
+      0.48
+    ],
+    "exit_release_degrees": [
+      20.0,
+      36.0
+    ],
+    "shape_modes": [
+      "C",
+      "S"
+    ],
+    "ordinary_primary_C_S_rhythm_is_explicitly_alternated": true,
+    "minimum_midpoint_bow_ratio": {
+      "ordinary_C": 0.075,
+      "ordinary_S": 0.07,
+      "flower_support_C": 0.09,
+      "L2": 0.065,
+      "L3": 0.075
+    },
+    "midpoint_bow_reinforces_existing_control_side": true,
+    "flower_support_shape_scale_candidates": [1.0, 0.78],
+    "sw3_terminal_support": {
+      "preserve_far_root": true,
+      "preserve_below_flower_waypoint": true,
+      "preserve_flower_underside_tip": true,
+      "entry_opening_degrees": [44.0, 54.0],
+      "first_leg_bow_ratio": 0.32,
+      "second_leg_bow_ratio": 0.22
+    },
+    "stage3_direction_is_a_macro_axis_not_a_final_centerline": true,
+    "narrow_occupancy_radius_bow_cap_used": false
+  },
+  "dependent_curve_compilation": {
+    "cubic_count": 2,
+    "entry_uses_actual_parent_local_tangent_as_reference": true,
+    "entry_is_rotated_from_parent_tangent_to_visible_fork_angle": true,
+    "exact_parent_tangent_continuity_required": false,
+    "entry_opening_degrees": [
+      42.0,
+      68.0
+    ],
+    "travel_uses_unit_shared_flow_instead_of_parent_radial_rotation": true,
+    "exit_release_degrees": [
+      18.0,
+      34.0
+    ],
+    "absolute_l2_chord_ranges_by_density": {
+      "dense": {
+        "short": [0.075, 0.11],
+        "medium": [0.105, 0.15],
+        "long": [0.135, 0.19]
+      },
+      "sparse": {
+        "short": [0.09, 0.13],
+        "medium": [0.125, 0.18],
+        "long": [0.155, 0.22]
+      },
+      "primary_sweep_led": {
+        "short": [0.08, 0.12],
+        "medium": [0.115, 0.17],
+        "long": [0.145, 0.21]
+      },
+      "light": {
+        "short": [0.07, 0.1],
+        "medium": [0.095, 0.145],
+        "long": [0.12, 0.18]
+      },
+      "moderate": {
+        "short": [0.075, 0.11],
+        "medium": [0.105, 0.16],
+        "long": [0.135, 0.2]
+      }
+    },
+    "l3_to_parent_chord_ratio": [0.42, 0.58],
+    "hierarchy_widths": {
+      "L1": 3.0,
+      "L2": 2.1,
+      "L3": 1.45
+    }
+  },
+  "topology": {
+    "maximum_hierarchy_level": 3,
+    "maximum_l3_per_unit": 1,
+    "mounts_by_l2_count": {
+      "0": [],
+      "1": [0.6],
+      "2": [0.34, 0.66],
+      "3": [0.26, 0.5, 0.74]
+    },
+    "candidate_side_patterns_per_unit": 4,
+    "global_complete_unit_selection": true
+  },
+  "visual_intent": {
+    "intertwining_means_crossing": false,
+    "intertwining_is_created_by": [
+      "long_C_and_S_sweeps",
+      "staggered_parent_arc_mounts",
+      "same_flow_companion_and_counter_envelope_pairing",
+      "shared_unit_flow_instead_of_radial_local_forks",
+      "flower_wrapping_and_shared_space_organization"
+    ],
+    "radial_chicken_foot_clusters_allowed": false,
+    "unregistered_geometric_crossing_allowed": false
+  },
+  "diagnostics": {
+    "shape_thresholds": {
+      "L1_minimum_deviation_ratio": 0.085,
+      "L2_minimum_deviation_ratio": 0.075,
+      "L3_minimum_deviation_ratio": 0.06,
+      "maximum_deviation_ratio": 0.55,
+      "L1_minimum_arc_ratio": 1.025,
+      "L2_minimum_arc_ratio": 1.018,
+      "L3_minimum_arc_ratio": 1.012
+    },
+    "child_root_must_lie_on_actual_parent": true,
+    "child_entry_opening_must_be_visible": true,
+    "wrong_flower_entry_is_failure": true,
+    "crossing_is_failure": true,
+    "numeric_checks_cannot_auto_approve_visual_gate": true
+  },
+  "stage_boundary": {
+    "branch_skeleton_only": true,
+    "leaves_present": false,
+    "buds_present": false,
+    "curl_heads_present": false,
+    "editor_integration_present": false
+  },
+  "review": {
+    "initial_state": "original_pending_review",
+    "criteria": [
+      "sw1_support_visibly_originates_in_the_wave_trough",
+      "sw1_1_units_are_long_and_dense_enough",
+      "sw1_3_has_five_complete_units_and_legible_children",
+      "branches_read_as_long_intertwined_vine_sweeps_without_crossing",
+      "no_radial_chicken_foot_clusters",
+      "hierarchy_and_flower_breathing_space_remain_legible"
+    ]
+  }
+}

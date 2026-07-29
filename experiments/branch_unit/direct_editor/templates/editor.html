@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>缠枝纹分支规则编辑器 · M0–M6</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='editor.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="identity">
+      <span class="eyebrow">DIRECT BRANCH RULE EDITOR</span>
+      <strong id="seed-title">Seed {{ seed }}</strong>
+      <span class="phase">M0–M6</span>
+    </div>
+    <nav class="tools" aria-label="直接绘制工具">
+      <button class="tool active" id="select-tool" data-mode="select" type="button">选择</button>
+      <button class="tool" id="add-tool" data-mode="add" type="button">新增枝</button>
+      <button class="tool" id="root-range-tool" data-mode="root-range" type="button">根点范围</button>
+      <button class="tool" id="endpoint-region-tool" data-mode="endpoint-region" type="button">枝尖合法区</button>
+      <button class="tool" id="envelope-tool" data-mode="envelope" type="button">曲线包络</button>
+      <button class="tool danger-tool" id="forbidden-tool" data-mode="forbidden" type="button">禁区</button>
+      <span class="divider" aria-hidden="true"></span>
+      <button class="tool" id="undo-button" type="button" disabled>撤销</button>
+      <button class="tool" id="redo-button" type="button" disabled>重做</button>
+      <button class="save" id="save-button" type="button">保存结构</button>
+    </nav>
+  </header>
+
+  <section class="contextbar" aria-label="会话与视图">
+    <label>真实 seed
+      <select id="seed-select">
+        <option value="4101">4101</option>
+        <option value="4102">4102</option>
+        <option value="4103">4103</option>
+      </select>
+    </label>
+    <div class="view-tools" role="group" aria-label="视图模式">
+      <button class="micro active" data-view="context" type="button">上下文</button>
+      <button class="micro" data-view="whole" type="button">整图</button>
+      <button class="micro" data-view="double" type="button">2× repeat</button>
+      <button class="micro" data-view="unit" type="button">Unit</button>
+    </div>
+    <span class="context-divider"></span>
+    <div class="branch-status-tools" role="group" aria-label="分支数量状态">
+      <span>选中枝：</span>
+      <button class="micro status-required" data-status="required" type="button">必需</button>
+      <button class="micro status-optional" data-status="optional" type="button">可选</button>
+      <button class="micro status-forbidden" data-status="forbidden" type="button">禁用</button>
+      <button class="micro delete" id="delete-button" type="button" disabled>删除</button>
+    </div>
+    <label id="forbidden-scope-label">禁区范围
+      <select id="forbidden-scope">
+        <option value="global">全局</option>
+        <option value="unit">当前 Unit</option>
+        <option value="parent">当前父枝</option>
+        <option value="level">当前层级</option>
+      </select>
+    </label>
+  </section>
+
+  <main>
+    <section class="statusbar" aria-live="polite">
+      <div id="selection-status">正在载入真实分支数据…</div>
+      <div id="geometry-status"></div>
+      <div id="save-status"></div>
+    </section>
+    <section class="canvas-shell">
+      <svg id="editor-canvas" role="img" aria-label="可直接操控和绘制合法域的 SVG 分支画布"></svg>
+      <div class="mode-hint" id="mode-hint">选择分支后直接拖动根点、枝尖或控制柄</div>
+      <div class="canvas-key" aria-hidden="true">
+        <span><i class="key-preferred"></i>preferred</span>
+        <span><i class="key-allowed"></i>allowed</span>
+        <span><i class="key-forbidden"></i>forbidden</span>
+        <span><i class="key-ghost"></i>相邻 repeat</span>
+      </div>
+    </section>
+
+    <section class="analysis-dock">
+      <article>
+        <h2>Unit 数量范围</h2>
+        <div id="unit-stats">选择任意分支查看所属 Unit</div>
+      </article>
+      <article>
+        <h2>图形约束</h2>
+        <div id="constraint-stats">尚未绘制 allowed / forbidden 区域</div>
+      </article>
+      <article class="target-card">
+        <h2>Target examples</h2>
+        <div class="target-controls">
+          <select id="target-select" aria-label="Target example"><option value="">暂无 target</option></select>
+          <button class="micro" id="compare-button" type="button" disabled>比较</button>
+        </div>
+        <div id="target-stats">正在读取当前 seed 的示教会话…</div>
+      </article>
+    </section>
+
+    <section class="instructions">
+      <span><b>选择</b> 拖根点/枝尖/Bézier 柄</span>
+      <span><b>新增枝</b> 从父枝直接拖出</span>
+      <span><b>合法区/禁区</b> 在画布自由圈定</span>
+      <span><b>包络</b> 拖两条边界曲线</span>
+    </section>
+  </main>
+
+  <template id="error-template"><div class="fatal-error" role="alert"></div></template>
+  <script>window.EDITOR_SEED = {{ seed | tojson }};</script>
+  <script src="{{ url_for('static', filename='editor.js') }}" defer></script>
+</body>
+</html>

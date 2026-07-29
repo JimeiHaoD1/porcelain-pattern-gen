@@ -1,0 +1,67 @@
+{
+  "all_structurally_valid": false,
+  "created_utc": "2026-07-21T12:27:10.733975+00:00",
+  "formal_experiment": false,
+  "generation_policy": {
+    "candidate_count": 1,
+    "repair_count": 0,
+    "resample_count": 0,
+    "retry_count": 0,
+    "validation_feedback_consumed": false
+  },
+  "generator": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\whole_local_branch.py",
+  "geometry_kernel_id": "whole_local_true_lateral_branch_units_n12_v10",
+  "plan_id": "proto_sw_1_3_J0c_true_lateral_units_7_12_2_v14",
+  "protocol": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\WHOLE_LOCAL_N12_DEV_PROTOCOL.md",
+  "prototype_id": "proto_sw_1_3",
+  "repeat_seams": [
+    "left",
+    "right"
+  ],
+  "runner": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\run_whole_local_n12_dev.py",
+  "schema": "whole_local_true_lateral_n12_dev_v2",
+  "seeds": [
+    {
+      "geometry_hash": "d2fc1911695437bb7028112d9933f663f44a75a560fc312eeed226ecb46d6d0f",
+      "issues": [
+        "secondary_2b_lat:out_of_bounds"
+      ],
+      "plan_digest": "5a1692b001ebab6a45972725c96221c90f862034488289b339d46ad3eac0d9bb",
+      "seed": 4101,
+      "valid": false
+    },
+    {
+      "geometry_hash": "bc826fba1990331794bb0cbc242b4587e6ecd1dca380c5e58c470f481011a5c5",
+      "issues": [
+        "secondary_3b_lat:backbone_contact",
+        "curve_clearance:secondary_6b_lat:secondary_7b_lat"
+      ],
+      "plan_digest": "0c6031483702ce2a75609174124eebbf4cf5be40ac4802db075ff4dbb3a136b4",
+      "seed": 4102,
+      "valid": false
+    },
+    {
+      "geometry_hash": "13f39d6d76bf3f518f3ae0f80f289f19ffd059904c2131397d744af64bc3fc58",
+      "issues": [
+        "secondary_3a_lat:outside_vertical_visible_envelope",
+        "secondary_3a_lat:unregistered_visible_envelope_contact",
+        "global_visible_envelope_overflow"
+      ],
+      "plan_digest": "ece94e54fc7980b52bcda3b13ddf2038965e635da6c2536d639fffe03d6012df",
+      "seed": 4103,
+      "valid": false
+    }
+  ],
+  "source_profile": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\run57_reproduction\\01_skeleton_analysis\\proto_sw_1_3\\skeleton_profile.json",
+  "standard_proofs_pass": true,
+  "strict_edge_sides": [
+    "top",
+    "bottom"
+  ],
+  "topology": {
+    "primary": 7,
+    "secondary": 12,
+    "tertiary": 2
+  },
+  "visual_gate": "pending_mount_variation_review"
+}

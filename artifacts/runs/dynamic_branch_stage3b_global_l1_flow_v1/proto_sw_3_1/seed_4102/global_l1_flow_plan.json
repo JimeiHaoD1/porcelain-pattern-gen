@@ -1,0 +1,784 @@
+{
+  "count_derivation": {
+    "blank_region_plus_support_evidence": 4,
+    "branch_guide_equivalent_l1": 2,
+    "fixed_count_copied": false,
+    "fixed_visual_capacity": 7,
+    "governing_evidence": "morphology_and_blank_space_capacity",
+    "ordinary_lane_count": 3,
+    "primary_branch_evidence": 0,
+    "required_support_count": 1,
+    "selected_l1_count": 4
+  },
+  "diagnostics": {
+    "automatic_deletion_used": false,
+    "automatic_repair_used": false,
+    "candidate_count": 150,
+    "feasible_candidate_count": 102,
+    "hard_issue_count": 0,
+    "lane_count": 4,
+    "rejected_candidate_count": 48,
+    "rejection_counts": {
+      "non_root_backbone_crossing_or_contact": 31,
+      "ordinary_lane_enters_flower_reserve": 26,
+      "ordinary_or_support_initial_departure_not_outward": 1
+    },
+    "silent_fallback_used": false,
+    "validation_guided_resample_used": false,
+    "validation_guided_retry_used": false
+  },
+  "family_id": "SW-3_tangent_terminal",
+  "geometry_semantics": "planning_flow_lane_not_final_branch_curve",
+  "global_latents": {
+    "asymmetry": -0.044166382,
+    "curl_energy": 0.909528465,
+    "flow_phase": 0.006926322,
+    "openness": 1.079379607,
+    "sweep_amplitude": 0.987008785
+  },
+  "input_digests": {
+    "analysis_digest": "352a1ab386d17351ac0fd538ffb693507fb6b7e18a29f7096b978face9bb50fd",
+    "fixed_visual_prior_digest": "c634525476e90c4caefb8ac691d14ac9e806d15785db9b3bbeb84bbf171d7a5b",
+    "morphology_digest": "97c9074288ea0d4ab902306bbcf09d3cae2ef13ad91f7d48be8fb3d2a6c030c8",
+    "strict_p0_digest": "4258b3cc96056193da1a9e0de9a52e20282ba74e74755c0c1e39df3fa0fffa19"
+  },
+  "lanes": [
+    {
+      "candidate_id": "ordinary_1_dynamic_025",
+      "centerline": [
+        [
+          0.317217728,
+          0.760880231
+        ],
+        [
+          0.330479322,
+          0.754123758
+        ],
+        [
+          0.344364987,
+          0.746460341
+        ],
+        [
+          0.358647983,
+          0.737941989
+        ],
+        [
+          0.373101571,
+          0.72862071
+        ],
+        [
+          0.38749901,
+          0.718548514
+        ],
+        [
+          0.401613562,
+          0.707777409
+        ],
+        [
+          0.415218487,
+          0.696359404
+        ],
+        [
+          0.428087045,
+          0.684346509
+        ],
+        [
+          0.439992496,
+          0.671790731
+        ],
+        [
+          0.450708102,
+          0.65874408
+        ],
+        [
+          0.460007122,
+          0.645258565
+        ],
+        [
+          0.467662817,
+          0.631386195
+        ],
+        [
+          0.473448446,
+          0.617178978
+        ],
+        [
+          0.477137272,
+          0.602688923
+        ],
+        [
+          0.478502553,
+          0.587968039
+        ],
+        [
+          0.477317551,
+          0.573068336
+        ],
+        [
+          0.473355526,
+          0.558041821
+        ],
+        [
+          0.466389738,
+          0.542940504
+        ]
+      ],
+      "curvature_signature": "S",
+      "features": {
+        "outward_alignment": 0.980993105,
+        "planned_chord": 0.264102277,
+        "root_preference": 0.66121889,
+        "vertical_match": 1.0
+      },
+      "flower_id": null,
+      "individual_score": 4.863432078,
+      "occupancy_radius": 0.018,
+      "planning_length": 0.293868825,
+      "role": "primary_sweep",
+      "root": [
+        0.317217728,
+        0.760880231
+      ],
+      "root_s": 0.268685004,
+      "segments": [
+        {
+          "p0": [
+            0.317217728,
+            0.760880231
+          ],
+          "p1": [
+            0.394461601,
+            0.723166243
+          ],
+          "p2": [
+            0.517649234,
+            0.633668795
+          ],
+          "p3": [
+            0.466389738,
+            0.542940504
+          ]
+        }
+      ],
+      "side_id": "right_normal",
+      "slot_id": "ordinary_1",
+      "source_channel": "dynamic_prior_conditioned",
+      "target": [
+        0.466389738,
+        0.542940504
+      ]
+    },
+    {
+      "candidate_id": "ordinary_2_dynamic_015",
+      "centerline": [
+        [
+          0.343222162,
+          0.850400617
+        ],
+        [
+          0.32771559,
+          0.85973045
+        ],
+        [
+          0.311999965,
+          0.870477612
+        ],
+        [
+          0.296287766,
+          0.882529826
+        ],
+        [
+          0.280791473,
+          0.895774813
+        ],
+        [
+          0.265723568,
+          0.910100296
+        ],
+        [
+          0.25129653,
+          0.925393997
+        ],
+        [
+          0.237722841,
+          0.941543637
+        ],
+        [
+          0.22521498,
+          0.958436939
+        ],
+        [
+          0.213985428,
+          0.975961624
+        ],
+        [
+          0.204246666,
+          0.994005415
+        ],
+        [
+          0.196211174,
+          1.012456034
+        ],
+        [
+          0.190091432,
+          1.031201203
+        ],
+        [
+          0.186099921,
+          1.050128643
+        ],
+        [
+          0.184449122,
+          1.069126077
+        ],
+        [
+          0.185351514,
+          1.088081227
+        ],
+        [
+          0.189019579,
+          1.106881814
+        ],
+        [
+          0.195665796,
+          1.125415561
+        ],
+        [
+          0.205502646,
+          1.14357019
+        ]
+      ],
+      "curvature_signature": "S",
+      "features": {
+        "outward_alignment": 0.980993105,
+        "planned_chord": 0.323905949,
+        "root_preference": 0.34965963,
+        "vertical_match": 1.0
+      },
+      "flower_id": null,
+      "individual_score": 4.101592688,
+      "occupancy_radius": 0.018,
+      "planning_length": 0.359298804,
+      "role": "balance",
+      "root": [
+        0.343222162,
+        0.850400617
+      ],
+      "root_s": 0.324383155,
+      "segments": [
+        {
+          "p0": [
+            0.343222162,
+            0.850400617
+          ],
+          "p1": [
+            0.251234856,
+            0.901903069
+          ],
+          "p2": [
+            0.136484684,
+            1.036004327
+          ],
+          "p3": [
+            0.205502646,
+            1.14357019
+          ]
+        }
+      ],
+      "side_id": "left_normal",
+      "slot_id": "ordinary_2",
+      "source_channel": "dynamic_prior_conditioned",
+      "target": [
+        0.205502646,
+        1.14357019
+      ]
+    },
+    {
+      "candidate_id": "support_1_sw3_08",
+      "centerline": [
+        [
+          0.376398777,
+          0.939823009
+        ],
+        [
+          0.38833919,
+          0.939273941
+        ],
+        [
+          0.401015728,
+          0.938981673
+        ],
+        [
+          0.414284214,
+          0.938910335
+        ],
+        [
+          0.428000473,
+          0.93902406
+        ],
+        [
+          0.442020329,
+          0.939286977
+        ],
+        [
+          0.456199607,
+          0.939663218
+        ],
+        [
+          0.470394131,
+          0.940116913
+        ],
+        [
+          0.484459726,
+          0.940612193
+        ],
+        [
+          0.498252217,
+          0.941113188
+        ],
+        [
+          0.511627426,
+          0.94158403
+        ],
+        [
+          0.52444118,
+          0.94198885
+        ],
+        [
+          0.536549302,
+          0.942291777
+        ],
+        [
+          0.547807616,
+          0.942456944
+        ],
+        [
+          0.558071948,
+          0.94244848
+        ],
+        [
+          0.567198122,
+          0.942230516
+        ],
+        [
+          0.575041962,
+          0.941767184
+        ],
+        [
+          0.581459292,
+          0.941022614
+        ],
+        [
+          0.586305937,
+          0.939960937
+        ],
+        [
+          0.599088076,
+          0.936495267
+        ],
+        [
+          0.612264608,
+          0.93371821
+        ],
+        [
+          0.625699154,
+          0.931509698
+        ],
+        [
+          0.639255335,
+          0.929749664
+        ],
+        [
+          0.652796772,
+          0.928318037
+        ],
+        [
+          0.666187087,
+          0.927094751
+        ],
+        [
+          0.6792899,
+          0.925959736
+        ],
+        [
+          0.691968834,
+          0.924792925
+        ],
+        [
+          0.704087508,
+          0.923474248
+        ],
+        [
+          0.715509544,
+          0.921883638
+        ],
+        [
+          0.726098564,
+          0.919901026
+        ],
+        [
+          0.735718187,
+          0.917406343
+        ],
+        [
+          0.744232037,
+          0.914279521
+        ],
+        [
+          0.751503733,
+          0.910400493
+        ],
+        [
+          0.757396897,
+          0.905649188
+        ],
+        [
+          0.761775149,
+          0.89990554
+        ],
+        [
+          0.764502112,
+          0.893049479
+        ],
+        [
+          0.765441406,
+          0.884960937
+        ]
+      ],
+      "curvature_signature": "CS",
+      "features": {
+        "below_flower_waypoint_margin": 0.055,
+        "outward_alignment": 0.937812075,
+        "remote_mount_arc_distance": 0.456385264,
+        "underside_contact_dx": 0.0,
+        "underside_contact_dy": 0.0
+      },
+      "flower_id": "flower_1",
+      "individual_score": 7.508917885,
+      "occupancy_radius": 0.018,
+      "planning_length": 0.409150335,
+      "role": "terminal_flower_support",
+      "root": [
+        0.376398777,
+        0.939823009
+      ],
+      "root_s": 0.381385264,
+      "segments": [
+        {
+          "p0": [
+            0.376398777,
+            0.939823009
+          ],
+          "p1": [
+            0.445544534,
+            0.93568646
+          ],
+          "p2": [
+            0.562226472,
+            0.94735406
+          ],
+          "p3": [
+            0.586305937,
+            0.939960937
+          ]
+        },
+        {
+          "p0": [
+            0.586305937,
+            0.939960937
+          ],
+          "p1": [
+            0.661542834,
+            0.916860937
+          ],
+          "p2": [
+            0.765441406,
+            0.937429767
+          ],
+          "p3": [
+            0.765441406,
+            0.884960937
+          ]
+        }
+      ],
+      "side_id": "right_normal",
+      "slot_id": "support_1",
+      "source_channel": "prototype_morphology_rule",
+      "target": [
+        0.765441406,
+        0.884960937
+      ]
+    },
+    {
+      "candidate_id": "ordinary_3_dynamic_060",
+      "centerline": [
+        [
+          0.824791113,
+          0.925206184
+        ],
+        [
+          0.851030849,
+          0.920056099
+        ],
+        [
+          0.876371724,
+          0.912737634
+        ],
+        [
+          0.900840867,
+          0.903345801
+        ],
+        [
+          0.92446541,
+          0.891975613
+        ],
+        [
+          0.947272483,
+          0.878722081
+        ],
+        [
+          0.969289218,
+          0.863680217
+        ],
+        [
+          0.990542744,
+          0.846945035
+        ],
+        [
+          1.011060193,
+          0.828611547
+        ],
+        [
+          1.030868696,
+          0.808774764
+        ],
+        [
+          1.049995383,
+          0.787529699
+        ],
+        [
+          1.068467385,
+          0.764971364
+        ],
+        [
+          1.086311832,
+          0.741194772
+        ],
+        [
+          1.103555857,
+          0.716294935
+        ],
+        [
+          1.120226588,
+          0.690366864
+        ],
+        [
+          1.136351158,
+          0.663505573
+        ],
+        [
+          1.151956696,
+          0.635806074
+        ],
+        [
+          1.167070334,
+          0.607363379
+        ],
+        [
+          1.181719202,
+          0.5782725
+        ]
+      ],
+      "curvature_signature": "C",
+      "features": {
+        "outward_alignment": 0.980993105,
+        "planned_chord": 0.497755604,
+        "root_preference": 0.734342588,
+        "vertical_match": 1.0
+      },
+      "flower_id": null,
+      "individual_score": 4.891843552,
+      "occupancy_radius": 0.018,
+      "planning_length": 0.517673483,
+      "role": "frontier",
+      "root": [
+        0.824791113,
+        0.925206184
+      ],
+      "root_s": 0.765692632,
+      "segments": [
+        {
+          "p0": [
+            0.824791113,
+            0.925206184
+          ],
+          "p1": [
+            0.984980378,
+            0.901000841
+          ],
+          "p2": [
+            1.09516604,
+            0.754572301
+          ],
+          "p3": [
+            1.181719202,
+            0.5782725
+          ]
+        }
+      ],
+      "side_id": "left_normal",
+      "slot_id": "ordinary_3",
+      "source_channel": "dynamic_prior_conditioned",
+      "target": [
+        1.181719202,
+        0.5782725
+      ]
+    }
+  ],
+  "plan_digest": "0d75a0b7c736d65d38f3952a15eec617b12066e68adee05e16752d3ba997c85c",
+  "plan_id": "proto_sw_3_1__seed_4102__global_l1_flow_v1",
+  "prototype_id": "proto_sw_3_1",
+  "review": {
+    "criteria": [
+      "global_direction_position_and_distance",
+      "prototype_specific_flower_branch_relation",
+      "immediate_outward_departure",
+      "root_and_target_spacing",
+      "white_space_distribution",
+      "non_crossing_periodic_flow",
+      "fixed_visual_capability_not_degraded"
+    ],
+    "numeric_checks_cannot_auto_approve_visual_gate": true,
+    "status": "l1_flow_pending_visual_review"
+  },
+  "role_counts": {
+    "balance": 1,
+    "frontier": 1,
+    "primary_sweep": 1,
+    "terminal_flower_support": 1
+  },
+  "schema": "dynamic_branch_global_l1_flow_plan_v1",
+  "seed": 4102,
+  "slots": [
+    {
+      "flower_id": "flower_1",
+      "preferred_s": 0.925,
+      "preferred_vertical_side": "lower",
+      "role": "terminal_flower_support",
+      "slot_id": "support_1"
+    },
+    {
+      "flower_id": null,
+      "preferred_s": 0.173592989,
+      "preferred_vertical_side": "upper",
+      "role": "primary_sweep",
+      "slot_id": "ordinary_1"
+    },
+    {
+      "flower_id": null,
+      "preferred_s": 0.506926322,
+      "preferred_vertical_side": "lower",
+      "role": "balance",
+      "slot_id": "ordinary_2"
+    },
+    {
+      "flower_id": null,
+      "preferred_s": 0.840259655,
+      "preferred_vertical_side": "upper",
+      "role": "frontier",
+      "slot_id": "ordinary_3"
+    }
+  ],
+  "solver": {
+    "beam_capacity": 576,
+    "expansion_cap_per_slot": 20,
+    "global_features": {
+      "fixed_prior_channel_present": 0.0,
+      "length_rhythm": 0.646987883,
+      "root_coverage": 0.497007628,
+      "root_gap_variation": 0.19814452,
+      "target_zone_coverage": 1.0
+    },
+    "lane_clearance_hard": 0.032,
+    "root_spacing_hard": 0.053051121,
+    "selected_pair_metrics": [
+      {
+        "candidate_ids": [
+          "ordinary_1_dynamic_025",
+          "ordinary_2_dynamic_015"
+        ],
+        "minimum_clearance": 0.093220867,
+        "pair_score": 0.948374907,
+        "parallel_glide": 0.887131496,
+        "root_gap": 0.055698151,
+        "terminal_alignment": 0.996342113
+      },
+      {
+        "candidate_ids": [
+          "ordinary_1_dynamic_025",
+          "support_1_sw3_08"
+        ],
+        "minimum_clearance": 0.188475235,
+        "pair_score": 0.303423777,
+        "parallel_glide": 0.0,
+        "root_gap": 0.11270026,
+        "terminal_alignment": 0.805877331
+      },
+      {
+        "candidate_ids": [
+          "ordinary_1_dynamic_025",
+          "ordinary_3_dynamic_060"
+        ],
+        "minimum_clearance": 0.205375291,
+        "pair_score": 0.0,
+        "parallel_glide": 0.0,
+        "root_gap": 0.497007628,
+        "terminal_alignment": 0.730374282
+      },
+      {
+        "candidate_ids": [
+          "ordinary_2_dynamic_015",
+          "support_1_sw3_08"
+        ],
+        "minimum_clearance": 0.093592813,
+        "pair_score": 0.75299157,
+        "parallel_glide": 0.66613817,
+        "root_gap": 0.057002109,
+        "terminal_alignment": 0.752333675
+      },
+      {
+        "candidate_ids": [
+          "ordinary_2_dynamic_015",
+          "ordinary_3_dynamic_060"
+        ],
+        "minimum_clearance": 0.242820698,
+        "pair_score": 0.0,
+        "parallel_glide": 0.0,
+        "root_gap": 0.441309477,
+        "terminal_alignment": 0.669333512
+      },
+      {
+        "candidate_ids": [
+          "ordinary_3_dynamic_060",
+          "support_1_sw3_08"
+        ],
+        "minimum_clearance": 0.067905333,
+        "pair_score": 0.690008544,
+        "parallel_glide": 0.76667616,
+        "root_gap": 0.384307368,
+        "terminal_alignment": 0.993012364
+      }
+    ],
+    "selected_total_score": 31.083796126,
+    "solver": "deterministic_seeded_global_beam_set_solver",
+    "terminal_state_count": 576
+  },
+  "stage_scope": {
+    "l1_only": true,
+    "l2_present": false,
+    "l3_present": false,
+    "old_stage3_layout_consumed": false,
+    "old_stage4_geometry_consumed": false,
+    "terminal_content_present": false
+  }
+}

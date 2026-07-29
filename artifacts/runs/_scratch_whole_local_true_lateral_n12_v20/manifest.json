@@ -1,0 +1,64 @@
+{
+  "all_structurally_valid": false,
+  "created_utc": "2026-07-21T12:34:52.922243+00:00",
+  "formal_experiment": false,
+  "generation_policy": {
+    "candidate_count": 1,
+    "repair_count": 0,
+    "resample_count": 0,
+    "retry_count": 0,
+    "validation_feedback_consumed": false
+  },
+  "generator": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\whole_local_branch.py",
+  "geometry_kernel_id": "whole_local_true_lateral_branch_units_n12_v14",
+  "plan_id": "proto_sw_1_3_J0c_true_lateral_units_7_12_2_v18",
+  "protocol": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\WHOLE_LOCAL_N12_DEV_PROTOCOL.md",
+  "prototype_id": "proto_sw_1_3",
+  "repeat_seams": [
+    "left",
+    "right"
+  ],
+  "runner": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\run_whole_local_n12_dev.py",
+  "schema": "whole_local_true_lateral_n12_dev_v2",
+  "seeds": [
+    {
+      "geometry_hash": "37bf5aa638a05647825d4d6f1ac4328a6c1f0843db135caec402aae77911280d",
+      "issues": [],
+      "plan_digest": "56b3d489512b58f186675582b49f825f071470cef8954d68268bb49ae13b875e",
+      "seed": 4101,
+      "valid": true
+    },
+    {
+      "geometry_hash": "c3ca7b9aad65c0d8e8a71982b3ec098454ceefe1f37c8fd3686dc966ddac8f2e",
+      "issues": [
+        "secondary_3b_lat:lateral_parent_length_ratio"
+      ],
+      "plan_digest": "bcfdfce38e7a44633b729497975a517942813b42f5eb38e8c0db90d8b2ca3fde",
+      "seed": 4102,
+      "valid": false
+    },
+    {
+      "geometry_hash": "a45c8ba5d6148707fa0e197b5d189fa2a605bbfabbe73e078eac497b5313ab23",
+      "issues": [
+        "secondary_3a_lat:outside_vertical_visible_envelope",
+        "secondary_3a_lat:unregistered_visible_envelope_contact",
+        "global_visible_envelope_overflow"
+      ],
+      "plan_digest": "7ca1a7fd8509ebe4dee52ab30cc31e389fd5469d9054871c3611ac8b469933c9",
+      "seed": 4103,
+      "valid": false
+    }
+  ],
+  "source_profile": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\run57_reproduction\\01_skeleton_analysis\\proto_sw_1_3\\skeleton_profile.json",
+  "standard_proofs_pass": false,
+  "strict_edge_sides": [
+    "top",
+    "bottom"
+  ],
+  "topology": {
+    "primary": 7,
+    "secondary": 12,
+    "tertiary": 2
+  },
+  "visual_gate": "pending_mount_variation_review"
+}

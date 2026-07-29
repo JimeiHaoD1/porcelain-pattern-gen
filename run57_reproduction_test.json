@@ -1,0 +1,39 @@
+{
+  "schema": "run57_reproduction_test_v1",
+  "date": "2026-07-03",
+  "migration": {
+    "status": "completed",
+    "asset_file_count": 59,
+    "asset_total_mib": 4.97
+  },
+  "current_source_test": {
+    "baseline_input_only": true,
+    "normalized_stage_comparisons": 20,
+    "normalized_stage_matches": 20,
+    "terminal_renderer_exact": false,
+    "first_failure": {
+      "prototype_id": "proto_sw_1_1",
+      "new_motif_count": 25,
+      "old_motif_count": 17,
+      "new_leaf_count": 42,
+      "old_leaf_count": 43,
+      "new_coverage": 0.756952,
+      "old_coverage": 0.847104
+    }
+  },
+  "historical_python311_bytecode_test": {
+    "svg_exact_matches": 5,
+    "svg_compared": 5,
+    "png_exact_matches": 5,
+    "png_compared": 5,
+    "json_exact_matches": 2,
+    "json_compared": 5,
+    "json_non_visual_differences": {
+      "proto_sw_1_3": {"field": "composition_candidate_count", "new": 460, "historical": 463},
+      "proto_sw_2_3": {"field": "composition_candidate_count", "new": 292, "historical": 293},
+      "proto_sw_3_2": {"field": "composition_candidate_count", "new": 761, "historical": 770}
+    },
+    "stderr_nonempty_count": 0,
+    "visual_result_reproduced": true
+  }
+}

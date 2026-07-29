@@ -1,0 +1,316 @@
+{
+  "schema": "dynamic_branch_morphology_contract_v1",
+  "contract_id": "sw_flower_branch_morphology_stage25_v1",
+  "classification_axes": {
+    "pattern_skeleton_class": {
+      "purpose": "art_history_and_corpus_annotation",
+      "consumed_by_stage_3_v1": false,
+      "current_legacy_value": "single_wave",
+      "professional_classification_status": "unassigned_pending_corpus_review",
+      "professional_allowed_values": [
+        "s_scroll",
+        "s_c",
+        "s_o",
+        "s_x",
+        "other",
+        "unassigned"
+      ]
+    },
+    "flower_branch_relation": {
+      "purpose": "branch_generation_control",
+      "consumed_by_stage_3_v1": true,
+      "allowed_family_ids": [
+        "SW-1_valley_filling",
+        "SW-2_axis_penetrating",
+        "SW-3_tangent_terminal"
+      ]
+    }
+  },
+  "policies": {
+    "strict_p0_remains_geometry_only": true,
+    "category_rules_are_not_prototype_id_topology": true,
+    "source_branch_geometry_consumed": false,
+    "source_counts_are_evidence_priors_not_generation_targets": true,
+    "legacy_unit_type_consumed": false,
+    "candidate_slots_present": false,
+    "dynamic_branch_plan_present": false,
+    "curve_geometry_present": false,
+    "visual_review_required": true
+  },
+  "families": {
+    "SW-1_valley_filling": {
+      "label_zh": "谷部填充与花旁包绕",
+      "label_en": "valley filling and flower-side wrapping",
+      "flower_binding": "valley_adjacent_wrap_support",
+      "visual_guide_mode": "paired_flower_flank_support",
+      "required_relationships": [
+        "each_flower_reads_as_supported_from_a_valley_or_valley_flank",
+        "blank_valley_space_is_organized_by_branch_units_not_uniformly_filled",
+        "flower_reserve_keeps_a_clear_breathing_ring"
+      ],
+      "role_policy": {
+        "required_per_flower": [
+          "flower_support"
+        ],
+        "optional": [
+          "wrap_flower",
+          "primary_sweep",
+          "secondary_sprig"
+        ]
+      },
+      "preferred_attachment_contexts": [
+        "valley_flank",
+        "flower_side_corridor",
+        "alternating_open_side"
+      ],
+      "growth_direction_policy": [
+        "grow_toward_a_flower_flank_without_entering_the_flower_reserve",
+        "alternate_two_sides_when_space_allows",
+        "preserve_visible_long_short_and_dense_open_rhythm"
+      ],
+      "forbidden_patterns": [
+        "uniform_blank_space_filling",
+        "flower_floating_without_support",
+        "branch_crossing_through_flower_core",
+        "prototype_id_specific_fixed_topology"
+      ]
+    },
+    "SW-2_axis_penetrating": {
+      "label_zh": "轴线贯穿与花轴一体",
+      "label_en": "axis penetration and flower-axis integration",
+      "flower_binding": "main_axis_integration",
+      "visual_guide_mode": "axis_through_flower",
+      "required_relationships": [
+        "flower_reads_as_part_of_the_continuous_main_axis",
+        "axis_direction_remains_legible_before_and_after_the_flower",
+        "primary_sweeps_mount_outside_the_flower_reserve"
+      ],
+      "role_policy": {
+        "required_per_repeat": [
+          "primary_sweep"
+        ],
+        "optional": [
+          "secondary_sprig"
+        ],
+        "not_required": [
+          "flower_support",
+          "wrap_flower"
+        ]
+      },
+      "preferred_attachment_contexts": [
+        "broad_axis_flank",
+        "open_side_outside_flower_reserve"
+      ],
+      "growth_direction_policy": [
+        "preserve_main_axis_continuity",
+        "use_broad_primary_sweeps_before_small_secondary_rhythm",
+        "avoid_turning_the_flower_into_a_side_attachment"
+      ],
+      "forbidden_patterns": [
+        "flower_treated_as_pasted_side_motif",
+        "support_stem_inserted_when_axis_integration_is_sufficient",
+        "uniform_small_sprig_scatter",
+        "prototype_id_specific_fixed_topology"
+      ]
+    },
+    "SW-3_tangent_terminal": {
+      "label_zh": "切向伸出与枝端着花",
+      "label_en": "tangent extension and terminal flowering",
+      "flower_binding": "tangent_terminal_flower",
+      "visual_guide_mode": "terminal_stem_to_flower",
+      "required_relationships": [
+        "each_flower_reads_as_the_terminal_of_a_directional_support_stem",
+        "support_stem_departs_along_parent_tangent_before_turning",
+        "terminal_flower_direction_remains_clear"
+      ],
+      "role_policy": {
+        "required_per_flower": [
+          "flower_support"
+        ],
+        "optional": [
+          "primary_sweep",
+          "secondary_sprig",
+          "terminal_hint"
+        ]
+      },
+      "preferred_attachment_contexts": [
+        "long_slope",
+        "tangent_continuation",
+        "open_terminal_corridor"
+      ],
+      "growth_direction_policy": [
+        "start_along_parent_tangent",
+        "extend_toward_the_terminal_flower",
+        "keep_secondary_rhythm_subordinate_to_the_flower_stem"
+      ],
+      "forbidden_patterns": [
+        "flower_floating_without_terminal_stem",
+        "radial_spokes_into_flower",
+        "secondary_cluster_overpowering_terminal_direction",
+        "prototype_id_specific_fixed_topology"
+      ]
+    }
+  },
+  "instances": {
+    "proto_sw_1_1": {
+      "family_id": "SW-1_valley_filling",
+      "pattern_skeleton_class": {
+        "legacy_value": "single_wave",
+        "professional_value": "unassigned"
+      },
+      "instance_style": {
+        "density_class": "dense",
+        "primary_sweep_class": "structural_support_dominant",
+        "side_rhythm": "near_balanced_frequent_alternation",
+        "flower_relation_emphasis": "support_plus_wrap",
+        "description_zh": "短支枝较密，上下交替接近平衡，花旁同时存在支撑与包绕关系。"
+      },
+      "evidence_priors": {
+        "flower_anchor_count": 2,
+        "branch_guide_count": 27,
+        "branch_side_counts": {
+          "up": 14,
+          "down": 13
+        },
+        "primary_branch_count": 0,
+        "structural_role_counts": {
+          "flower_support": 2,
+          "wrap_flower": 2
+        }
+      },
+      "evidence_sources": {
+        "source_image": "chanzhi_sw_clean/artifacts/analysis/prototype_source_images/proto_sw_1_1.source.png",
+        "legacy_annotation": "newpipe/data/prototype_library/chanzhi/prototypes/proto_sw_1_1.json",
+        "legacy_node_rule": "SW-1_valley_filling"
+      }
+    },
+    "proto_sw_1_3": {
+      "family_id": "SW-1_valley_filling",
+      "pattern_skeleton_class": {
+        "legacy_value": "single_wave",
+        "professional_value": "unassigned"
+      },
+      "instance_style": {
+        "density_class": "sparse",
+        "primary_sweep_class": "few_long_sweeps",
+        "side_rhythm": "sparse_asymmetric_alternation",
+        "flower_relation_emphasis": "support_without_mandatory_wrap",
+        "description_zh": "枝条较疏，少量较长主支枝承担结构，花朵以支撑关系为主。"
+      },
+      "evidence_priors": {
+        "flower_anchor_count": 2,
+        "branch_guide_count": 3,
+        "branch_side_counts": {
+          "up": 2,
+          "down": 1
+        },
+        "primary_branch_count": 3,
+        "structural_role_counts": {
+          "flower_support": 2,
+          "wrap_flower": 0
+        }
+      },
+      "evidence_sources": {
+        "source_image": "chanzhi_sw_clean/artifacts/analysis/prototype_source_images/proto_sw_1_3.source.png",
+        "legacy_annotation": "newpipe/data/prototype_library/chanzhi/prototypes/proto_sw_1_3.json",
+        "legacy_node_rule": "SW-1_valley_filling"
+      }
+    },
+    "proto_sw_2_3": {
+      "family_id": "SW-2_axis_penetrating",
+      "pattern_skeleton_class": {
+        "legacy_value": "single_wave",
+        "professional_value": "unassigned"
+      },
+      "instance_style": {
+        "density_class": "primary_sweep_led",
+        "primary_sweep_class": "dominant",
+        "side_rhythm": "broad_axis_flank_alternation",
+        "flower_relation_emphasis": "flower_integrated_with_main_axis",
+        "description_zh": "花朵属于连续轴线构成，以宽阔主支枝组织节奏，不依赖花托或包绕枝。"
+      },
+      "evidence_priors": {
+        "flower_anchor_count": 1,
+        "branch_guide_count": 0,
+        "branch_side_counts": {
+          "up": 0,
+          "down": 0
+        },
+        "primary_branch_count": 6,
+        "structural_role_counts": {
+          "flower_support": 0,
+          "wrap_flower": 0
+        }
+      },
+      "evidence_sources": {
+        "source_image": "chanzhi_sw_clean/artifacts/analysis/prototype_source_images/proto_sw_2_3.source.png",
+        "legacy_annotation": "newpipe/data/prototype_library/chanzhi/prototypes/proto_sw_2_3.json",
+        "legacy_node_rule": "SW-2_axis_penetrating"
+      }
+    },
+    "proto_sw_3_1": {
+      "family_id": "SW-3_tangent_terminal",
+      "pattern_skeleton_class": {
+        "legacy_value": "single_wave",
+        "professional_value": "unassigned"
+      },
+      "instance_style": {
+        "density_class": "light",
+        "primary_sweep_class": "terminal_support_dominant",
+        "side_rhythm": "light_near_balanced",
+        "flower_relation_emphasis": "single_terminal_flower",
+        "description_zh": "单花位于方向明确的枝端，侧枝较轻，不能削弱末端花枝的指向。"
+      },
+      "evidence_priors": {
+        "flower_anchor_count": 1,
+        "branch_guide_count": 7,
+        "branch_side_counts": {
+          "up": 4,
+          "down": 3
+        },
+        "primary_branch_count": 0,
+        "structural_role_counts": {
+          "flower_support": 1,
+          "wrap_flower": 0
+        }
+      },
+      "evidence_sources": {
+        "source_image": "chanzhi_sw_clean/artifacts/analysis/prototype_source_images/proto_sw_3_1.source.png",
+        "legacy_annotation": "newpipe/data/prototype_library/chanzhi/prototypes/proto_sw_3_1.json",
+        "legacy_node_rule": "SW-3_tangent_terminal"
+      }
+    },
+    "proto_sw_3_2": {
+      "family_id": "SW-3_tangent_terminal",
+      "pattern_skeleton_class": {
+        "legacy_value": "single_wave",
+        "professional_value": "unassigned"
+      },
+      "instance_style": {
+        "density_class": "moderate",
+        "primary_sweep_class": "primary_plus_terminal_support",
+        "side_rhythm": "upper_side_emphasis",
+        "flower_relation_emphasis": "two_terminal_flowers",
+        "description_zh": "双花分别由末端花枝组织，同时保留较强主支枝，支枝分布明显偏向一侧。"
+      },
+      "evidence_priors": {
+        "flower_anchor_count": 2,
+        "branch_guide_count": 6,
+        "branch_side_counts": {
+          "up": 5,
+          "down": 1
+        },
+        "primary_branch_count": 6,
+        "structural_role_counts": {
+          "flower_support": 2,
+          "wrap_flower": 0
+        }
+      },
+      "evidence_sources": {
+        "source_image": "chanzhi_sw_clean/artifacts/analysis/prototype_source_images/proto_sw_3_2.source.png",
+        "legacy_annotation": "newpipe/data/prototype_library/chanzhi/prototypes/proto_sw_3_2.json",
+        "legacy_node_rule": "SW-3_tangent_terminal"
+      }
+    }
+  }
+}

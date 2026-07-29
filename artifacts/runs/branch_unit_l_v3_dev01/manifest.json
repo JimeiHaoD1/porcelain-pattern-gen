@@ -1,0 +1,129 @@
+{
+  "schema": "branch_unit_l_v3_development_manifest_v1",
+  "experiment_id": "branch_unit_L_v3_dev01",
+  "generated_at": "2026-07-20T14:28:51.424192+00:00",
+  "formal_gate_eligible": false,
+  "protocol_status": "draft pending executable contract tests",
+  "fixture_count": 3,
+  "all_l1_automated_checks_pass": true,
+  "visual_status": "pending_user_confirmation",
+  "formal_generation_locked": true,
+  "cases": [
+    {
+      "trial_id": "D0",
+      "child_count": 0,
+      "L0_hard_valid": true,
+      "L1_hard_valid": true,
+      "L0_hard_failure_reasons": [],
+      "L1_hard_failure_reasons": [],
+      "fairness": {
+        "budget_hash": "a4f0e3070f6f6a544b7e9d4fb55b8b291d0f85ed94455937484a2852758e85e2",
+        "primary_control_points_equal": true,
+        "semantic_curve_count_equal": true,
+        "cubic_segment_count_equal": true,
+        "role_widths_equal": true,
+        "total_length_symmetric_delta": 1e-08,
+        "vector_ink_symmetric_delta": 1e-08,
+        "raster_ink_symmetric_delta": 0.00061087,
+        "thresholds": {
+          "total_length": 0.03,
+          "vector_ink": 0.03,
+          "raster_ink": 0.05
+        },
+        "budget_match": true
+      },
+      "development_checks": {
+        "hard_valid": true,
+        "terminal_turn_sign_matches_release_side": true,
+        "terminal_reduces_primary_cumulative_turn": true,
+        "terminal_minimum_forward_dot": 0.7286651745,
+        "terminal_all_segments_forward": true,
+        "two_child_mount_gap_world": null,
+        "two_child_mount_gap_in_10_18": true,
+        "two_child_target_direction_separation_degrees": null,
+        "two_child_long_short_hierarchy": true,
+        "no_internal_or_context_failure": true,
+        "automated_pass": true
+      },
+      "pair_image": "pairs/D0.png"
+    },
+    {
+      "trial_id": "D1",
+      "child_count": 1,
+      "L0_hard_valid": true,
+      "L1_hard_valid": true,
+      "L0_hard_failure_reasons": [],
+      "L1_hard_failure_reasons": [],
+      "fairness": {
+        "budget_hash": "264561368238f6e0a3261dde484cf18e670967853140ec70d827d72999d2b5e8",
+        "primary_control_points_equal": true,
+        "semantic_curve_count_equal": true,
+        "cubic_segment_count_equal": true,
+        "role_widths_equal": true,
+        "total_length_symmetric_delta": 2e-08,
+        "vector_ink_symmetric_delta": 1e-08,
+        "raster_ink_symmetric_delta": 0.00026799,
+        "thresholds": {
+          "total_length": 0.03,
+          "vector_ink": 0.03,
+          "raster_ink": 0.05
+        },
+        "budget_match": true
+      },
+      "development_checks": {
+        "hard_valid": true,
+        "terminal_turn_sign_matches_release_side": true,
+        "terminal_reduces_primary_cumulative_turn": true,
+        "terminal_minimum_forward_dot": 0.7053049974,
+        "terminal_all_segments_forward": true,
+        "two_child_mount_gap_world": null,
+        "two_child_mount_gap_in_10_18": true,
+        "two_child_target_direction_separation_degrees": null,
+        "two_child_long_short_hierarchy": true,
+        "no_internal_or_context_failure": true,
+        "automated_pass": true
+      },
+      "pair_image": "pairs/D1.png"
+    },
+    {
+      "trial_id": "D2",
+      "child_count": 2,
+      "L0_hard_valid": false,
+      "L1_hard_valid": true,
+      "L0_hard_failure_reasons": [
+        "unit_clearance:child_1:child_2"
+      ],
+      "L1_hard_failure_reasons": [],
+      "fairness": {
+        "budget_hash": "3fd89fb44404f37cfeae6530d29581b4b8a784ec3407ebf4abdf8982a632350b",
+        "primary_control_points_equal": true,
+        "semantic_curve_count_equal": true,
+        "cubic_segment_count_equal": true,
+        "role_widths_equal": true,
+        "total_length_symmetric_delta": 1.1e-07,
+        "vector_ink_symmetric_delta": 8e-08,
+        "raster_ink_symmetric_delta": 0.05267156,
+        "thresholds": {
+          "total_length": 0.03,
+          "vector_ink": 0.03,
+          "raster_ink": 0.05
+        },
+        "budget_match": false
+      },
+      "development_checks": {
+        "hard_valid": true,
+        "terminal_turn_sign_matches_release_side": true,
+        "terminal_reduces_primary_cumulative_turn": true,
+        "terminal_minimum_forward_dot": 0.7050894486,
+        "terminal_all_segments_forward": true,
+        "two_child_mount_gap_world": 14.0,
+        "two_child_mount_gap_in_10_18": true,
+        "two_child_target_direction_separation_degrees": 79.0764635076,
+        "two_child_long_short_hierarchy": true,
+        "no_internal_or_context_failure": true,
+        "automated_pass": true
+      },
+      "pair_image": "pairs/D2.png"
+    }
+  ]
+}

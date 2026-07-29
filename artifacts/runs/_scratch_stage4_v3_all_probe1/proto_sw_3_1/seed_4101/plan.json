@@ -1,0 +1,705 @@
+{
+  "branch_units": [
+    {
+      "branch_unit_id": "BU01",
+      "child_rhythm_envelope": {
+        "child_geometry_deferred_to_stage_4": true,
+        "length_sequence": [
+          "medium",
+          "short"
+        ],
+        "maximum_child_count": 2,
+        "minimum_child_count": 1,
+        "rhythm_policy": "light_near_balanced"
+      },
+      "directional_layout_intent": {
+        "branch_shape_simulation": false,
+        "immediate_outward_departure": true,
+        "outward_normal_alignment": 0.953583,
+        "parent_clearance_after_initial_departure": 0.064342,
+        "path_points": [
+          [
+            0.262105047,
+            0.616089992
+          ],
+          [
+            0.463962972,
+            0.529714578
+          ]
+        ],
+        "position_distance_direction_only": true,
+        "segment_count": 1,
+        "type": "directional_polyline_not_branch_geometry"
+      },
+      "family_id": "SW-3_tangent_terminal",
+      "flower_relation_intents": [],
+      "occupancy_envelope": {
+        "end_hint": [
+          0.463962972,
+          0.529714578
+        ],
+        "path_points": [
+          [
+            0.262105047,
+            0.616089992
+          ],
+          [
+            0.463962972,
+            0.529714578
+          ]
+        ],
+        "radius": 0.041,
+        "start": [
+          0.262105047,
+          0.616089992
+        ],
+        "type": "symbolic_directional_corridor_polyline",
+        "used_for_stage3_unit_clearance_only": true
+      },
+      "parent_ref": {
+        "kind": "backbone",
+        "mount_point": [
+          0.262105047,
+          0.616089992
+        ],
+        "mount_s": 0.175,
+        "prototype_id": "proto_sw_3_1"
+      },
+      "primary_sweep_intent": {
+        "directional_path_points": [
+          [
+            0.262105047,
+            0.616089992
+          ],
+          [
+            0.463962972,
+            0.529714578
+          ]
+        ],
+        "end_hint": [
+          0.463962972,
+          0.529714578
+        ],
+        "end_hint_is_symbolic_not_curve_geometry": true,
+        "eventual_direction": [
+          0.919367712,
+          -0.3933993
+        ],
+        "kind": "primary_sweep",
+        "length_class": "medium",
+        "length_hint": 0.219561687
+      },
+      "provenance": {
+        "analysis_digest": "352a1ab386d17351ac0fd538ffb693507fb6b7e18a29f7096b978face9bb50fd",
+        "candidate_id": "sweep_l1_mount_region_2_1_forward_probe_014_right_normal",
+        "legacy_branch_geometry_used": false,
+        "morphology_digest": "97c9074288ea0d4ab902306bbcf09d3cae2ef13ad91f7d48be8fb3d2a6c030c8",
+        "prototype_specific_topology_rule_used": false,
+        "seed": 4101,
+        "source_interval_capacity": "large"
+      },
+      "reserve_zone_refs": [
+        "flower_reserve:flower_1"
+      ],
+      "root_interval_ref": {
+        "kind": "candidate_l1_attachment_interval",
+        "region_id": "l1_mount_region_2",
+        "s_ranges": [
+          [
+            0.05,
+            0.7625
+          ]
+        ],
+        "side_id": "right_normal"
+      },
+      "root_tangent_intent": {
+        "curve_compilation_deferred": true,
+        "direct_outward_departure_required": true,
+        "must_start_along_parent_tangent": false,
+        "parent_tangent_is_reference_only": true,
+        "parent_tangent_reference": [
+          0.65198921,
+          0.758228244
+        ]
+      },
+      "semantic_function": "subordinate_primary_sweep",
+      "structural_role": "primary_sweep",
+      "terminal_intent": {
+        "buds_present": false,
+        "curl_head_present": false,
+        "geometry_deferred_to_stage_4": true,
+        "kind": "open_symbolic_tip",
+        "leaves_present": false
+      }
+    },
+    {
+      "branch_unit_id": "BU02",
+      "child_rhythm_envelope": {
+        "child_geometry_deferred_to_stage_4": true,
+        "length_sequence": [
+          "medium",
+          "short"
+        ],
+        "maximum_child_count": 1,
+        "minimum_child_count": 0,
+        "rhythm_policy": "light_near_balanced"
+      },
+      "directional_layout_intent": {
+        "branch_shape_simulation": false,
+        "immediate_outward_departure": true,
+        "outward_normal_alignment": 0.899398,
+        "parent_clearance_after_initial_departure": 0.059912,
+        "path_points": [
+          [
+            0.447373633,
+            1.054523391
+          ],
+          [
+            0.674310593,
+            0.978781406
+          ],
+          [
+            0.765441406,
+            0.894666054
+          ]
+        ],
+        "position_distance_direction_only": true,
+        "segment_count": 2,
+        "type": "directional_polyline_not_branch_geometry"
+      },
+      "family_id": "SW-3_tangent_terminal",
+      "flower_relation_intents": [
+        {
+          "approach": "below_flower_corridor_to_underside",
+          "contact_point": [
+            0.765441406,
+            0.894666054
+          ],
+          "contact_policy": "underside_flower_boundary",
+          "flower_core_entry_allowed": false,
+          "flower_id": "flower_1",
+          "origin_policy": "remote_parent_mount_long_terminal_reach",
+          "relation": "terminal_flower",
+          "root_to_flower_boundary_reach": 0.363260045,
+          "route_policy": "below_flower_corridor",
+          "under_approach_waypoint": [
+            0.674310593,
+            0.978781406
+          ]
+        }
+      ],
+      "occupancy_envelope": {
+        "end_hint": [
+          0.765441406,
+          0.894666054
+        ],
+        "path_points": [
+          [
+            0.447373633,
+            1.054523391
+          ],
+          [
+            0.674310593,
+            0.978781406
+          ],
+          [
+            0.765441406,
+            0.894666054
+          ]
+        ],
+        "radius": 0.034,
+        "start": [
+          0.447373633,
+          1.054523391
+        ],
+        "type": "symbolic_directional_corridor_polyline",
+        "used_for_stage3_unit_clearance_only": true
+      },
+      "parent_ref": {
+        "kind": "backbone",
+        "mount_point": [
+          0.447373633,
+          1.054523391
+        ],
+        "mount_s": 0.4625,
+        "prototype_id": "proto_sw_3_1"
+      },
+      "primary_sweep_intent": {
+        "directional_path_points": [
+          [
+            0.447373633,
+            1.054523391
+          ],
+          [
+            0.674310593,
+            0.978781406
+          ],
+          [
+            0.765441406,
+            0.894666054
+          ]
+        ],
+        "end_hint": [
+          0.765441406,
+          0.894666054
+        ],
+        "end_hint_is_symbolic_not_curve_geometry": true,
+        "eventual_direction": [
+          0.948562433,
+          -0.316590129
+        ],
+        "kind": "remote_below_flower_terminal_support",
+        "length_class": "long_terminal_flower_reach",
+        "length_hint": 0.363260045
+      },
+      "provenance": {
+        "analysis_digest": "352a1ab386d17351ac0fd538ffb693507fb6b7e18a29f7096b978face9bb50fd",
+        "candidate_id": "support_flower_1_6",
+        "legacy_branch_geometry_used": false,
+        "morphology_digest": "97c9074288ea0d4ab902306bbcf09d3cae2ef13ad91f7d48be8fb3d2a6c030c8",
+        "prototype_specific_topology_rule_used": false,
+        "seed": 4101,
+        "source_interval_capacity": "remote_terminal_corridor_required"
+      },
+      "reserve_zone_refs": [
+        "flower_reserve:flower_1"
+      ],
+      "root_interval_ref": {
+        "arc_direction": "reverse_arc",
+        "arc_distance_from_nearest_flower_mount": 0.4625,
+        "contact_side": "underside",
+        "flower_id": "flower_1",
+        "kind": "remote_terminal_support_corridor",
+        "near_flower_stub_allowed": false,
+        "nearest_flower_mount_s": 0.925,
+        "route_below_flower": true,
+        "source_mount_s": 0.4625
+      },
+      "root_tangent_intent": {
+        "curve_compilation_deferred": true,
+        "direct_outward_departure_required": true,
+        "must_start_along_parent_tangent": false,
+        "parent_tangent_is_reference_only": true,
+        "parent_tangent_reference": [
+          0.699387094,
+          0.714743096
+        ]
+      },
+      "semantic_function": "terminal_flower",
+      "structural_role": "terminal_flower_support",
+      "terminal_intent": {
+        "buds_present": false,
+        "curl_head_present": false,
+        "geometry_deferred_to_stage_4": true,
+        "kind": "flower_terminal",
+        "leaves_present": false
+      }
+    },
+    {
+      "branch_unit_id": "BU03",
+      "child_rhythm_envelope": {
+        "child_geometry_deferred_to_stage_4": true,
+        "length_sequence": [
+          "medium",
+          "short"
+        ],
+        "maximum_child_count": 2,
+        "minimum_child_count": 1,
+        "rhythm_policy": "light_near_balanced"
+      },
+      "directional_layout_intent": {
+        "branch_shape_simulation": false,
+        "immediate_outward_departure": true,
+        "outward_normal_alignment": 0.953583,
+        "parent_clearance_after_initial_departure": 0.063273,
+        "path_points": [
+          [
+            0.819804883,
+            0.972077059
+          ],
+          [
+            1.036100214,
+            0.953219251
+          ]
+        ],
+        "position_distance_direction_only": true,
+        "segment_count": 1,
+        "type": "directional_polyline_not_branch_geometry"
+      },
+      "family_id": "SW-3_tangent_terminal",
+      "flower_relation_intents": [],
+      "occupancy_envelope": {
+        "end_hint": [
+          1.036100214,
+          0.953219251
+        ],
+        "path_points": [
+          [
+            0.819804883,
+            0.972077059
+          ],
+          [
+            1.036100214,
+            0.953219251
+          ]
+        ],
+        "radius": 0.041,
+        "start": [
+          0.819804883,
+          0.972077059
+        ],
+        "type": "symbolic_directional_corridor_polyline",
+        "used_for_stage3_unit_clearance_only": true
+      },
+      "parent_ref": {
+        "kind": "backbone",
+        "mount_point": [
+          0.819804883,
+          0.972077059
+        ],
+        "mount_s": 0.7375,
+        "prototype_id": "proto_sw_3_1"
+      },
+      "primary_sweep_intent": {
+        "directional_path_points": [
+          [
+            0.819804883,
+            0.972077059
+          ],
+          [
+            1.036100214,
+            0.953219251
+          ]
+        ],
+        "end_hint": [
+          1.036100214,
+          0.953219251
+        ],
+        "end_hint_is_symbolic_not_curve_geometry": true,
+        "eventual_direction": [
+          0.996220879,
+          -0.086855975
+        ],
+        "kind": "primary_sweep",
+        "length_class": "medium",
+        "length_hint": 0.217115838
+      },
+      "provenance": {
+        "analysis_digest": "352a1ab386d17351ac0fd538ffb693507fb6b7e18a29f7096b978face9bb50fd",
+        "candidate_id": "sweep_l1_mount_region_3_4_forward_probe_059_left_normal",
+        "legacy_branch_geometry_used": false,
+        "morphology_digest": "97c9074288ea0d4ab902306bbcf09d3cae2ef13ad91f7d48be8fb3d2a6c030c8",
+        "prototype_specific_topology_rule_used": false,
+        "seed": 4101,
+        "source_interval_capacity": "large"
+      },
+      "reserve_zone_refs": [
+        "flower_reserve:flower_1"
+      ],
+      "root_interval_ref": {
+        "kind": "candidate_l1_attachment_interval",
+        "region_id": "l1_mount_region_3",
+        "s_ranges": [
+          [
+            0.675,
+            0.775
+          ]
+        ],
+        "side_id": "left_normal"
+      },
+      "root_tangent_intent": {
+        "curve_compilation_deferred": true,
+        "direct_outward_departure_required": true,
+        "must_start_along_parent_tangent": false,
+        "parent_tangent_is_reference_only": true,
+        "parent_tangent_reference": [
+          0.217169004,
+          -0.976134019
+        ]
+      },
+      "semantic_function": "subordinate_primary_sweep",
+      "structural_role": "primary_sweep",
+      "terminal_intent": {
+        "buds_present": false,
+        "curl_head_present": false,
+        "geometry_deferred_to_stage_4": true,
+        "kind": "open_symbolic_tip",
+        "leaves_present": false
+      }
+    }
+  ],
+  "classification": {
+    "flower_branch_relation": {
+      "family_id": "SW-3_tangent_terminal",
+      "generation_control": true,
+      "label_en": "tangent extension and terminal flowering",
+      "label_zh": "切向伸出与枝端着花"
+    },
+    "pattern_skeleton_class": {
+      "generation_control_in_stage_3_v1": false,
+      "legacy_value": "single_wave",
+      "professional_value": "unassigned"
+    }
+  },
+  "coordinate_system": {
+    "canvas_bounds": [
+      0.0,
+      0.0,
+      1.0,
+      1.1875
+    ],
+    "coordinate_system": "repeat_width_isotropic",
+    "horizontal_domain": "one_period_with_ghost_neighbors",
+    "repeat_x_range": [
+      0.0,
+      1.0
+    ]
+  },
+  "family_invariants": [
+    "terminal_flower_stem_present_per_flower",
+    "terminal_flower_stem_originates_remote_from_flower",
+    "terminal_flower_stem_reads_as_a_long_directional_reach",
+    "terminal_flower_route_passes_below_flower",
+    "terminal_flower_contact_is_on_flower_underside",
+    "parent_tangent_is_reference_not_a_preview_segment",
+    "secondary_rhythm_subordinate_to_terminal_direction"
+  ],
+  "global_selection": {
+    "evaluated_set_count": 2946,
+    "initial_layout_policy": {
+      "density_class": "light",
+      "direction_neighborhood_s": 0.15,
+      "directional_preview_is_branch_shape_simulation": false,
+      "immediate_outward_departure_required": true,
+      "maximum_local_direction_difference_degrees": 90.0,
+      "minimum_outward_normal_alignment": 0.82,
+      "minimum_parent_clearance_after_initial_departure": 0.03,
+      "minimum_periodic_root_spacing": 0.1,
+      "minimum_symbolic_intent_clearance": 0.035,
+      "occupancy_radius_clearance_factor": 0.42,
+      "one_selected_root_per_density_bin": true,
+      "opposite_side_same_root_exception_allowed": false,
+      "parent_clearance_measurement_start_fraction": 0.3,
+      "parent_tangent_departure_segment_in_preview_allowed": false,
+      "role_density_field_consumed_by_global_selection": true,
+      "symbolic_intent_polyline_clearance_is_hard_constraint": true,
+      "symbolic_intent_polyline_crossing_allowed": false
+    },
+    "objective": {
+      "candidate_quality": 6.460928,
+      "local_direction_coherence": 1.0,
+      "maximum_local_direction_difference": 0.0,
+      "minimum_root_spacing": 0.275,
+      "minimum_symbolic_intent_clearance": 0.093756,
+      "repeat_coverage": 0.75,
+      "role_density_fit": 0.334496,
+      "root_spacing": 0.279167,
+      "side_rhythm": 1.0,
+      "symbolic_intent_crossing_count": 0.0,
+      "total": 9.698099
+    },
+    "optional_candidate_count": 27,
+    "required_candidate_count": 16,
+    "required_group_count": 1,
+    "role_density_field_consumed": true,
+    "selected_candidate_ids": [
+      "support_flower_1_6",
+      "sweep_l1_mount_region_2_1_forward_probe_014_right_normal",
+      "sweep_l1_mount_region_3_4_forward_probe_059_left_normal"
+    ],
+    "selection_method": "exhaustive_complete_branchunit_set_scoring",
+    "single_forward_plan": true,
+    "target_optional_unit_count": 2,
+    "valid_set_count": 1798,
+    "validation_guided_retry": false
+  },
+  "initial_layout_policy": {
+    "constraints_applied_before_curve_compilation": true,
+    "density_class": "light",
+    "direction_neighborhood_s": 0.15,
+    "directional_preview_is_branch_shape_simulation": false,
+    "immediate_outward_departure_required": true,
+    "long_sweep_reach_is_macro_layout_not_curve_shape": true,
+    "maximum_local_direction_difference_degrees": 90.0,
+    "minimum_outward_normal_alignment": 0.82,
+    "minimum_parent_clearance_after_initial_departure": 0.03,
+    "minimum_periodic_root_spacing": 0.1,
+    "minimum_symbolic_intent_clearance": 0.035,
+    "occupancy_radius_clearance_factor": 0.42,
+    "one_selected_root_per_density_bin": true,
+    "opposite_side_same_root_exception_allowed": false,
+    "parent_clearance_measurement_start_fraction": 0.3,
+    "parent_tangent_departure_segment_in_preview_allowed": false,
+    "role_density_field_consumed_by_global_selection": true,
+    "sw1_trough_support_is_family_hard_constraint": false,
+    "symbolic_intent_polyline_clearance_is_hard_constraint": true,
+    "symbolic_intent_polyline_crossing_allowed": false
+  },
+  "input_refs": {
+    "morphology_digest": "97c9074288ea0d4ab902306bbcf09d3cae2ef13ad91f7d48be8fb3d2a6c030c8",
+    "prototype_analysis_digest": "352a1ab386d17351ac0fd538ffb693507fb6b7e18a29f7096b978face9bb50fd",
+    "strict_p0_digest": "4258b3cc96056193da1a9e0de9a52e20282ba74e74755c0c1e39df3fa0fffa19"
+  },
+  "instance_priors": {
+    "density_class": "light",
+    "flower_relation_emphasis": "single_terminal_flower",
+    "primary_sweep_class": "terminal_support_dominant",
+    "side_rhythm": "light_near_balanced",
+    "source_observation_counts_used_as_fixed_targets": false
+  },
+  "plan_contract_id": "dynamic_branchunit_directional_layout_stage3_v3",
+  "plan_digest": "5ded8535db9a13c98c2b98e32c2799268def98388b27946cc54ac23009b17a80",
+  "plan_id": "proto_sw_3_1__seed_4101__raw_1__plan_v4",
+  "planning_contract": {
+    "automatic_deletion_used": false,
+    "automatic_repair_used": false,
+    "complete_branchunit_is_primary_primitive": true,
+    "legacy_branch_geometry_used": false,
+    "raw_plan_count_for_task": 1,
+    "validation_guided_resample_used": false,
+    "validation_guided_retry_used": false
+  },
+  "policy_id": "branchunit_long_sweep_trough_support_layout_v4",
+  "prototype_id": "proto_sw_3_1",
+  "raw_candidate_index": 1,
+  "review": {
+    "criteria": [
+      "sw1_flower_support_roots_are_in_the_detected_trough_band",
+      "sw1_1_uses_long_dense_sweeps",
+      "sw1_3_has_few_long_sweeps_but_not_missing_substructure",
+      "macro_intents_do_not_cross"
+    ],
+    "stage_4_unlocked": false,
+    "status": "plan_pending_review",
+    "visual_gate_required": true
+  },
+  "role_density_field": {
+    "bin_count": 8,
+    "bins": [
+      {
+        "available_l1_probe_count": 17,
+        "bin_id": "density_bin_1",
+        "flower_influence": 0.375,
+        "mean_available_clearance": 0.38,
+        "planner_selected_slot_count": 0,
+        "preferred_role": "primary_sweep",
+        "s_range": [
+          0.0,
+          0.125
+        ],
+        "target_density": 0.42
+      },
+      {
+        "available_l1_probe_count": 22,
+        "bin_id": "density_bin_2",
+        "flower_influence": 0.0,
+        "mean_available_clearance": 0.335397727,
+        "planner_selected_slot_count": 0,
+        "preferred_role": "primary_sweep",
+        "s_range": [
+          0.125,
+          0.25
+        ],
+        "target_density": 0.340985
+      },
+      {
+        "available_l1_probe_count": 22,
+        "bin_id": "density_bin_3",
+        "flower_influence": 0.0,
+        "mean_available_clearance": 0.300568182,
+        "planner_selected_slot_count": 0,
+        "preferred_role": "primary_sweep",
+        "s_range": [
+          0.25,
+          0.375
+        ],
+        "target_density": 0.326137
+      },
+      {
+        "available_l1_probe_count": 19,
+        "bin_id": "density_bin_4",
+        "flower_influence": 0.0,
+        "mean_available_clearance": 0.276381579,
+        "planner_selected_slot_count": 0,
+        "preferred_role": "primary_sweep",
+        "s_range": [
+          0.375,
+          0.5
+        ],
+        "target_density": 0.315826
+      },
+      {
+        "available_l1_probe_count": 11,
+        "bin_id": "density_bin_5",
+        "flower_influence": 0.0,
+        "mean_available_clearance": 0.264204545,
+        "planner_selected_slot_count": 0,
+        "preferred_role": "primary_sweep",
+        "s_range": [
+          0.5,
+          0.625
+        ],
+        "target_density": 0.310635
+      },
+      {
+        "available_l1_probe_count": 18,
+        "bin_id": "density_bin_6",
+        "flower_influence": 0.0,
+        "mean_available_clearance": 0.34875,
+        "planner_selected_slot_count": 0,
+        "preferred_role": "primary_sweep",
+        "s_range": [
+          0.625,
+          0.75
+        ],
+        "target_density": 0.346678
+      },
+      {
+        "available_l1_probe_count": 5,
+        "bin_id": "density_bin_7",
+        "flower_influence": 0.488636,
+        "mean_available_clearance": 0.38,
+        "planner_selected_slot_count": 0,
+        "preferred_role": "terminal_flower_support",
+        "s_range": [
+          0.75,
+          0.875
+        ],
+        "target_density": 0.438182
+      },
+      {
+        "available_l1_probe_count": 0,
+        "bin_id": "density_bin_8",
+        "flower_influence": 0.943182,
+        "mean_available_clearance": 0.0,
+        "planner_selected_slot_count": 0,
+        "preferred_role": "terminal_flower_support",
+        "s_range": [
+          0.875,
+          1.0
+        ],
+        "target_density": 0.348909
+      }
+    ],
+    "counts_are_soft_instance_priors": true,
+    "density_class": "light",
+    "family_id": "SW-3_tangent_terminal",
+    "schema": "dynamic_branch_role_density_field_v1",
+    "source_branch_counts_used_as_fixed_targets": false
+  },
+  "schema": "dynamic_branch_plan_v4",
+  "seed": 4101,
+  "stage_boundary": {
+    "branch_shape_simulation_present": false,
+    "buds_present": false,
+    "candidate_slots_are_symbolic": true,
+    "curl_heads_present": false,
+    "curve_geometry_present": false,
+    "directional_layout_only": true,
+    "dynamic_branch_plan_present": true,
+    "editor_integration_present": false,
+    "leaves_present": false
+  },
+  "supersedes_policy_id": "branchunit_directional_layout_free_space_and_below_flower_v3",
+  "task_id": "proto_sw_3_1__seed_4101__raw_1"
+}

@@ -1,0 +1,210 @@
+{
+  "schema": "dynamic_branch_stage4_unit_curve_contract_v2",
+  "contract_id": "dynamic_branchunit_hierarchical_curve_compilation_stage4_v2",
+  "purpose": "materialize each approved directional BranchUnitPlan into one complete dynamic L1/L2/L3 topology and compile the hierarchy into visibly curved parent-local cubic Bezier skeleton geometry",
+  "supersedes": {
+    "contract_id": "dynamic_branchunit_bezier_compilation_stage4_v1",
+    "reason": "stage4 v1 encoded each directional placeholder as one near-collinear curve and did not expand a complete BranchUnit",
+    "v1_artifacts_are_preserved_as_rejected_evidence": true
+  },
+  "required_input": {
+    "stage3_manifest_schema": "dynamic_branch_stage3_plan_manifest_v3",
+    "plan_schema": "dynamic_branch_plan_v3",
+    "required_plan_review_state": "plan_approved_for_curve_compilation",
+    "prototype_count": 5,
+    "seed_count": 3,
+    "task_count": 15
+  },
+  "output": {
+    "schema": "dynamic_branch_unit_curve_candidate_v2",
+    "manifest_schema": "dynamic_branch_stage4_unit_curve_manifest_v2",
+    "one_raw_candidate_per_task": true,
+    "output_directory": "dynamic_branch_stage4_unit_curves_v2",
+    "required_artifacts_per_task": [
+      "stage4_v2_input_snapshot.json",
+      "dynamic_branch_unit_curve.json",
+      "unit_curve_diagnostics.json",
+      "original_unit_curve.svg",
+      "original_unit_curve.png",
+      "three_repeat_unit_curve.svg",
+      "three_repeat_unit_curve.png",
+      "original_visual_review.json"
+    ]
+  },
+  "unit_topology_materialization": {
+    "stage3_branch_unit_count_is_preserved": true,
+    "actual_l2_count_is_selected_once_from_each_stage3_child_rhythm_envelope": true,
+    "l2_count_may_vary_by_seed": true,
+    "l3_count_may_vary_by_seed": true,
+    "maximum_l3_per_unit": 1,
+    "maximum_hierarchy_level": 3,
+    "child_mount_fraction_range": [
+      0.32,
+      0.78
+    ],
+    "minimum_sibling_mount_fraction_gap": 0.11,
+    "l2_parent_local_angle_degrees": [
+      38.0,
+      64.0
+    ],
+    "l3_parent_local_angle_degrees": [
+      36.0,
+      58.0
+    ],
+    "l2_length_ratio_by_class": {
+      "short": [
+        0.25,
+        0.32
+      ],
+      "medium": [
+        0.34,
+        0.43
+      ],
+      "long": [
+        0.42,
+        0.50
+      ]
+    },
+    "l3_to_parent_length_ratio": [
+      0.42,
+      0.55
+    ],
+    "l3_parent_local_turn_sign_candidates": [
+      -1,
+      1
+    ],
+    "l3_orientation_is_selected_before_final_diagnostics": true,
+    "candidate_side_patterns_per_unit": 4,
+    "joint_unit_candidate_selection_required": true,
+    "global_unit_set_selection_required": true,
+    "topology_is_frozen_before_selected_dependent_curves_are_emitted": true
+  },
+  "primary_curve_compilation": {
+    "stage3_directional_path_is_a_position_distance_direction_corridor_not_a_final_centerline": true,
+    "ordinary_primary_cubic_count": 2,
+    "sw3_terminal_support_cubic_count": 2,
+    "stage3_mount_point_is_preserved": true,
+    "stage3_tip_hint_is_preserved": true,
+    "sw3_below_flower_waypoint_is_preserved": true,
+    "ordinary_primary_bow_ratio_range": [
+      0.105,
+      0.155
+    ],
+    "flower_support_bow_ratio_range": [
+      0.075,
+      0.12
+    ],
+    "primary_bow_must_not_exceed_stage3_occupancy_radius_factor": 0.92,
+    "root_direction_policy": "outward_dominant_parent_influenced",
+    "root_parent_tangent_weight": 0.18,
+    "root_planned_direction_weight": 0.82,
+    "visible_parent_hugging_prefix_allowed": false,
+    "primary_shape_modes": [
+      "c_sweep",
+      "soft_s"
+    ],
+    "primary_bow_sign_candidates": [
+      -1,
+      1
+    ],
+    "global_primary_set_selection_required": true
+  },
+  "dependent_curve_compilation": {
+    "compile_order": [
+      "L1",
+      "L2",
+      "L3"
+    ],
+    "child_root_is_sampled_by_parent_arc_length_fraction": true,
+    "bezier_parameter_is_not_used_as_mount_fraction": true,
+    "child_entry_derivative_uses_actual_parent_local_tangent": true,
+    "l2_cubic_count": 1,
+    "l3_cubic_count": 1,
+    "child_bow_range": [
+      0.14,
+      0.3
+    ],
+    "hierarchy_widths": {
+      "L1": 3.0,
+      "L2": 2.1,
+      "L3": 1.45
+    }
+  },
+  "forward_selection": {
+    "selection_is_part_of_the_single_forward_generation_plan": true,
+    "selection_occurs_before_final_candidate_diagnostics": true,
+    "primary_candidates_are_selected_as_one_global_set": true,
+    "complete_unit_candidates_are_selected_as_one_global_set": true,
+    "selection_considers": [
+      "registered_parent_contacts",
+      "curve_crossing",
+      "minimum_visual_clearance",
+      "flower_reserves",
+      "l3_parent_local_orientation",
+      "canvas_and_repeat_bounds",
+      "family_side_rhythm",
+      "seed_preference"
+    ],
+    "validation_guided_retry": false,
+    "validation_guided_resample": false,
+    "automatic_repair": false,
+    "automatic_deletion": false
+  },
+  "diagnostics": {
+    "read_only": true,
+    "near_straight_is_curve_issue": true,
+    "shape_thresholds": {
+      "L1_minimum_deviation_ratio": 0.055,
+      "L2_minimum_deviation_ratio": 0.05,
+      "L3_minimum_deviation_ratio": 0.04,
+      "maximum_deviation_ratio": 0.25,
+      "L1_minimum_arc_ratio": 1.012,
+      "L2_minimum_arc_ratio": 1.01,
+      "L3_minimum_arc_ratio": 1.006
+    },
+    "child_root_off_parent_is_attachment_issue": true,
+    "child_entry_tangent_mismatch_is_attachment_issue": true,
+    "unregistered_curve_crossing_is_collision_issue": true,
+    "non_root_backbone_contact_is_collision_issue": true,
+    "wrong_flower_entry_is_flower_relation_issue": true,
+    "numeric_checks_cannot_auto_approve_visual_gate": true
+  },
+  "candidate_policy": {
+    "validation_guided_retry_allowed": false,
+    "validation_guided_resample_allowed": false,
+    "automatic_repair_allowed": false,
+    "automatic_deletion_allowed": false,
+    "compilation_failures_must_be_preserved": true,
+    "all_fifteen_candidates_must_be_preserved": true
+  },
+  "stage_boundary": {
+    "complete_branch_units_present": true,
+    "dynamic_l1_l2_l3_topology_present": true,
+    "branch_skeleton_only": true,
+    "bezier_curve_geometry_present": true,
+    "leaves_present": false,
+    "buds_present": false,
+    "curl_heads_present": false,
+    "editor_integration_present": false
+  },
+  "review": {
+    "initial_state": "original_pending_review",
+    "allowed_states": [
+      "original_visually_approved",
+      "original_needs_edit",
+      "original_rejected"
+    ],
+    "criteria": [
+      "each_branch_unit_reads_as_a_complete_primary_plus_child_group",
+      "primary_curves_are_visibly_curved_not_straight_placeholders",
+      "children_grow_from_actual_parent_curves",
+      "unit_direction_distance_and_position_still_follow_stage3",
+      "sw3_support_starts_remote_routes_below_and_contacts_flower_underside",
+      "units_do_not_cross",
+      "primary_secondary_tertiary_hierarchy_is_legible",
+      "long_short_left_right_dense_open_rhythm_is_legible",
+      "repeat_is_continuous",
+      "no_leaves_buds_or_curl_heads"
+    ]
+  }
+}

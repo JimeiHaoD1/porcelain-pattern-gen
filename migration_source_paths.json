@@ -1,0 +1,335 @@
+{
+  "schema_version": "1.0",
+  "created_date": "2026-07-03",
+  "source_root": "D:\\sdxl",
+  "target_root": "D:\\sdxl\\chanzhi_sw_clean",
+  "operation_status": "migration_executed_and_reproduction_tested",
+  "research_scope": "SW two-way continuous vine-scroll structurally controllable SVG generation",
+  "planned_migrate_now_summary": {
+    "file_count": 59,
+    "total_mib": 4.97,
+    "baseline_svg_count": 5,
+    "core_code_count": 8,
+    "run57_regression_snapshot_count": 40,
+    "run57_historical_pyc_count": 6
+  },
+  "global_rules": {
+    "run57_svg_json_as_formal_input": false,
+    "run57_adapter_in_main_code": false,
+    "diffusion_weights_allowed": false,
+    "pix2pix_data_allowed": false,
+    "reference_assets_excluded_from_runtime": true
+  },
+  "entries": [
+    {
+      "id": "baseline_svg_sw5",
+      "category": "baseline SVG",
+      "decision": "migrate_now",
+      "migrate": true,
+      "source_paths": [
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_ready_experiment\\from_chanzhidanyuan_20260513_v10\\library_build\\generated\\proto_sw_1_1\\proto_sw_1_1_baseline.svg",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_ready_experiment\\from_chanzhidanyuan_20260513_v10\\library_build\\generated\\proto_sw_1_3\\proto_sw_1_3_baseline.svg",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_ready_experiment\\from_chanzhidanyuan_20260513_v10\\library_build\\generated\\proto_sw_2_3\\proto_sw_2_3_baseline.svg",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_ready_experiment\\from_chanzhidanyuan_20260513_v10\\library_build\\generated\\proto_sw_3_1\\proto_sw_3_1_baseline.svg",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_ready_experiment\\from_chanzhidanyuan_20260513_v10\\library_build\\generated\\proto_sw_3_2\\proto_sw_3_2_baseline.svg"
+      ],
+      "planned_destination": "data/baselines/sw/<prototype_id>/<prototype_id>_baseline.svg",
+      "reason": "Upstream inputs consumed by the run57 skeleton analyzer; not run57 outputs.",
+      "formal_input": true,
+      "reference_only": false,
+      "contamination_risk": "low",
+      "exclude_siblings": ["*.png", "*_debug.png", "*_flower_mask.png", "*_dense_high.svg", "*_sparse_low.svg", "*_op_*.svg"]
+    },
+    {
+      "id": "chanzhi_mainline_core",
+      "category": "chanzhi_mainline core code",
+      "decision": "migrate_now",
+      "migrate": true,
+      "source_paths": [
+        "D:\\sdxl\\newpipe\\chanzhi_mainline\\__init__.py",
+        "D:\\sdxl\\newpipe\\chanzhi_mainline\\chanzhi_transferable_pipeline.py",
+        "D:\\sdxl\\newpipe\\chanzhi_mainline\\chanzhi_skeleton_analyzer.py",
+        "D:\\sdxl\\newpipe\\chanzhi_mainline\\chanzhi_svg_skeleton_io.py",
+        "D:\\sdxl\\newpipe\\chanzhi_mainline\\chanzhi_branch_layout_grammar.py",
+        "D:\\sdxl\\newpipe\\chanzhi_mainline\\chanzhi_branch_geometry.py",
+        "D:\\sdxl\\newpipe\\chanzhi_mainline\\chanzhi_terminal_primitives.py",
+        "D:\\sdxl\\newpipe\\chanzhi_mainline\\chanzhi_terminal_renderer.py"
+      ],
+      "planned_destination": "src/chanzhi_sw/",
+      "reason": "Minimal four-stage SW structure generation dependency closure.",
+      "formal_input": false,
+      "reference_only": false,
+      "contamination_risk": "medium",
+      "required_controls": ["remove old output defaults", "reject run28/run56/run57 runtime inputs", "separate structural_valid from visual_approved"]
+    },
+    {
+      "id": "run57_final_reference",
+      "category": "run57 final reference",
+      "decision": "migrate_now",
+      "migrate": true,
+      "source_paths": [
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_1_1\\terminal_lineart.svg",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_1_1\\terminal_lineart_preview.png",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_1_1\\terminal_render.json",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_1_3\\terminal_lineart.svg",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_1_3\\terminal_lineart_preview.png",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_1_3\\terminal_render.json",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_2_3\\terminal_lineart.svg",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_2_3\\terminal_lineart_preview.png",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_2_3\\terminal_render.json",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_3_1\\terminal_lineart.svg",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_3_1\\terminal_lineart_preview.png",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_3_1\\terminal_render.json",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_3_2\\terminal_lineart.svg",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_3_2\\terminal_lineart_preview.png",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\proto_sw_3_2\\terminal_render.json",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\terminal_render_manifest.json",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\04_terminal_lineart\\terminal_lineart_contact_sheet.png"
+      ],
+      "prototype_ids": ["proto_sw_1_1", "proto_sw_1_3", "proto_sw_2_3", "proto_sw_3_1", "proto_sw_3_2"],
+      "planned_destination": "tests/fixtures/reference_only/run57_snapshot/04_terminal_lineart/",
+      "reason": "Frozen best-result regression snapshot to preserve and continue optimizing the run57 method; visual maturity was not approved.",
+      "formal_input": false,
+      "reference_only": true,
+      "contamination_risk": "critical"
+    },
+    {
+      "id": "run57_historical_bytecode",
+      "category": "chanzhi_mainline core code",
+      "decision": "migrate_now",
+      "migrate": true,
+      "source_paths": [
+        "D:\\sdxl\\newpipe\\__pycache__\\chanzhi_branch_geometry.cpython-311.pyc",
+        "D:\\sdxl\\newpipe\\__pycache__\\chanzhi_branch_layout_grammar.cpython-311.pyc",
+        "D:\\sdxl\\newpipe\\__pycache__\\chanzhi_skeleton_analyzer.cpython-311.pyc",
+        "D:\\sdxl\\newpipe\\__pycache__\\chanzhi_terminal_primitives.cpython-311.pyc",
+        "D:\\sdxl\\newpipe\\__pycache__\\chanzhi_terminal_renderer.cpython-311.pyc",
+        "D:\\sdxl\\newpipe\\__pycache__\\chanzhi_transferable_pipeline.cpython-311.pyc"
+      ],
+      "planned_destination": "legacy/run57_exact/runtime/<module>.pyc",
+      "reason": "Forensic Python 3.11 bytecode is the only discovered implementation that reproduces the historical run57 visual outputs exactly.",
+      "formal_input": false,
+      "reference_only": true,
+      "contamination_risk": "high",
+      "required_controls": ["never import from src", "never use as default runtime", "recover maintainable source before optimization"]
+    },
+    {
+      "id": "run28_intermediates",
+      "category": "run28/run56/run57 intermediates",
+      "decision": "migrate_now",
+      "migrate": true,
+      "source_paths": ["D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run28_75pct_full_validation\\"],
+      "planned_destination": "tests/fixtures/reference_only/run57_snapshot/01_skeleton_analysis/ and 02_branch_layout/",
+      "reason": "The run28 skeleton and layout states are the actual upstream snapshot used by the best historical run57 result.",
+      "formal_input": false,
+      "reference_only": true,
+      "contamination_risk": "high",
+      "allowed_selection": [
+        "01_skeleton_analysis/skeleton_analyzer_manifest.json",
+        "01_skeleton_analysis/<prototype_id>/skeleton_profile.json",
+        "01_skeleton_analysis/<prototype_id>/region_graph.json",
+        "02_branch_layout/branch_layout_manifest.json",
+        "02_branch_layout/<prototype_id>/branch_layout_plan.json"
+      ],
+      "excluded_selection": ["03_branch_geometry/", "04_terminal_lineart/", "*.png"]
+    },
+    {
+      "id": "run56_intermediates",
+      "category": "run28/run56/run57 intermediates",
+      "decision": "migrate_now",
+      "migrate": true,
+      "source_paths": ["D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run56_soft_curves_full\\"],
+      "planned_destination": "tests/fixtures/reference_only/run57_snapshot/03_branch_geometry/",
+      "reason": "The run56 soft-curve geometry state is the actual geometry snapshot used by the best historical run57 terminal result.",
+      "formal_input": false,
+      "reference_only": true,
+      "contamination_risk": "high",
+      "allowed_selection": [
+        "03_branch_geometry/branch_geometry_manifest.json",
+        "03_branch_geometry/<prototype_id>/branch_geometry.json"
+      ],
+      "excluded_selection": ["parallel/", "*.png"]
+    },
+    {
+      "id": "run57_intermediates",
+      "category": "run28/run56/run57 intermediates",
+      "decision": "do_not_migrate",
+      "migrate": false,
+      "source_paths": ["D:\\sdxl\\newpipe\\outputs\\chanzhi_transferable_pipeline\\run57_smooth_candidate_filter\\parallel\\"],
+      "planned_destination": null,
+      "reason": "Parallel and preview artifacts are redundant once the unique run57 terminal regression snapshot is preserved.",
+      "formal_input": false,
+      "reference_only": true,
+      "contamination_risk": "high"
+    },
+    {
+      "id": "mmkg_minimal_optional",
+      "category": "MMKG",
+      "decision": "migrate_later",
+      "migrate": "only_if_semantic_control_returns",
+      "source_paths": [
+        "D:\\sdxl\\newpipe\\data\\mmkg\\motif_flat.csv",
+        "D:\\sdxl\\newpipe\\data\\mmkg\\mmkg_final_v53_optimized.csv"
+      ],
+      "planned_destination": "optional/semantic/data/",
+      "reason": "Not required by the run57 structure pipeline; current 532-relation schema conflicts with legacy tests.",
+      "formal_input": false,
+      "reference_only": false,
+      "contamination_risk": "high"
+    },
+    {
+      "id": "mmkg_full",
+      "category": "MMKG",
+      "decision": "do_not_migrate",
+      "migrate": false,
+      "source_paths": ["D:\\sdxl\\MMKG\\"],
+      "planned_destination": null,
+      "reason": "Broad 295 MiB multi-ornament knowledge and sketch collection, not an SW runtime dependency.",
+      "formal_input": false,
+      "reference_only": true,
+      "contamination_risk": "high"
+    },
+    {
+      "id": "paper_experiment_v1_protocol",
+      "category": "paper_experiment_v1",
+      "decision": "migrate_later",
+      "migrate": "rewrite_protocol_only",
+      "source_paths": [
+        "D:\\sdxl\\paper_experiment\\configs\\paper_experiment_v1.json",
+        "D:\\sdxl\\paper_experiment\\README.md",
+        "D:\\sdxl\\paper_experiment\\tests\\"
+      ],
+      "planned_destination": "experiments/paper_v2/",
+      "reason": "Protocol ideas may be reused only after all frozen run dependencies and final-method claims are removed.",
+      "formal_input": false,
+      "reference_only": false,
+      "contamination_risk": "critical"
+    },
+    {
+      "id": "run57_adapter",
+      "category": "run57_adapter.py",
+      "decision": "do_not_migrate",
+      "migrate": false,
+      "source_paths": [
+        "D:\\sdxl\\paper_experiment\\run57_adapter.py",
+        "D:\\sdxl\\paper_experiment\\__pycache__\\run57_adapter.cpython-311.pyc"
+      ],
+      "planned_destination": null,
+      "reason": "Post-processes frozen run28/run56/run57 artifacts instead of generating from baseline SVG.",
+      "formal_input": false,
+      "reference_only": true,
+      "contamination_risk": "critical"
+    },
+    {
+      "id": "paper_experiment_generated_assets",
+      "category": "paper_experiment_v1",
+      "decision": "do_not_migrate",
+      "migrate": false,
+      "source_paths": [
+        "D:\\sdxl\\paper_experiment\\outputs\\",
+        "D:\\sdxl\\paper_experiment\\figures\\",
+        "D:\\sdxl\\paper_experiment\\metrics\\",
+        "D:\\sdxl\\paper_experiment\\manifests\\"
+      ],
+      "planned_destination": null,
+      "reason": "Generated evidence derived from frozen outputs and adapter transformations.",
+      "formal_input": false,
+      "reference_only": false,
+      "contamination_risk": "critical"
+    },
+    {
+      "id": "diffusion_lora_pix2pix_controlnet",
+      "category": "diffusion / LoRA / pix2pix / ControlNet",
+      "decision": "do_not_migrate",
+      "migrate": false,
+      "source_paths": [
+        "D:\\sdxl\\lora_output\\",
+        "D:\\sdxl\\train_lora.py",
+        "D:\\sdxl\\newpipe\\pix2pix\\",
+        "D:\\sdxl\\newpipe\\outputs\\pure_sdxl_chanzhi\\",
+        "D:\\sdxl\\newpipe\\outputs\\controlnet_*\\",
+        "D:\\sdxl\\newpipe\\outputs\\chanzhi_diff_*\\",
+        "D:\\sdxl\\newpipe\\outputs\\stage_b\\"
+      ],
+      "planned_destination": null,
+      "reason": "Out of structural SVG scope; weights and pix2pix data are explicitly forbidden.",
+      "formal_input": false,
+      "reference_only": false,
+      "contamination_risk": "critical"
+    },
+    {
+      "id": "chanzhi_archive",
+      "category": "chanzhi_archive",
+      "decision": "reference_only",
+      "migrate": false,
+      "source_paths": ["D:\\sdxl\\newpipe\\chanzhi_archive\\"],
+      "planned_destination": null,
+      "reason": "Historical experiments remain useful for route archaeology but must stay isolated from the clean runtime.",
+      "formal_input": false,
+      "reference_only": true,
+      "contamination_risk": "high"
+    },
+    {
+      "id": "selected_design_docs",
+      "category": "docs / PPT / audit reports",
+      "decision": "migrate_later",
+      "migrate": "selected_text_only_after_deduplication",
+      "source_paths": [
+        "D:\\sdxl\\chanzhi_classification_guide.txt",
+        "D:\\sdxl\\chanzhi_annotation_color_spec_v2.txt",
+        "D:\\sdxl\\pipelinev7.txt",
+        "D:\\sdxl\\advisor_progress_report_20260613\\claim_register.md"
+      ],
+      "planned_destination": "docs/design/ and docs/evidence/",
+      "reason": "Preserves SW taxonomy, SVG truth, and claim boundaries without carrying report binaries.",
+      "formal_input": false,
+      "reference_only": false,
+      "contamination_risk": "low"
+    },
+    {
+      "id": "audit_markdown",
+      "category": "docs / PPT / audit reports",
+      "decision": "reference_only",
+      "migrate": "optional_single_markdown_copy",
+      "source_paths": ["D:\\sdxl\\project_audit_20260625\\D_sdxl项目全量审查与工作汇报_20260625.md"],
+      "planned_destination": "references/immutable/audits/",
+      "reason": "Primary evidence source for migration decisions.",
+      "formal_input": false,
+      "reference_only": true,
+      "contamination_risk": "low"
+    },
+    {
+      "id": "office_reports_and_audit_attachments",
+      "category": "docs / PPT / audit reports",
+      "decision": "do_not_migrate",
+      "migrate": false,
+      "source_paths": [
+        "D:\\sdxl\\advisor_progress_report_20260613\\",
+        "D:\\sdxl\\project_audit_20260625\\extracted_documents\\",
+        "D:\\sdxl\\project_audit_20260625\\*.docx",
+        "D:\\sdxl\\project_audit_20260625\\*.pdf"
+      ],
+      "planned_destination": null,
+      "reason": "Version-heavy report binaries and extracted copies do not support runtime generation.",
+      "formal_input": false,
+      "reference_only": true,
+      "contamination_risk": "medium"
+    },
+    {
+      "id": "temporary_dependencies_duplicates",
+      "category": ".codex_tmp / .deps / duplicate PNG",
+      "decision": "do_not_migrate",
+      "migrate": false,
+      "source_paths": [
+        "D:\\sdxl\\.codex_tmp\\",
+        "D:\\sdxl\\.deps\\",
+        "D:\\sdxl\\project_audit_20260625\\duplicate_files.csv"
+      ],
+      "planned_destination": null,
+      "reason": "Temporary files, vendored local dependencies, and duplicate instances are cleanup targets, not project assets.",
+      "formal_input": false,
+      "reference_only": false,
+      "contamination_risk": "high"
+    }
+  ]
+}

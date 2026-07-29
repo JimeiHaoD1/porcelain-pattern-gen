@@ -1,0 +1,61 @@
+{
+  "blocking_lane_pairs": [
+    {
+      "first_candidate_count": 6,
+      "first_lane_id": "ordinary_1",
+      "reason": "every_candidate_pair_crosses",
+      "second_candidate_count": 2,
+      "second_lane_id": "ordinary_3"
+    }
+  ],
+  "contract_id": "global_complete_unit_constraint_selection_v1",
+  "family_id": "SW-3_tangent_terminal",
+  "feasible": false,
+  "lane_count": 4,
+  "prototype_id": "proto_sw_3_1",
+  "review": {
+    "criteria": [
+      "whole_composition_vine_flow",
+      "cross_unit_non_crossing",
+      "hierarchy_and_density_rhythm",
+      "flower_support_relation",
+      "repeat_continuity"
+    ],
+    "numeric_checks_cannot_auto_approve_visual_gate": true
+  },
+  "schema": "dynamic_branch_stage5_global_unit_selection_v1",
+  "seed": 4103,
+  "selected_candidate_count": 0,
+  "selected_candidate_ids": [],
+  "selected_candidates": [],
+  "selection_digest": "b7b20d273f1f8fa019f52857a4db8ac813ff826b7a6bda194894647d244cf79b",
+  "selection_id": "proto_sw_3_1__seed_4103__global_l1_flow_v1__unit_candidates_v1__global_unit_selection_v1",
+  "solver_trace": {
+    "automatic_deletion_used": false,
+    "automatic_repair_used": false,
+    "backtrack_count": 8,
+    "best_of_n_visual_ranking_used": false,
+    "candidate_order": [
+      "declared_role_stratum_priority",
+      "cross_unit_conflict_degree",
+      "candidate_id"
+    ],
+    "composite_visual_score_used": false,
+    "lane_order": [
+      "ordinary_3",
+      "support_1",
+      "ordinary_1",
+      "ordinary_2"
+    ],
+    "method": "deterministic_constraint_backtracking",
+    "search_node_count": 44,
+    "silent_fallback_used": false,
+    "stopped_at_first_complete_legal_assignment": false,
+    "validation_guided_resample_used": false,
+    "validation_guided_retry_used": false
+  },
+  "source_conflict_graph_digest": "5599f83760cca4ebd717f44ea7e852496fba6814c26162045043c95fa1dd73ae",
+  "source_inventory_digest": "9a55e7a056f61d2df3ebe0b9702497650fb1552a69be09766c509b360b5e365f",
+  "source_inventory_id": "proto_sw_3_1__seed_4103__global_l1_flow_v1__unit_candidates_v1",
+  "status": "global_unit_selection_infeasible"
+}

@@ -1,0 +1,81 @@
+{
+  "schema": "branch_unit_l_run_manifest_v1",
+  "experiment_id": "branch_unit_L_v2",
+  "generated_at": "2026-07-20T12:32:08.715381+00:00",
+  "scope": "L_only_local_parameter_coordination",
+  "prototype_id": "proto_sw_1_3",
+  "region_id": "growth_region_2",
+  "causal_question": "Does unit-coupled parameterization outperform independent parameterization under one shared geometry kernel?",
+  "variants": {
+    "L0": "independent_parameterization",
+    "L1": "unit_coupled_parameterization"
+  },
+  "shared_factors": [
+    "rebuilt proto_sw_1_3 scene",
+    "growth_region_2 anchor",
+    "two-cubic primary geometry",
+    "child and terminal cubic compilers",
+    "primary control points",
+    "raw named random tokens",
+    "identical child mount/length/angle/bow value pools",
+    "topology and widths",
+    "nominal length and ink budget",
+    "check-only hard validator",
+    "fixed renderer and crops"
+  ],
+  "excluded": [
+    "context adaptation experiment C",
+    "global rhythm experiment G",
+    "candidate search",
+    "beam search",
+    "repair",
+    "resampling",
+    "failure replacement",
+    "commercial model evaluation",
+    "data annotation tooling"
+  ],
+  "generation_policy": {
+    "candidate_count_per_variant_per_trial": 1,
+    "retry_count": 0,
+    "resample_count": 0,
+    "repair_count": 0,
+    "selection_count": 1
+  },
+  "trial_count": 12,
+  "child_positive_trial_count": 8,
+  "data_validity": {
+    "all_12_pairs_generated": true,
+    "all_budget_match": true,
+    "visual_status": "pending_blind_review",
+    "structural_valid_is_not_visual_approval": true
+  },
+  "development_gates": {
+    "L1_usable": {
+      "minimum": 4,
+      "denominator": 12
+    },
+    "L1_blind_preference_overall": {
+      "minimum": 7,
+      "denominator": 12
+    },
+    "L1_blind_preference_child_positive": {
+      "minimum": 5,
+      "denominator": 8
+    },
+    "paper_evidence": false
+  },
+  "artifacts": {
+    "metrics": "metrics.csv",
+    "pair_metrics": "pair_metrics.csv",
+    "replay_manifest": "replay_manifest.json",
+    "blind_key": "blind_key.json",
+    "blind_review_template": "blind_review_template.json",
+    "blind_contact_sheet": "contact_sheet_blind.png",
+    "unblinded_contact_sheet": "contact_sheet_unblinded.png",
+    "blind_pairs": "pairs/blind",
+    "unblinded_pairs": "pairs/unblinded",
+    "debug": "debug",
+    "vectors": "vectors",
+    "artifact_hashes": "artifact_hashes.json"
+  }
+}

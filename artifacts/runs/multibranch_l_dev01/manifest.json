@@ -1,0 +1,204 @@
+{
+  "schema": "multibranch_l_dev_manifest_v1",
+  "experiment_id": "multibranch_L_dev01",
+  "status": "development_only_pending_visual_gate",
+  "generated_at": "2026-07-20T15:30:49.010614+00:00",
+  "prototype_id": "proto_sw_1_3",
+  "input_policy": "backbone_flower_reserves_repeat_bounds_only_v1",
+  "input_digest": "474577e5895c93d563ec8853ac85d7cb63e22323bdd1c342965643e8abd52654",
+  "source_profile": {
+    "path": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\run57_reproduction\\01_skeleton_analysis\\proto_sw_1_3\\skeleton_profile.json",
+    "sha256": "842f3064bf4a8166391aeee496e1a52015b8cf52757a60440188dc0cbca82afb",
+    "source_existing_guide_count_observed_but_not_consumed": 9
+  },
+  "profile_intervention_proof": {
+    "original_digest": "474577e5895c93d563ec8853ac85d7cb63e22323bdd1c342965643e8abd52654",
+    "poisoned_ignored_fields_digest": "474577e5895c93d563ec8853ac85d7cb63e22323bdd1c342965643e8abd52654",
+    "identical": true,
+    "poisoned_fields": [
+      "existing_guides",
+      "growth_regions",
+      "space_samples",
+      "region_graph",
+      "nodes",
+      "segments",
+      "qa"
+    ]
+  },
+  "topology": {
+    "allowed_branch_counts": [
+      4,
+      5
+    ],
+    "flower_branches": 2,
+    "free_branches": "N-2",
+    "child_branches": 0,
+    "inherited_branches": 0
+  },
+  "bend_contract": {
+    "maximum_effective_turn_lobes": 2,
+    "maximum_curvature_sign_reversals": 1,
+    "maximum_cubic_segments": 2,
+    "minimum_visible_turn_degrees": 12.0,
+    "minimum_visible_turn_length_ratio": 0.08
+  },
+  "variants": {
+    "L0": "independent_row_mapping",
+    "L1": "joint_center_gap_set_mapping"
+  },
+  "generation_policy": {
+    "candidate_count_per_variant_per_case": 1,
+    "retry_count": 0,
+    "resample_count": 0,
+    "repair_count": 0,
+    "selection_count": 1
+  },
+  "cases": [
+    {
+      "case_id": "D4",
+      "branch_count": 4,
+      "seed": 2404,
+      "token_digest": "dda744ed6a37fdcfe0bb8e3f53c3b0de22c16718be5d687b4e0eb4f3bc3ce4d9",
+      "target_role_lengths": {
+        "flower_1_branch": 108.64358466,
+        "flower_2_branch": 42.0,
+        "free_1_branch": 68.07723079,
+        "free_2_branch": 67.59710165
+      },
+      "L0_geometry_hash": "8d6a283ed16c876d95dfd12551ac464c060db159062410131d32199839173ccb",
+      "L1_geometry_hash": "171df210de23cac71010827be2dca88b749aba8aa5dd15924e1cac8c0640769c",
+      "L0_valid": false,
+      "L1_valid": false,
+      "L0_issues": [
+        "flower_1_branch:bend_count_over_2",
+        "flower_1_branch:hidden_extra_reversal",
+        "flower_1_branch:backbone_recontact",
+        "flower_1_branch:early_target_flower_intrusion:flower_1",
+        "flower_2_branch:bend_count_over_2",
+        "flower_2_branch:hidden_extra_reversal",
+        "flower_2_branch:backbone_recontact",
+        "free_1_branch:backbone_recontact",
+        "free_2_branch:out_of_bounds",
+        "free_2_branch:backbone_recontact",
+        "branch_clearance:flower_1_branch:free_1_branch"
+      ],
+      "L1_issues": [
+        "flower_1_branch:bend_count_over_2",
+        "flower_1_branch:hidden_extra_reversal",
+        "flower_1_branch:backbone_recontact",
+        "flower_1_branch:early_target_flower_intrusion:flower_1",
+        "flower_2_branch:bend_count_over_2",
+        "flower_2_branch:hidden_extra_reversal",
+        "flower_2_branch:backbone_recontact",
+        "free_1_branch:backbone_recontact",
+        "free_2_branch:two_cubic_not_c1",
+        "free_2_branch:backbone_recontact"
+      ],
+      "fairness": {
+        "branch_count_equal": true,
+        "role_target_lengths_and_widths_equal": true,
+        "total_length_symmetric_delta": 9.329e-07,
+        "vector_ink_symmetric_delta": 9.329e-07,
+        "thresholds": {
+          "total_length": 0.002,
+          "vector_ink": 0.002
+        },
+        "budget_match": true
+      }
+    },
+    {
+      "case_id": "D5",
+      "branch_count": 5,
+      "seed": 2505,
+      "token_digest": "f4c36de8d6b9b25459bcb51a8e4db6b4e4925153fe5bec6337810cd18b93a2c5",
+      "target_role_lengths": {
+        "flower_1_branch": 98.51910282,
+        "flower_2_branch": 42.0,
+        "free_1_branch": 53.96157382,
+        "free_2_branch": 54.22480387,
+        "free_3_branch": 66.76061946
+      },
+      "L0_geometry_hash": "01de6a8730bc2137a48228e244e8201a60de9bf0ff9f1861d53b9d7d29a1e510",
+      "L1_geometry_hash": "894086cc3f4b4faa742a73da834ca5d87654e3c20a2cb299d818a627a926fa80",
+      "L0_valid": false,
+      "L1_valid": false,
+      "L0_issues": [
+        "flower_1_branch:bend_count_over_2",
+        "flower_1_branch:hidden_extra_reversal",
+        "flower_1_branch:backbone_recontact",
+        "flower_1_branch:early_target_flower_intrusion:flower_1",
+        "flower_2_branch:bend_count_over_2",
+        "flower_2_branch:hidden_extra_reversal",
+        "flower_2_branch:backbone_recontact",
+        "free_1_branch:two_cubic_not_c1",
+        "free_1_branch:backbone_recontact",
+        "free_2_branch:two_cubic_not_c1",
+        "free_2_branch:backbone_recontact",
+        "free_2_branch:flower_intrusion:flower_1",
+        "free_3_branch:out_of_bounds",
+        "free_3_branch:backbone_recontact",
+        "branch_clearance:flower_1_branch:free_2_branch"
+      ],
+      "L1_issues": [
+        "flower_1_branch:bend_count_over_2",
+        "flower_1_branch:hidden_extra_reversal",
+        "flower_1_branch:backbone_recontact",
+        "flower_1_branch:early_target_flower_intrusion:flower_1",
+        "flower_2_branch:bend_count_over_2",
+        "flower_2_branch:hidden_extra_reversal",
+        "flower_2_branch:backbone_recontact",
+        "free_1_branch:two_cubic_not_c1",
+        "free_1_branch:backbone_recontact",
+        "free_2_branch:backbone_recontact",
+        "free_2_branch:flower_intrusion:flower_2",
+        "free_3_branch:two_cubic_not_c1",
+        "free_3_branch:backbone_recontact"
+      ],
+      "fairness": {
+        "branch_count_equal": true,
+        "role_target_lengths_and_widths_equal": true,
+        "total_length_symmetric_delta": 4.8418e-06,
+        "vector_ink_symmetric_delta": 4.8418e-06,
+        "thresholds": {
+          "total_length": 0.002,
+          "vector_ink": 0.002
+        },
+        "budget_match": true
+      }
+    }
+  ],
+  "structural_summary": {
+    "all_fairness_budgets_match": true,
+    "all_l0_structurally_valid": false,
+    "all_l1_structurally_valid": false,
+    "visual_status": "pending_user_review",
+    "formal_generation_blocked": true
+  },
+  "excluded": [
+    "inherited_svg_branches",
+    "secondary_or_tertiary_branches",
+    "formal_12_pair_matrix",
+    "blind_scoring",
+    "context_C_experiment",
+    "global_G_experiment",
+    "density_field",
+    "candidate_search",
+    "beam_search",
+    "backtracking",
+    "model_training"
+  ],
+  "source_files": {
+    "protocol": {
+      "path": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\MULTIBRANCH_L_DEV_PROTOCOL.md",
+      "sha256": "b7b7aba33435cf2182f87cff06931a33f486b4a7244450682d90be02ea2fb575"
+    },
+    "runner": {
+      "path": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\run_multibranch_l_dev.py",
+      "sha256": "fa28ef3dac73b99ef856e17e83251d29e8be405ae2cecb4ca0d4c0e17421c93a"
+    },
+    "kernel": {
+      "path": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\multibranch_l.py",
+      "sha256": "4aa93bbeb18e10f093053a3ce665e8f814b53d1615b046856d52f46a6032d252"
+    }
+  }
+}

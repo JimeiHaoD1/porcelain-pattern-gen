@@ -1,0 +1,129 @@
+{
+  "standard": {
+    "ignored_field_intervention": {
+      "original_input_digest": "ec4214eec23fab93cab5c5b40e83c6b0918353eab596bbe66228a1fec5339b9d",
+      "poisoned_input_digest": "ec4214eec23fab93cab5c5b40e83c6b0918353eab596bbe66228a1fec5339b9d",
+      "original_geometry_hash": "109df739ebe71e9eac5101c33822d4e3b669dd510ff9b125e1e38a4c84101f7a",
+      "poisoned_geometry_hash": "109df739ebe71e9eac5101c33822d4e3b669dd510ff9b125e1e38a4c84101f7a",
+      "identical": true,
+      "poisoned_fields": [
+        "backbone.source_path_order",
+        "existing_guides",
+        "growth_regions",
+        "space_samples",
+        "region_graph",
+        "nodes",
+        "segments",
+        "qa",
+        "attachments",
+        "branch_roles",
+        "clearance"
+      ]
+    },
+    "global_dependency": {
+      "control": "rhythm_shift",
+      "changed_primary_ids": [
+        "primary_1_free",
+        "primary_2_free",
+        "primary_3_free",
+        "primary_5_flower_2",
+        "primary_6_balance",
+        "primary_7_free"
+      ],
+      "changed_primary_count": 6,
+      "passes": true
+    },
+    "subtree_dependency": {
+      "subtree_id": "primary_6_balance",
+      "changed_curve_ids": [
+        "primary_6_balance",
+        "secondary_6a",
+        "tertiary_6a_1"
+      ],
+      "expected_subtree_curve_ids": [
+        "primary_6_balance",
+        "secondary_6a",
+        "tertiary_6a_1"
+      ],
+      "other_subtrees_byte_identical": true,
+      "primary_and_descendant_changed": true,
+      "passes": true
+    },
+    "traversal_order": {
+      "forward_hash": "109df739ebe71e9eac5101c33822d4e3b669dd510ff9b125e1e38a4c84101f7a",
+      "reverse_hash": "109df739ebe71e9eac5101c33822d4e3b669dd510ff9b125e1e38a4c84101f7a",
+      "identical": true
+    },
+    "seed_variation_and_replay": {
+      "seeds": [
+        4101,
+        4102,
+        4103
+      ],
+      "geometry_hashes": [
+        "109df739ebe71e9eac5101c33822d4e3b669dd510ff9b125e1e38a4c84101f7a",
+        "b06934cfcbab03463bfabbb5ba68bc12910fcc74fba28b1dd83496df25fd5d20",
+        "30893689b25ff425a357d99f3a02ed95098f3176509d4b164f73e6ca453ffe21"
+      ],
+      "plan_digests": [
+        "a8bcbbf8833e1c5f8bb91dba7e88ed8de377afeba2d3b4d85e44ba3f39bf8ba3",
+        "cb3f675f07a5b393d8191dc9b4cbdb362ea53d03d403e32d7a0f15d9924fe87d",
+        "939f8883a61ac61739f514a197911694e5c830aafd2a26ae6959ddfc0126b47e"
+      ],
+      "canonical_json_byte_identical_by_seed": {
+        "4101": true,
+        "4102": true,
+        "4103": true
+      },
+      "raw_plan_and_geometry_equal_by_seed": {
+        "4101": true,
+        "4102": true,
+        "4103": true
+      },
+      "geometry_hash_replay_by_seed": {
+        "4101": true,
+        "4102": true,
+        "4103": true
+      },
+      "all_replays_byte_identical": true,
+      "all_geometry_distinct": true,
+      "all_parameter_plans_distinct": true,
+      "passes": true
+    }
+  },
+  "negative_checks": {
+    "wrong_visible_repeat": {
+      "rejected": true,
+      "error": "J0a visible repeat must be 256 x 304, got 256 x 305"
+    },
+    "tampered_envelope_declaration": {
+      "rejected": true,
+      "issues": [
+        "global_envelope_declaration_mismatch"
+      ],
+      "mismatches": [
+        "envelope_left_x"
+      ],
+      "geometry_hash_unchanged": true
+    },
+    "wrong_side_registration": {
+      "rejected": true,
+      "issues": [
+        "primary_2_free:unregistered_curve_edge_approach",
+        "primary_2_free:unregistered_visible_envelope_contact",
+        "primary_2_free:boundary_target_error",
+        "primary_2_free:boundary_exit_not_parallel",
+        "global_boundary_assignment"
+      ],
+      "unexpected_approach_sides": [
+        "left"
+      ],
+      "curve_issues": [
+        "unregistered_curve_edge_approach",
+        "unregistered_visible_envelope_contact",
+        "boundary_target_error",
+        "boundary_exit_not_parallel"
+      ]
+    }
+  }
+}

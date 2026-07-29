@@ -1,0 +1,82 @@
+{
+  "ignored_field_intervention": {
+    "original_input_digest": "ec4214eec23fab93cab5c5b40e83c6b0918353eab596bbe66228a1fec5339b9d",
+    "poisoned_input_digest": "ec4214eec23fab93cab5c5b40e83c6b0918353eab596bbe66228a1fec5339b9d",
+    "original_geometry_hash": "109df739ebe71e9eac5101c33822d4e3b669dd510ff9b125e1e38a4c84101f7a",
+    "poisoned_geometry_hash": "109df739ebe71e9eac5101c33822d4e3b669dd510ff9b125e1e38a4c84101f7a",
+    "identical": true,
+    "poisoned_fields": [
+      "backbone.source_path_order",
+      "existing_guides",
+      "growth_regions",
+      "space_samples",
+      "region_graph",
+      "nodes",
+      "segments",
+      "qa",
+      "attachments",
+      "branch_roles",
+      "clearance"
+    ]
+  },
+  "global_dependency": {
+    "control": "rhythm_shift",
+    "changed_primary_ids": [
+      "primary_1_free",
+      "primary_2_free",
+      "primary_3_free",
+      "primary_5_flower_2",
+      "primary_6_balance",
+      "primary_7_free"
+    ],
+    "changed_primary_count": 6,
+    "passes": true
+  },
+  "subtree_dependency": {
+    "subtree_id": "primary_6_balance",
+    "changed_curve_ids": [
+      "primary_6_balance",
+      "secondary_6a",
+      "tertiary_6a_1"
+    ],
+    "expected_subtree_curve_ids": [
+      "primary_6_balance",
+      "secondary_6a",
+      "tertiary_6a_1"
+    ],
+    "other_subtrees_byte_identical": true,
+    "primary_and_descendant_changed": true,
+    "passes": true
+  },
+  "traversal_order": {
+    "forward_hash": "109df739ebe71e9eac5101c33822d4e3b669dd510ff9b125e1e38a4c84101f7a",
+    "reverse_hash": "109df739ebe71e9eac5101c33822d4e3b669dd510ff9b125e1e38a4c84101f7a",
+    "identical": true
+  },
+  "seed_variation_and_replay": {
+    "seeds": [
+      4101,
+      4102,
+      4103
+    ],
+    "geometry_hashes": [
+      "109df739ebe71e9eac5101c33822d4e3b669dd510ff9b125e1e38a4c84101f7a",
+      "b06934cfcbab03463bfabbb5ba68bc12910fcc74fba28b1dd83496df25fd5d20",
+      "30893689b25ff425a357d99f3a02ed95098f3176509d4b164f73e6ca453ffe21"
+    ],
+    "plan_digests": [
+      "1599055f848c6bf100b7c695b68b176a97203ba4f05081586b1dc0070e166ace",
+      "c31fe18bc58665caaa081f33877233f81abd36b256c70696dd647d049f17d10b",
+      "ad66ef6fe738b192ca7fc03f15c916e9d717e6c0ef24e5f87449e8fa352309e8"
+    ],
+    "byte_identical_replay_by_seed": {
+      "4101": true,
+      "4102": true,
+      "4103": true
+    },
+    "all_replays_byte_identical": true,
+    "all_geometry_distinct": true,
+    "all_parameter_plans_distinct": true,
+    "passes": true
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "status": "FAIL",
+  "review_scope": [
+    "planning_failure_4101.json",
+    "planning_failure_4103.json",
+    "contact_sheet.png",
+    "contact_sheet_debug.png",
+    "contact_sheet_units.png",
+    "contact_sheet_repeat_2x.png"
+  ],
+  "structural_result": {
+    "4101": "planning failure at primary_7_free: no legal parent/side component remains",
+    "4102": "structural pass",
+    "4103": "planning failure at the second tertiary of primary_1_free"
+  },
+  "successful_seed_visual_findings": [
+    "the level-3 curves are now collision-free and genuinely parent-relative",
+    "the new curves remain small appendages because the frozen v23 level-2 parents did not reserve recursive length or free space",
+    "the high root opening still produces abrupt fork joints in several units",
+    "the additional level does not materially improve whole-scene occupancy or neighbouring-unit rhythm"
+  ],
+  "causal_conclusion": "V3A fails because recursion was added after level-2 planning. A legal level-3 child cannot always be inserted into a parent and context that never reserved recursive capacity.",
+  "decision": "Stop frozen-L1-L2 V3A. Do not start edge-goal propagation. The next experiment, if authorized, must jointly reserve mount, length, direction, and whitespace capacity while level-2 parents are planned."
+}

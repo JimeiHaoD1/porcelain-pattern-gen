@@ -1,0 +1,108 @@
+{
+  "schema": "dynamic_branch_implementation_contract_v1",
+  "contract_id": "dynamic_branchunit_stage0_stage2_v1",
+  "fixed_baseline": {
+    "baseline_id": "fixed_depth_7_12_2_v23",
+    "strict_paired_comparison_prototypes": [
+      "proto_sw_1_3"
+    ],
+    "cross_prototype_fixed_baseline_claimed": false,
+    "generalized_fixed_topology_baseline_in_scope": false
+  },
+  "candidate_policy": {
+    "raw_candidate_count_per_prototype_seed": 1,
+    "validation_guided_retry_allowed": false,
+    "validation_guided_resample_allowed": false,
+    "automatic_repair_allowed": false,
+    "automatic_deletion_allowed": false,
+    "planning_failures_must_be_preserved": true,
+    "compilation_failures_must_be_preserved": true
+  },
+  "failure_policy": {
+    "fatal_contract_errors": [
+      "invalid_schema",
+      "missing_required_field",
+      "invalid_coordinate",
+      "invalid_parent_graph",
+      "non_finite_geometry",
+      "unrenderable_geometry"
+    ],
+    "diagnostic_issue_labels": [
+      "attachment_issue",
+      "flower_relation_issue",
+      "collision_issue",
+      "boundary_issue",
+      "hierarchy_issue",
+      "repeat_issue",
+      "curve_issue"
+    ],
+    "fatal_errors_are_diagnostic_labels": false,
+    "fatal_failures_keep_raw_input_and_error_record": true,
+    "fatal_failures_require_placeholder_svg": false
+  },
+  "visual_acceptance": {
+    "prototype_ids": [
+      "proto_sw_1_1",
+      "proto_sw_1_3",
+      "proto_sw_2_3",
+      "proto_sw_3_1",
+      "proto_sw_3_2"
+    ],
+    "seeds": [
+      4101,
+      4102,
+      4103
+    ],
+    "all_fifteen_candidates_preserved": true,
+    "all_fifteen_candidates_receive_terminal_review_state": true,
+    "all_raw_candidates_must_be_visually_approved": false,
+    "minimum_edited_visually_approved_per_prototype": 1,
+    "allowed_terminal_states": [
+      "edited_visually_approved",
+      "edited_needs_revision",
+      "edited_rejected"
+    ]
+  },
+  "analysis_visual_acceptance": {
+    "initial_state": "analysis_pending_review",
+    "allowed_states": [
+      "analysis_pending_review",
+      "analysis_approved",
+      "analysis_needs_revision",
+      "analysis_rejected"
+    ],
+    "all_five_prototypes_require_visual_review": true,
+    "stage_3_requires_all_five_analysis_approved": true,
+    "numeric_checks_cannot_auto_approve_visual_gate": true
+  },
+  "morphology_visual_acceptance": {
+    "initial_state": "morphology_pending_review",
+    "allowed_states": [
+      "morphology_pending_review",
+      "morphology_approved",
+      "morphology_needs_revision",
+      "morphology_rejected"
+    ],
+    "classification_axes": {
+      "generation_control": "flower_branch_relation",
+      "research_annotation_only": "pattern_skeleton_class"
+    },
+    "family_ids": [
+      "SW-1_valley_filling",
+      "SW-2_axis_penetrating",
+      "SW-3_tangent_terminal"
+    ],
+    "all_five_prototypes_require_visual_review": true,
+    "stage_3_requires_all_five_morphology_approved": true,
+    "semantic_guides_are_not_candidate_slots": true,
+    "numeric_checks_cannot_auto_approve_visual_gate": true
+  },
+  "stage_boundaries": {
+    "stage_0": "freeze and verify the existing fixed 7/12/2 baseline",
+    "stage_1": "define and validate StrictP0 v2 in repeat-local coordinates",
+    "stage_2": "PrototypeAnalysis and analysis overlays, ending at a required visual review gate",
+    "stage_2_5": "flower-branch morphology family plus five instance priors and non-selecting visual guides",
+    "stage_3_not_started": "seed-driven DynamicBranchPlan",
+    "stage_4_not_started": "generic curve compilation"
+  }
+}

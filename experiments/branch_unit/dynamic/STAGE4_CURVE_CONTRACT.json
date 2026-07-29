@@ -1,0 +1,113 @@
+{
+  "schema": "dynamic_branch_stage4_curve_contract_v1",
+  "contract_id": "dynamic_branchunit_bezier_compilation_stage4_v1",
+  "purpose": "compile approved stage3 directional BranchUnit layouts into immutable cubic Bezier branch skeleton candidates without topology changes or automatic repair",
+  "required_input": {
+    "stage3_manifest_schema": "dynamic_branch_stage3_plan_manifest_v3",
+    "plan_schema": "dynamic_branch_plan_v3",
+    "required_plan_review_state": "plan_approved_for_curve_compilation",
+    "prototype_count": 5,
+    "seed_count": 3,
+    "task_count": 15
+  },
+  "output": {
+    "schema": "dynamic_branch_curve_candidate_v1",
+    "manifest_schema": "dynamic_branch_stage4_curve_manifest_v1",
+    "one_raw_curve_candidate_per_task": true,
+    "required_artifacts_per_task": [
+      "stage4_input_snapshot.json",
+      "dynamic_branch_curve.json",
+      "curve_compile_diagnostics.json",
+      "original_curve.svg",
+      "original_curve.png",
+      "three_repeat_curve.svg",
+      "three_repeat_curve.png",
+      "original_visual_review.json"
+    ],
+    "failure_artifact": "curve_compilation_failure.json"
+  },
+  "curve_representation": {
+    "type": "cubic_bezier",
+    "maximum_cubic_segments_per_branch": 2,
+    "ordinary_direction_path_segment_count": 1,
+    "sw3_direction_path_segment_count": 2,
+    "branch_root_equals_stage3_mount_point": true,
+    "branch_tip_equals_stage3_directional_endpoint": true,
+    "intermediate_stage3_waypoint_is_preserved_as_a_cubic_join": true,
+    "root_derivative_uses_oriented_parent_tangent": true,
+    "parent_tangent_is_derivative_only_not_a_straight_preview_segment": true,
+    "short_root_handle_required": true,
+    "maximum_root_handle_length": 0.010,
+    "minimum_root_handle_length": 0.004,
+    "root_handle_fraction_of_first_segment": 0.035,
+    "interior_handle_fraction": 0.34,
+    "terminal_handle_fraction": 0.28,
+    "g1_continuity_required_at_two_cubic_join": true
+  },
+  "stage3_geometry_preservation": {
+    "mount_s_must_not_change": true,
+    "directional_path_points_must_not_change": true,
+    "flower_relation_must_not_change": true,
+    "unit_count_must_not_change": true,
+    "unit_ids_must_not_change": true,
+    "curve_must_stay_within_stage3_directional_corridor": true,
+    "ordinary_unit_must_depart_toward_the_planned_free_space": true,
+    "sw3_route_below_flower_required": true,
+    "sw3_underside_contact_required": true
+  },
+  "diagnostics": {
+    "read_only": true,
+    "may_report": [
+      "attachment_issue",
+      "flower_relation_issue",
+      "collision_issue",
+      "boundary_issue",
+      "repeat_issue",
+      "curve_issue"
+    ],
+    "curve_curve_crossing_is_issue": true,
+    "non_root_backbone_crossing_is_issue": true,
+    "wrong_flower_entry_is_issue": true,
+    "corridor_escape_is_issue": true,
+    "diagnostics_cannot_modify_candidate": true,
+    "numeric_checks_cannot_auto_approve_visual_gate": true
+  },
+  "candidate_policy": {
+    "validation_guided_retry_allowed": false,
+    "validation_guided_resample_allowed": false,
+    "automatic_repair_allowed": false,
+    "automatic_deletion_allowed": false,
+    "compilation_failures_must_be_preserved": true,
+    "all_fifteen_candidates_must_be_preserved": true
+  },
+  "stage_boundary": {
+    "branch_skeleton_only": true,
+    "bezier_curve_geometry_present": true,
+    "topology_changes_present": false,
+    "leaves_present": false,
+    "buds_present": false,
+    "curl_heads_present": false,
+    "editor_integration_present": false
+  },
+  "review": {
+    "initial_state": "original_pending_review",
+    "allowed_states": [
+      "original_visually_approved",
+      "original_needs_edit",
+      "original_rejected"
+    ],
+    "all_fifteen_candidates_require_terminal_review_state": true,
+    "criteria": [
+      "overall_branch_flow_is_continuous",
+      "root_attachment_is_natural_without_a_visible_parent_hugging_segment",
+      "curve_follows_stage3_direction_distance_and_position",
+      "sw3_support_passes_below_and_contacts_the_flower_underside",
+      "curves_do_not_cross",
+      "curves_do_not_enter_wrong_flowers",
+      "density_and_open_space_rhythm_remain_legible",
+      "curve_is_not_stiff_or_snake_like",
+      "repeat_is_continuous",
+      "no_leaves_buds_or_curl_heads"
+    ]
+  }
+}

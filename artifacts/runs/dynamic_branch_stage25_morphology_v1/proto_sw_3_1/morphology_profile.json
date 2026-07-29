@@ -1,0 +1,114 @@
+{
+  "classification": {
+    "flower_branch_relation": {
+      "family_id": "SW-3_tangent_terminal",
+      "generation_control": true,
+      "label_en": "tangent extension and terminal flowering",
+      "label_zh": "切向伸出与枝端着花"
+    },
+    "pattern_skeleton_class": {
+      "generation_control_in_stage_3_v1": false,
+      "legacy_value": "single_wave",
+      "professional_value": "unassigned"
+    }
+  },
+  "evidence": {
+    "legacy_branch_geometry_consumed": false,
+    "legacy_node_rule_used_only_for_family_provenance": true,
+    "legacy_unit_type_consumed": false,
+    "sources": {
+      "legacy_annotation": "newpipe/data/prototype_library/chanzhi/prototypes/proto_sw_3_1.json",
+      "legacy_node_rule": "SW-3_tangent_terminal",
+      "source_image": "chanzhi_sw_clean/artifacts/analysis/prototype_source_images/proto_sw_3_1.source.png"
+    }
+  },
+  "family_rule": {
+    "flower_binding": "tangent_terminal_flower",
+    "forbidden_patterns": [
+      "flower_floating_without_terminal_stem",
+      "radial_spokes_into_flower",
+      "secondary_cluster_overpowering_terminal_direction",
+      "prototype_id_specific_fixed_topology"
+    ],
+    "growth_direction_policy": [
+      "start_along_parent_tangent",
+      "extend_toward_the_terminal_flower",
+      "keep_secondary_rhythm_subordinate_to_the_flower_stem"
+    ],
+    "preferred_attachment_contexts": [
+      "long_slope",
+      "tangent_continuation",
+      "open_terminal_corridor"
+    ],
+    "required_relationships": [
+      "each_flower_reads_as_the_terminal_of_a_directional_support_stem",
+      "support_stem_departs_along_parent_tangent_before_turning",
+      "terminal_flower_direction_remains_clear"
+    ],
+    "role_policy": {
+      "optional": [
+        "primary_sweep",
+        "secondary_sprig",
+        "terminal_hint"
+      ],
+      "required_per_flower": [
+        "flower_support"
+      ]
+    },
+    "visual_guide_mode": "terminal_stem_to_flower"
+  },
+  "generation_boundary": {
+    "candidate_slots_present": false,
+    "curve_geometry_present": false,
+    "dynamic_branch_plan_present": false,
+    "evidence_counts_are_generation_targets": false,
+    "source_branch_geometry_copied": false,
+    "strict_p0_modified": false,
+    "visual_guides_are_non_selecting_semantic_annotations": true
+  },
+  "instance_priors": {
+    "count_usage": "evidence_prior_not_fixed_generation_target",
+    "density_class": "light",
+    "description_zh": "单花位于方向明确的枝端，侧枝较轻，不能削弱末端花枝的指向。",
+    "flower_relation_emphasis": "single_terminal_flower",
+    "primary_sweep_class": "terminal_support_dominant",
+    "side_rhythm": "light_near_balanced",
+    "source_observation_counts": {
+      "branch_guide_count": 7,
+      "branch_side_counts": {
+        "down": 3,
+        "up": 4
+      },
+      "flower_anchor_count": 1,
+      "primary_branch_count": 0,
+      "structural_role_counts": {
+        "flower_support": 1,
+        "wrap_flower": 0
+      }
+    }
+  },
+  "morphology_contract_id": "sw_flower_branch_morphology_stage25_v1",
+  "morphology_digest": "97c9074288ea0d4ab902306bbcf09d3cae2ef13ad91f7d48be8fb3d2a6c030c8",
+  "policy_id": "flower_branch_relation_plus_instance_priors_v1",
+  "prototype_id": "proto_sw_3_1",
+  "review": {
+    "allowed_states": [
+      "morphology_pending_review",
+      "morphology_approved",
+      "morphology_needs_revision",
+      "morphology_rejected"
+    ],
+    "criteria": [
+      "family_assignment_matches_source",
+      "flower_branch_binding_matches_source",
+      "required_relationships_match_source",
+      "instance_density_and_rhythm_match_source",
+      "forbidden_patterns_are_correct",
+      "no_old_branch_geometry_is_being_copied"
+    ],
+    "status": "morphology_pending_review",
+    "visual_gate_required": true
+  },
+  "schema": "dynamic_branch_morphology_profile_v1",
+  "source_stage2_analysis_digest": "352a1ab386d17351ac0fd538ffb693507fb6b7e18a29f7096b978face9bb50fd"
+}

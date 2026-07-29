@@ -1,0 +1,63 @@
+{
+  "all_structurally_valid": false,
+  "created_utc": "2026-07-21T12:31:17.818452+00:00",
+  "formal_experiment": false,
+  "generation_policy": {
+    "candidate_count": 1,
+    "repair_count": 0,
+    "resample_count": 0,
+    "retry_count": 0,
+    "validation_feedback_consumed": false
+  },
+  "generator": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\whole_local_branch.py",
+  "geometry_kernel_id": "whole_local_true_lateral_branch_units_n12_v12",
+  "plan_id": "proto_sw_1_3_J0c_true_lateral_units_7_12_2_v16",
+  "protocol": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\WHOLE_LOCAL_N12_DEV_PROTOCOL.md",
+  "prototype_id": "proto_sw_1_3",
+  "repeat_seams": [
+    "left",
+    "right"
+  ],
+  "runner": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\run_whole_local_n12_dev.py",
+  "schema": "whole_local_true_lateral_n12_dev_v2",
+  "seeds": [
+    {
+      "geometry_hash": "aeedc124434de325ffbedee6f3ad0b043e46415cb4eed741e9c645f28f74abb9",
+      "issues": [],
+      "plan_digest": "8a5e9a4edc43334c07bb55d39e2b5abd963f66452de29e456a8952d02d7d3227",
+      "seed": 4101,
+      "valid": true
+    },
+    {
+      "geometry_hash": "bffe4d55526eec23f96bc843c58538f8a6ba4a0caab9793b2ebc10c9ca355b13",
+      "issues": [],
+      "plan_digest": "54807ea4d230c76bb0cc4835b359fb2d32640c52e99ce4cafbf001b6ff09b8f8",
+      "seed": 4102,
+      "valid": true
+    },
+    {
+      "geometry_hash": "9916023174937807f0a68cf82b3ebac461698b828dd7f326e637739b85e5b76c",
+      "issues": [
+        "secondary_3a_lat:outside_vertical_visible_envelope",
+        "secondary_3a_lat:unregistered_visible_envelope_contact",
+        "tertiary_6a_1:flower_intrusion:flower_1",
+        "global_visible_envelope_overflow"
+      ],
+      "plan_digest": "31664f037727f0df9f9b703cdaf9d582975664fa0cb69409eae2b060e8dafbb9",
+      "seed": 4103,
+      "valid": false
+    }
+  ],
+  "source_profile": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\run57_reproduction\\01_skeleton_analysis\\proto_sw_1_3\\skeleton_profile.json",
+  "standard_proofs_pass": true,
+  "strict_edge_sides": [
+    "top",
+    "bottom"
+  ],
+  "topology": {
+    "primary": 7,
+    "secondary": 12,
+    "tertiary": 2
+  },
+  "visual_gate": "pending_mount_variation_review"
+}

@@ -1,0 +1,115 @@
+{
+  "classification": {
+    "flower_branch_relation": {
+      "family_id": "SW-2_axis_penetrating",
+      "generation_control": true,
+      "label_en": "axis penetration and flower-axis integration",
+      "label_zh": "轴线贯穿与花轴一体"
+    },
+    "pattern_skeleton_class": {
+      "generation_control_in_stage_3_v1": false,
+      "legacy_value": "single_wave",
+      "professional_value": "unassigned"
+    }
+  },
+  "evidence": {
+    "legacy_branch_geometry_consumed": false,
+    "legacy_node_rule_used_only_for_family_provenance": true,
+    "legacy_unit_type_consumed": false,
+    "sources": {
+      "legacy_annotation": "newpipe/data/prototype_library/chanzhi/prototypes/proto_sw_2_3.json",
+      "legacy_node_rule": "SW-2_axis_penetrating",
+      "source_image": "chanzhi_sw_clean/artifacts/analysis/prototype_source_images/proto_sw_2_3.source.png"
+    }
+  },
+  "family_rule": {
+    "flower_binding": "main_axis_integration",
+    "forbidden_patterns": [
+      "flower_treated_as_pasted_side_motif",
+      "support_stem_inserted_when_axis_integration_is_sufficient",
+      "uniform_small_sprig_scatter",
+      "prototype_id_specific_fixed_topology"
+    ],
+    "growth_direction_policy": [
+      "preserve_main_axis_continuity",
+      "use_broad_primary_sweeps_before_small_secondary_rhythm",
+      "avoid_turning_the_flower_into_a_side_attachment"
+    ],
+    "preferred_attachment_contexts": [
+      "broad_axis_flank",
+      "open_side_outside_flower_reserve"
+    ],
+    "required_relationships": [
+      "flower_reads_as_part_of_the_continuous_main_axis",
+      "axis_direction_remains_legible_before_and_after_the_flower",
+      "primary_sweeps_mount_outside_the_flower_reserve"
+    ],
+    "role_policy": {
+      "not_required": [
+        "flower_support",
+        "wrap_flower"
+      ],
+      "optional": [
+        "secondary_sprig"
+      ],
+      "required_per_repeat": [
+        "primary_sweep"
+      ]
+    },
+    "visual_guide_mode": "axis_through_flower"
+  },
+  "generation_boundary": {
+    "candidate_slots_present": false,
+    "curve_geometry_present": false,
+    "dynamic_branch_plan_present": false,
+    "evidence_counts_are_generation_targets": false,
+    "source_branch_geometry_copied": false,
+    "strict_p0_modified": false,
+    "visual_guides_are_non_selecting_semantic_annotations": true
+  },
+  "instance_priors": {
+    "count_usage": "evidence_prior_not_fixed_generation_target",
+    "density_class": "primary_sweep_led",
+    "description_zh": "花朵属于连续轴线构成，以宽阔主支枝组织节奏，不依赖花托或包绕枝。",
+    "flower_relation_emphasis": "flower_integrated_with_main_axis",
+    "primary_sweep_class": "dominant",
+    "side_rhythm": "broad_axis_flank_alternation",
+    "source_observation_counts": {
+      "branch_guide_count": 0,
+      "branch_side_counts": {
+        "down": 0,
+        "up": 0
+      },
+      "flower_anchor_count": 1,
+      "primary_branch_count": 6,
+      "structural_role_counts": {
+        "flower_support": 0,
+        "wrap_flower": 0
+      }
+    }
+  },
+  "morphology_contract_id": "sw_flower_branch_morphology_stage25_v1",
+  "morphology_digest": "34fb01d1bb24d76cbfa85fe58560ac55003923ff051a9fbc7a7d976e20d92909",
+  "policy_id": "flower_branch_relation_plus_instance_priors_v1",
+  "prototype_id": "proto_sw_2_3",
+  "review": {
+    "allowed_states": [
+      "morphology_pending_review",
+      "morphology_approved",
+      "morphology_needs_revision",
+      "morphology_rejected"
+    ],
+    "criteria": [
+      "family_assignment_matches_source",
+      "flower_branch_binding_matches_source",
+      "required_relationships_match_source",
+      "instance_density_and_rhythm_match_source",
+      "forbidden_patterns_are_correct",
+      "no_old_branch_geometry_is_being_copied"
+    ],
+    "status": "morphology_pending_review",
+    "visual_gate_required": true
+  },
+  "schema": "dynamic_branch_morphology_profile_v1",
+  "source_stage2_analysis_digest": "32f47a625a269be2a7a2976198948ad6737024374d555c45457d1803c7846934"
+}

@@ -1,0 +1,66 @@
+{
+  "schema": "whole_local_subtree_frontier_dev_v5_failed",
+  "created_utc": "2026-07-21T07:08:15.064259+00:00",
+  "formal_experiment": false,
+  "status": "retained_failed_attempt",
+  "source_profile": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\run57_reproduction\\01_skeleton_analysis\\proto_sw_1_3\\skeleton_profile.json",
+  "source_sha256": "0da45fb121b4bca0e9f4d3ee478ca3e3aee6852494c12e8b0fd219560d8c8172",
+  "plan_id": "proto_sw_1_3_J0a_seeded_subtree_frontier_v5",
+  "geometry_kernel_id": "whole_local_hierarchy_degree_elevated_quadratic_subtree_frontier_v1",
+  "seeds": [
+    {
+      "seed": 4101,
+      "valid": false,
+      "issues": [
+        "primary_2_free:parent_recontact",
+        "primary_7_free:parent_recontact",
+        "secondary_2a:frontier_route_bend_count_over_2",
+        "secondary_3a:frontier_route_bend_count_over_2",
+        "secondary_6a:frontier_route_bend_count_over_2",
+        "secondary_7a:frontier_route_bend_count_over_2",
+        "tertiary_3a_1:unregistered_curve_edge_approach",
+        "tertiary_6a_1:unregistered_curve_edge_approach"
+      ],
+      "geometry_hash": "ac1550efbe92487c548b208290a48b0eea579d35d81b58ec2c79aff50f2805ac",
+      "plan_digest": "53e8a439dcefce7329ff05bbc9243749f6ec7b75b5d8a3815f508d47df916e4a"
+    },
+    {
+      "seed": 4102,
+      "valid": false,
+      "issues": [
+        "primary_2_free:parent_recontact",
+        "secondary_2a:frontier_route_bend_count_over_2",
+        "secondary_3a:frontier_route_bend_count_over_2",
+        "secondary_6a:frontier_route_bend_count_over_2",
+        "secondary_7a:frontier_route_bend_count_over_2",
+        "secondary_7a:backbone_contact",
+        "tertiary_3a_1:unregistered_curve_edge_approach",
+        "tertiary_6a_1:unregistered_curve_edge_approach"
+      ],
+      "geometry_hash": "2cef65d54035b30e38e986c14bcf351149e3faeab45c3d8a0d91a6ecb1716fe5",
+      "plan_digest": "ae2e55ee55b4cf32a71fd71ca3c35ad4d96f6c8bf606b36690a80b5b14111210"
+    },
+    {
+      "seed": 4103,
+      "valid": false,
+      "issues": [
+        "primary_2_free:parent_recontact",
+        "primary_3_free:parent_recontact",
+        "primary_7_free:parent_recontact",
+        "secondary_2a:frontier_route_bend_count_over_2",
+        "secondary_3a:frontier_route_bend_count_over_2",
+        "secondary_6a:frontier_route_bend_count_over_2",
+        "secondary_7a:frontier_route_bend_count_over_2",
+        "tertiary_3a_1:unregistered_curve_edge_approach",
+        "tertiary_6a_1:unregistered_curve_edge_approach"
+      ],
+      "geometry_hash": "5c62dcb60e5cf3f205af3ffc1b9911feb0788461438fbb158f1ea793de588139",
+      "plan_digest": "d600bb5afb15b07e4bade5fa82b924710f1a28c6c001d85de747eee4e66cd617"
+    }
+  ],
+  "failure_summary": [
+    "frontier routes had 3-4 bend lobes because parent and continuation were compiled independently",
+    "tertiary laterals remained in the edge approach bands",
+    "some short primary carriers recontacted the backbone"
+  ]
+}

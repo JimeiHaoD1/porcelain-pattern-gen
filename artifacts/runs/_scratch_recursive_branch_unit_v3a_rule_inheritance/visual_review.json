@@ -1,0 +1,27 @@
+{
+  "status": "FAIL",
+  "review_scope": [
+    "contact_sheet.png",
+    "contact_sheet_debug.png",
+    "contact_sheet_units.png",
+    "contact_sheet_repeat_2x.png"
+  ],
+  "improvements_over_recursive_v2": [
+    "level-1 and level-2 geometry returns exactly to the v23 baseline",
+    "level-3 roots now leave their actual level-2 parent laterally instead of following an edge-carrier continuation",
+    "level-3 curvature has both a lower and upper gate instead of only an over-bend limit",
+    "seed changes visibly affect attachment, direction, length, and tertiary count"
+  ],
+  "structural_failures": [
+    "seed 4102 has a clearance conflict between secondary_6b_lat and tertiary_7_7a_r1",
+    "the chord-only context score did not reject the colliding final Bezier tube"
+  ],
+  "visual_failures": [
+    "most tertiary curves still read as short accent ticks rather than a third growth level",
+    "several roots form abrupt T/Y forks because entry opening and whole-curve lateral opening are still conflated",
+    "adding tertiary count does not create a coherent whole-repeat rhythm; it mostly adds small curls near existing secondary tips",
+    "dense local additions at the upper and lower rims coexist with large inactive central gaps",
+    "the recursive structure does not yet read as a coordinated BranchUnit across neighbouring units"
+  ],
+  "decision": "Do not advance this result. Preserve it as the first V3A failure and replace chord-only context with a joint parent/side/compiled-curve legal domain."
+}

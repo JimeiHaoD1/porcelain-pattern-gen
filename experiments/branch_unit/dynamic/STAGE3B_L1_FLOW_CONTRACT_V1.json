@@ -1,0 +1,86 @@
+{
+  "schema": "dynamic_branch_stage3b_l1_flow_contract_v1",
+  "contract_id": "global_l1_flow_lane_planning_v1",
+  "scope": {
+    "prototype_ids": [
+      "proto_sw_1_1",
+      "proto_sw_1_3",
+      "proto_sw_2_3",
+      "proto_sw_3_1",
+      "proto_sw_3_2"
+    ],
+    "seeds": [
+      4101,
+      4102,
+      4103
+    ],
+    "branch_skeleton_only": true,
+    "l1_only": true,
+    "l2_present": false,
+    "l3_present": false,
+    "leaves_present": false,
+    "buds_present": false,
+    "curl_heads_present": false
+  },
+  "input_policy": {
+    "strict_p0_consumed": true,
+    "prototype_analysis_consumed": true,
+    "morphology_profile_consumed": true,
+    "fixed_visual_prior_consumed": true,
+    "old_stage3_selected_layout_consumed": false,
+    "old_stage4_curve_geometry_consumed": false
+  },
+  "planning_policy": {
+    "one_forward_global_solve_per_task": true,
+    "validation_guided_retry_allowed": false,
+    "validation_guided_resample_allowed": false,
+    "automatic_repair_allowed": false,
+    "automatic_lane_deletion_allowed": false,
+    "silent_fallback_allowed": false,
+    "candidate_enumeration_is_part_of_the_single_global_solve": true,
+    "selected_layout_count_per_task": 1
+  },
+  "lane_roles": [
+    "primary_sweep",
+    "balance",
+    "frontier",
+    "flower_support",
+    "terminal_flower_support"
+  ],
+  "hard_constraints": [
+    "root_on_backbone",
+    "ordinary_lane_immediate_outward_departure",
+    "no_non_root_backbone_crossing",
+    "no_lane_crossing",
+    "no_periodic_lane_crossing",
+    "minimum_root_spacing",
+    "minimum_lane_clearance",
+    "ordinary_lane_outside_flower_reserves",
+    "required_flower_support_count",
+    "sw1_support_originates_at_trough_or_trough_flank",
+    "sw3_support_mount_is_remote",
+    "sw3_support_routes_below_flower",
+    "sw3_support_contacts_flower_underside"
+  ],
+  "soft_objectives": [
+    "fixed_prior_fidelity",
+    "root_arc_coverage",
+    "target_zone_coverage",
+    "parallel_glide",
+    "lane_nesting",
+    "long_short_rhythm",
+    "dense_open_rhythm",
+    "flower_breathing_space",
+    "prototype_identity",
+    "seed_diversity_without_identity_drift"
+  ],
+  "output": {
+    "geometry_semantics": "planning_flow_lane_not_final_branch_curve",
+    "selected_l1_layout_only": true,
+    "internal_candidate_inventory_preserved": true,
+    "structural_diagnostics_present": true,
+    "visual_review_required": true,
+    "numeric_checks_can_approve_visual_gate": false,
+    "initial_review_state": "l1_flow_pending_visual_review"
+  }
+}

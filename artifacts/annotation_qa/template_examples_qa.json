@@ -1,0 +1,151 @@
+{
+  "schema_version": "chanzhi.annotation_qa.v1",
+  "input": "D:\\sdxl\\chanzhi_sw_clean\\data\\annotation_templates\\chanzhi_annotation_v3_template.svg",
+  "profile": "hybrid",
+  "settings": {
+    "attachment_tolerance": 8.0,
+    "flower_tolerance": "auto",
+    "include_examples": true
+  },
+  "status": "pass",
+  "summary": {
+    "errors": 0,
+    "warnings": 0,
+    "annotation_elements": 13,
+    "backbones": 1,
+    "unit_boundaries": 2
+  },
+  "issues": [],
+  "elements": [
+    {
+      "id": "unit_boundary_left_example",
+      "tag": "path",
+      "role": "unit_boundary",
+      "stroke": "#000000",
+      "terminal_family": null,
+      "generation": null,
+      "parent_id": null,
+      "target_flower_id": null
+    },
+    {
+      "id": "unit_boundary_right_example",
+      "tag": "path",
+      "role": "unit_boundary",
+      "stroke": "#000000",
+      "terminal_family": null,
+      "generation": null,
+      "parent_id": null,
+      "target_flower_id": null
+    },
+    {
+      "id": "backbone_001",
+      "tag": "path",
+      "role": "backbone",
+      "stroke": "#0000ff",
+      "terminal_family": "hybrid",
+      "generation": null,
+      "parent_id": null,
+      "target_flower_id": null
+    },
+    {
+      "id": "secondary_backbone_001",
+      "tag": "path",
+      "role": "secondary_backbone",
+      "stroke": "#ff00ff",
+      "terminal_family": "hybrid",
+      "generation": null,
+      "parent_id": null,
+      "target_flower_id": null
+    },
+    {
+      "id": "primary_scroll_001",
+      "tag": "path",
+      "role": "scroll_branch",
+      "stroke": "#ff9900",
+      "terminal_family": "scroll_swollen",
+      "generation": "1",
+      "parent_id": "backbone_001",
+      "target_flower_id": null
+    },
+    {
+      "id": "primary_leaf_001",
+      "tag": "path",
+      "role": "primary_branch",
+      "stroke": "#ff9900",
+      "terminal_family": "leaf_bearing",
+      "generation": "1",
+      "parent_id": "backbone_001",
+      "target_flower_id": null
+    },
+    {
+      "id": "secondary_scroll_001",
+      "tag": "path",
+      "role": "scroll_branch",
+      "stroke": "#00b7c7",
+      "terminal_family": "scroll_swollen",
+      "generation": "2",
+      "parent_id": "primary_scroll_001",
+      "target_flower_id": null
+    },
+    {
+      "id": "tertiary_scroll_001",
+      "tag": "path",
+      "role": "scroll_branch",
+      "stroke": "#7a3db8",
+      "terminal_family": "scroll_swollen",
+      "generation": "3",
+      "parent_id": "secondary_scroll_001",
+      "target_flower_id": null
+    },
+    {
+      "id": "leaf_guide_001",
+      "tag": "path",
+      "role": "leaf_guide",
+      "stroke": "#00ff00",
+      "terminal_family": "leaf_bearing",
+      "generation": null,
+      "parent_id": "primary_leaf_001",
+      "target_flower_id": null
+    },
+    {
+      "id": "leaf_guide_002",
+      "tag": "path",
+      "role": "leaf_guide",
+      "stroke": "#00ff00",
+      "terminal_family": "leaf_bearing",
+      "generation": null,
+      "parent_id": "primary_leaf_001",
+      "target_flower_id": null
+    },
+    {
+      "id": "flower_support_001",
+      "tag": "path",
+      "role": "flower_support",
+      "stroke": "#007800",
+      "terminal_family": null,
+      "generation": null,
+      "parent_id": "backbone_001",
+      "target_flower_id": "flower_anchor_001"
+    },
+    {
+      "id": "wrap_flower_001",
+      "tag": "path",
+      "role": "wrap_flower",
+      "stroke": "#ffff00",
+      "terminal_family": null,
+      "generation": null,
+      "parent_id": "backbone_001",
+      "target_flower_id": "flower_anchor_001"
+    },
+    {
+      "id": "flower_anchor_001",
+      "tag": "ellipse",
+      "role": "flower_anchor",
+      "stroke": "#ff0000",
+      "terminal_family": null,
+      "generation": null,
+      "parent_id": null,
+      "target_flower_id": null
+    }
+  ]
+}

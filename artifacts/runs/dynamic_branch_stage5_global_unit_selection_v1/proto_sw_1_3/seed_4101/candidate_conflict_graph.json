@@ -1,0 +1,369 @@
+{
+  "conflict_graph_digest": "c97c8e922fd835b0d403fc7e0feb07d86c4fa4e8d23ad345b4a4d8f70e1ec9dd",
+  "contract_id": "global_complete_unit_constraint_selection_v1",
+  "edge_count": 4,
+  "edges": [
+    {
+      "crossings": [
+        {
+          "first_curve_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1.L2.1",
+          "first_level": "L2",
+          "second_curve_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5.L2.1",
+          "second_level": "L2",
+          "second_repeat_shift_x": 0.0
+        }
+      ],
+      "first_candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1__Frontier-Y-C__long_s",
+      "first_lane_id": "ordinary_1",
+      "reason": "cross_unit_curve_crossing",
+      "second_candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5__Frontier-Y-C__long_s",
+      "second_lane_id": "ordinary_5"
+    },
+    {
+      "crossings": [
+        {
+          "first_curve_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1.L2.1",
+          "first_level": "L2",
+          "second_curve_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5.L2.1",
+          "second_level": "L2",
+          "second_repeat_shift_x": 0.0
+        },
+        {
+          "first_curve_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1.L3.1",
+          "first_level": "L3",
+          "second_curve_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5.L2.1",
+          "second_level": "L2",
+          "second_repeat_shift_x": 0.0
+        }
+      ],
+      "first_candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1__Frontier-Y-C__outer_hook",
+      "first_lane_id": "ordinary_1",
+      "reason": "cross_unit_curve_crossing",
+      "second_candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5__Frontier-Y-C__long_c",
+      "second_lane_id": "ordinary_5"
+    },
+    {
+      "crossings": [
+        {
+          "first_curve_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1.L3.1",
+          "first_level": "L3",
+          "second_curve_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5.L2.1",
+          "second_level": "L2",
+          "second_repeat_shift_x": 0.0
+        }
+      ],
+      "first_candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1__Frontier-Y-C__outer_hook",
+      "first_lane_id": "ordinary_1",
+      "reason": "cross_unit_curve_crossing",
+      "second_candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5__Frontier-Y-C__long_s",
+      "second_lane_id": "ordinary_5"
+    },
+    {
+      "crossings": [
+        {
+          "first_curve_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1.L3.1",
+          "first_level": "L3",
+          "second_curve_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5.L2.1",
+          "second_level": "L2",
+          "second_repeat_shift_x": 0.0
+        }
+      ],
+      "first_candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1__Frontier-Y-C__outer_hook",
+      "first_lane_id": "ordinary_1",
+      "reason": "cross_unit_curve_crossing",
+      "second_candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5__Frontier-Y-C__outer_hook",
+      "second_lane_id": "ordinary_5"
+    }
+  ],
+  "eligible_node_count": 27,
+  "ineligible_node_count": 3,
+  "node_count": 30,
+  "nodes": [
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1__Frontier-Y-C__long_c",
+      "eligible": true,
+      "grammar_id": "Frontier-Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "long_c",
+      "role": "frontier",
+      "source_lane_id": "ordinary_1"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1__Frontier-Y-C__long_s",
+      "eligible": true,
+      "grammar_id": "Frontier-Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "long_s",
+      "role": "frontier",
+      "source_lane_id": "ordinary_1"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_1__Frontier-Y-C__outer_hook",
+      "eligible": true,
+      "grammar_id": "Frontier-Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "outer_hook",
+      "role": "frontier",
+      "source_lane_id": "ordinary_1"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_2__Y-C__compact_c",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "compact_c",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_2"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_2__Y-C__balanced_s",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "balanced_s",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_2"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_2__Y-C__open_c",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_c",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_2"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_2__Y-2C__staggered_c",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_2"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_2__Y-2C__nested_s",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_2"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_2__Y-2C__open_asymmetric",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_2"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__support_1__FlowerSupport-C__lower_wrap_c",
+      "eligible": true,
+      "grammar_id": "FlowerSupport-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "lower_wrap_c",
+      "role": "flower_support",
+      "source_lane_id": "support_1"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__support_1__FlowerSupport-C__lower_wrap_s",
+      "eligible": false,
+      "grammar_id": "FlowerSupport-C",
+      "intrinsic_issue_codes": [
+        "descendant_enters_flower_reserve"
+      ],
+      "parameter_stratum": "lower_wrap_s",
+      "role": "flower_support",
+      "source_lane_id": "support_1"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__support_1__FlowerSupport-C__compact_wrap",
+      "eligible": true,
+      "grammar_id": "FlowerSupport-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "compact_wrap",
+      "role": "flower_support",
+      "source_lane_id": "support_1"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_3__Y-C__compact_c",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "compact_c",
+      "role": "balance",
+      "source_lane_id": "ordinary_3"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_3__Y-C__balanced_s",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "balanced_s",
+      "role": "balance",
+      "source_lane_id": "ordinary_3"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_3__Y-C__open_c",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_c",
+      "role": "balance",
+      "source_lane_id": "ordinary_3"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_3__Y-2C__staggered_c",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "staggered_c",
+      "role": "balance",
+      "source_lane_id": "ordinary_3"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_3__Y-2C__nested_s",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "sibling_mounts_too_close"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "balance",
+      "source_lane_id": "ordinary_3"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_3__Y-2C__open_asymmetric",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "balance",
+      "source_lane_id": "ordinary_3"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__support_2__FlowerSupport-C__lower_wrap_c",
+      "eligible": true,
+      "grammar_id": "FlowerSupport-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "lower_wrap_c",
+      "role": "flower_support",
+      "source_lane_id": "support_2"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__support_2__FlowerSupport-C__lower_wrap_s",
+      "eligible": false,
+      "grammar_id": "FlowerSupport-C",
+      "intrinsic_issue_codes": [
+        "descendant_enters_flower_reserve"
+      ],
+      "parameter_stratum": "lower_wrap_s",
+      "role": "flower_support",
+      "source_lane_id": "support_2"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__support_2__FlowerSupport-C__compact_wrap",
+      "eligible": true,
+      "grammar_id": "FlowerSupport-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "compact_wrap",
+      "role": "flower_support",
+      "source_lane_id": "support_2"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_4__Y-C__compact_c",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "compact_c",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_4"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_4__Y-C__balanced_s",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "balanced_s",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_4"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_4__Y-C__open_c",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_c",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_4"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_4__Y-2C__staggered_c",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_4"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_4__Y-2C__nested_s",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_4"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_4__Y-2C__open_asymmetric",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "ordinary_4"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5__Frontier-Y-C__long_c",
+      "eligible": true,
+      "grammar_id": "Frontier-Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "long_c",
+      "role": "frontier",
+      "source_lane_id": "ordinary_5"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5__Frontier-Y-C__long_s",
+      "eligible": true,
+      "grammar_id": "Frontier-Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "long_s",
+      "role": "frontier",
+      "source_lane_id": "ordinary_5"
+    },
+    {
+      "candidate_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__ordinary_5__Frontier-Y-C__outer_hook",
+      "eligible": true,
+      "grammar_id": "Frontier-Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "outer_hook",
+      "role": "frontier",
+      "source_lane_id": "ordinary_5"
+    }
+  ],
+  "prototype_id": "proto_sw_1_3",
+  "repeat_shifts_checked": [
+    -1.0,
+    0.0,
+    1.0
+  ],
+  "schema": "dynamic_branch_stage5_candidate_conflict_graph_v1",
+  "seed": 4101,
+  "source_inventory_digest": "5c6cc810741852816722ebe8a20bfa12280aa936ae5495acc083e5b263fff35b",
+  "source_inventory_id": "proto_sw_1_3__seed_4101__global_l1_flow_v1__unit_candidates_v1"
+}

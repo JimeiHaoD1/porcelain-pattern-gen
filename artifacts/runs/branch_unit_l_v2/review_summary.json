@@ -1,0 +1,401 @@
+{
+  "schema": "branch_unit_l_blind_review_summary_v1",
+  "experiment_id": "branch_unit_L_v2",
+  "review_source": {
+    "path": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\branch_unit_l_v2\\blind_review_round1.json",
+    "sha256": "4676ef9ed5866df32a73d0665a662983d3f163e3401d7fb583bd750b1b5ac2d5",
+    "bytes": 16159
+  },
+  "blind_key_sha256": "5d04efd02f95b8f82f5ffcae57e36953d15697af6bf4be0361f95bf03cd9a046",
+  "reviewer": "codex_fresh_blind_reviewer_v2",
+  "reviewed_at": "2026-07-20T20:38:40.1249383+08:00",
+  "mapping_hidden_until_review_frozen": true,
+  "counts": {
+    "L0_effective_usable": 4,
+    "L1_effective_usable": 0,
+    "L1_wins_overall": 3,
+    "L0_wins_overall": 6,
+    "ties": 0,
+    "both_bad": 3,
+    "L1_wins_child_positive": 3,
+    "child_positive_denominator": 8
+  },
+  "gates": {
+    "L1_usable_at_least_4_of_12": false,
+    "L1_preferred_at_least_7_of_12": false,
+    "L1_preferred_at_least_5_of_8_child_positive": false
+  },
+  "decision": "no_go_stop_branch_unit_route",
+  "interpretation_limit": "development screening only; not paper-level statistical evidence",
+  "rows": [
+    {
+      "blind_id": "B01",
+      "trial_id": "L10",
+      "child_count": 0,
+      "L0_panel": "A",
+      "L1_panel": "B",
+      "L0_visual_usable": false,
+      "L1_visual_usable": false,
+      "L0_effective_usable": false,
+      "L1_effective_usable": false,
+      "preference": "both_bad",
+      "L0_primary_label": "hard_angle_bend",
+      "L1_primary_label": "hard_angle_bend",
+      "L0_secondary_labels": [],
+      "L1_secondary_labels": [],
+      "L0_notes": "The stem and crown remain legible, but the thin left tip turns sharply down-left from an almost horizontal crown, producing a visible terminal kink.",
+      "L1_notes": "The zero-child unit is connected and readable, but its short left tip reverses downward at the end of the crown instead of continuing the crown tangent.",
+      "pair_notes": "Both panels show the same terminal-direction reversal and neither has a meaningful visual advantage.",
+      "review_confidence": 0.94,
+      "hard_valid": {
+        "L0": true,
+        "L1": true
+      },
+      "hard_failure_reasons": {
+        "L0": [],
+        "L1": []
+      }
+    },
+    {
+      "blind_id": "B02",
+      "trial_id": "L06",
+      "child_count": 2,
+      "L0_panel": "B",
+      "L1_panel": "A",
+      "L0_visual_usable": false,
+      "L1_visual_usable": false,
+      "L0_effective_usable": false,
+      "L1_effective_usable": false,
+      "preference": "both_bad",
+      "L0_primary_label": "crowded_reserve",
+      "L1_primary_label": "crowded_reserve",
+      "L0_secondary_labels": [
+        "hard_angle_bend"
+      ],
+      "L1_secondary_labels": [
+        "hard_angle_bend"
+      ],
+      "L0_notes": "The upright child merges through the top elbow before becoming distinct, leaving a congested junction; the terminal tip also turns abruptly down-left.",
+      "L1_notes": "The single child is visibly connected but is packed into the crown elbow and shares the turn before separating; the left terminal also hooks down-left.",
+      "pair_notes": "Both panels have a readable main stem but combine an elbow-packed child with the same kinked terminal closure.",
+      "review_confidence": 0.89,
+      "hard_valid": {
+        "L0": false,
+        "L1": false
+      },
+      "hard_failure_reasons": {
+        "L0": [
+          "unit_clearance:primary:child_2",
+          "unit_clearance:child_1:child_2"
+        ],
+        "L1": [
+          "unit_clearance:primary:child_1",
+          "unit_clearance:child_1:child_2"
+        ]
+      }
+    },
+    {
+      "blind_id": "B03",
+      "trial_id": "L08",
+      "child_count": 1,
+      "L0_panel": "A",
+      "L1_panel": "B",
+      "L0_visual_usable": false,
+      "L1_visual_usable": false,
+      "L0_effective_usable": false,
+      "L1_effective_usable": false,
+      "preference": "L1",
+      "L0_primary_label": "hairlike_cluster",
+      "L1_primary_label": "hard_angle_bend",
+      "L0_secondary_labels": [
+        "weak_hierarchy",
+        "hard_angle_bend"
+      ],
+      "L1_secondary_labels": [],
+      "L0_notes": "A thin child shadows the underside of the crown and disappears into the elbow, reading as a stray parallel hair rather than a branch; the left tip is also kinked downward.",
+      "L1_notes": "The up-right child separates cleanly from the primary and the hierarchy is clear, but the left terminal turns down against the crown direction.",
+      "pair_notes": "B is clearly better because its child reads as an attached shoot; A has a parallel hair under the crown.",
+      "review_confidence": 0.97,
+      "hard_valid": {
+        "L0": false,
+        "L1": true
+      },
+      "hard_failure_reasons": {
+        "L0": [
+          "unit_clearance:primary:child_1"
+        ],
+        "L1": []
+      }
+    },
+    {
+      "blind_id": "B04",
+      "trial_id": "L05",
+      "child_count": 1,
+      "L0_panel": "A",
+      "L1_panel": "B",
+      "L0_visual_usable": false,
+      "L1_visual_usable": false,
+      "L0_effective_usable": false,
+      "L1_effective_usable": false,
+      "preference": "both_bad",
+      "L0_primary_label": "hard_angle_bend",
+      "L1_primary_label": "hard_angle_bend",
+      "L0_secondary_labels": [],
+      "L1_secondary_labels": [],
+      "L0_notes": "The upward child is distinct and naturally attached, but the left terminal makes a sharp down-left hook from the crown.",
+      "L1_notes": "The child and main sweep are coherent, yet the thin terminal changes direction abruptly downward at the left end.",
+      "pair_notes": "The panels are visually equivalent and share the same terminal-continuity failure.",
+      "review_confidence": 0.94,
+      "hard_valid": {
+        "L0": true,
+        "L1": true
+      },
+      "hard_failure_reasons": {
+        "L0": [],
+        "L1": []
+      }
+    },
+    {
+      "blind_id": "B05",
+      "trial_id": "L09",
+      "child_count": 2,
+      "L0_panel": "A",
+      "L1_panel": "B",
+      "L0_visual_usable": false,
+      "L1_visual_usable": false,
+      "L0_effective_usable": false,
+      "L1_effective_usable": false,
+      "preference": "L1",
+      "L0_primary_label": "hairlike_cluster",
+      "L1_primary_label": "crowded_reserve",
+      "L0_secondary_labels": [
+        "crowded_reserve",
+        "weak_hierarchy"
+      ],
+      "L1_secondary_labels": [
+        "hard_angle_bend"
+      ],
+      "L0_notes": "Two narrow children rise almost parallel from a very small crown interval, forming a comb-like hair cluster that competes with the main sweep; the left terminal itself is continuous.",
+      "L1_notes": "The two children have distinct directions but converge into essentially the same elbow point, producing a crowded three-way junction; the left terminal also hooks downward.",
+      "pair_notes": "Both fail, but B's splayed child directions remain more legible than A's tight pair of parallel hairs.",
+      "review_confidence": 0.86,
+      "hard_valid": {
+        "L0": false,
+        "L1": false
+      },
+      "hard_failure_reasons": {
+        "L0": [
+          "unit_clearance:child_1:child_2"
+        ],
+        "L1": [
+          "unit_clearance:child_1:child_2"
+        ]
+      }
+    },
+    {
+      "blind_id": "B06",
+      "trial_id": "L07",
+      "child_count": 0,
+      "L0_panel": "A",
+      "L1_panel": "B",
+      "L0_visual_usable": true,
+      "L1_visual_usable": false,
+      "L0_effective_usable": true,
+      "L1_effective_usable": false,
+      "preference": "L0",
+      "L0_primary_label": "unit_success",
+      "L1_primary_label": "hard_angle_bend",
+      "L0_secondary_labels": [],
+      "L1_secondary_labels": [],
+      "L0_notes": "The zero-child unit has a dominant continuous sweep, a smooth rounded turn, and a tapered up-left terminal that follows the crown direction.",
+      "L1_notes": "The main stem is readable, but the thin terminal doubles down-left from a crown that is traveling up-left, leaving a conspicuous hooked finish.",
+      "pair_notes": "A preserves tangent continuity through the terminal; B visibly reverses direction at the tip.",
+      "review_confidence": 0.98,
+      "hard_valid": {
+        "L0": true,
+        "L1": true
+      },
+      "hard_failure_reasons": {
+        "L0": [],
+        "L1": []
+      }
+    },
+    {
+      "blind_id": "B07",
+      "trial_id": "L03",
+      "child_count": 2,
+      "L0_panel": "A",
+      "L1_panel": "B",
+      "L0_visual_usable": false,
+      "L1_visual_usable": false,
+      "L0_effective_usable": false,
+      "L1_effective_usable": false,
+      "preference": "L0",
+      "L0_primary_label": "hard_angle_bend",
+      "L1_primary_label": "hairlike_cluster",
+      "L0_secondary_labels": [],
+      "L1_secondary_labels": [
+        "weak_hierarchy",
+        "hard_angle_bend"
+      ],
+      "L0_notes": "The two right-facing children are separated by position and direction and remain subordinate to the primary, but the left terminal bends sharply down from the crown.",
+      "L1_notes": "The inner child runs back beneath and nearly parallel to the crown, creating a second hair-like contour and weakening the hierarchy; the terminal also hooks down-left.",
+      "pair_notes": "A's two shoots remain distinct and readable, whereas B introduces a crown-parallel inner hair.",
+      "review_confidence": 0.92,
+      "hard_valid": {
+        "L0": true,
+        "L1": true
+      },
+      "hard_failure_reasons": {
+        "L0": [],
+        "L1": []
+      }
+    },
+    {
+      "blind_id": "B08",
+      "trial_id": "L12",
+      "child_count": 2,
+      "L0_panel": "A",
+      "L1_panel": "B",
+      "L0_visual_usable": false,
+      "L1_visual_usable": false,
+      "L0_effective_usable": false,
+      "L1_effective_usable": false,
+      "preference": "L0",
+      "L0_primary_label": "hard_angle_bend",
+      "L1_primary_label": "crowded_reserve",
+      "L0_secondary_labels": [],
+      "L1_secondary_labels": [
+        "hard_angle_bend",
+        "weak_hierarchy"
+      ],
+      "L0_notes": "The two children are visibly attached at separated locations and splay in distinct directions, but the terminal turns down-left instead of closing the crown continuously.",
+      "L1_notes": "Both children concentrate at the crown elbow, making the fork visually congested and reducing positional rhythm; the thin terminal also hooks downward.",
+      "pair_notes": "A has clearer child spacing and hierarchy; B compresses both shoots into the elbow.",
+      "review_confidence": 0.91,
+      "hard_valid": {
+        "L0": true,
+        "L1": true
+      },
+      "hard_failure_reasons": {
+        "L0": [],
+        "L1": []
+      }
+    },
+    {
+      "blind_id": "B09",
+      "trial_id": "L04",
+      "child_count": 0,
+      "L0_panel": "A",
+      "L1_panel": "B",
+      "L0_visual_usable": true,
+      "L1_visual_usable": false,
+      "L0_effective_usable": true,
+      "L1_effective_usable": false,
+      "preference": "L0",
+      "L0_primary_label": "unit_success",
+      "L1_primary_label": "hard_angle_bend",
+      "L0_secondary_labels": [],
+      "L1_secondary_labels": [],
+      "L0_notes": "The zero-child primary is dominant and connected, and its thin up-left taper continues the crown direction into a coherent terminal closure.",
+      "L1_notes": "The sweep is otherwise clear, but the short terminal curls down-left from the horizontal crown, creating a visible end kink.",
+      "pair_notes": "A closes along the crown tangent; B reverses downward at the terminal.",
+      "review_confidence": 0.98,
+      "hard_valid": {
+        "L0": true,
+        "L1": true
+      },
+      "hard_failure_reasons": {
+        "L0": [],
+        "L1": []
+      }
+    },
+    {
+      "blind_id": "B10",
+      "trial_id": "L01",
+      "child_count": 0,
+      "L0_panel": "B",
+      "L1_panel": "A",
+      "L0_visual_usable": true,
+      "L1_visual_usable": false,
+      "L0_effective_usable": true,
+      "L1_effective_usable": false,
+      "preference": "L0",
+      "L0_primary_label": "unit_success",
+      "L1_primary_label": "hard_angle_bend",
+      "L0_secondary_labels": [],
+      "L1_secondary_labels": [],
+      "L0_notes": "The primary rises and turns in one readable sweep, with a thin up-left taper that extends the crown cleanly; the zero-child rhythm condition holds by construction.",
+      "L1_notes": "The zero-child sweep is legible, but its thin left tip drops down-left at a hard angle from the crown.",
+      "pair_notes": "B has a continuous terminal taper, while A ends in a downward hook.",
+      "review_confidence": 0.97,
+      "hard_valid": {
+        "L0": true,
+        "L1": true
+      },
+      "hard_failure_reasons": {
+        "L0": [],
+        "L1": []
+      }
+    },
+    {
+      "blind_id": "B11",
+      "trial_id": "L02",
+      "child_count": 1,
+      "L0_panel": "A",
+      "L1_panel": "B",
+      "L0_visual_usable": false,
+      "L1_visual_usable": false,
+      "L0_effective_usable": false,
+      "L1_effective_usable": false,
+      "preference": "L1",
+      "L0_primary_label": "hairlike_cluster",
+      "L1_primary_label": "hard_angle_bend",
+      "L0_secondary_labels": [
+        "weak_hierarchy",
+        "hard_angle_bend"
+      ],
+      "L1_secondary_labels": [],
+      "L0_notes": "The child runs left just beneath and nearly parallel to the crown, resembling an extra hair rather than a distinct shoot; the primary terminal also hooks down-left.",
+      "L1_notes": "The up-right child is cleanly attached and subordinate to the main sweep, but the left terminal turns sharply downward from the crown.",
+      "pair_notes": "B's child reads as a branch; A's crown-parallel child reads as a stray hair.",
+      "review_confidence": 0.96,
+      "hard_valid": {
+        "L0": true,
+        "L1": true
+      },
+      "hard_failure_reasons": {
+        "L0": [],
+        "L1": []
+      }
+    },
+    {
+      "blind_id": "B12",
+      "trial_id": "L11",
+      "child_count": 1,
+      "L0_panel": "B",
+      "L1_panel": "A",
+      "L0_visual_usable": true,
+      "L1_visual_usable": false,
+      "L0_effective_usable": true,
+      "L1_effective_usable": false,
+      "preference": "L0",
+      "L0_primary_label": "unit_success",
+      "L1_primary_label": "hard_angle_bend",
+      "L0_secondary_labels": [],
+      "L1_secondary_labels": [],
+      "L0_notes": "The main sweep remains dominant, the right child separates naturally at the elbow, and the thin up-left terminal completes the crown as one coherent growth unit.",
+      "L1_notes": "The right child is clearly attached and the hierarchy is readable, but the short left terminal drops down-left from the crown and breaks tangent continuity.",
+      "pair_notes": "The child structure is comparably clear, but only B preserves terminal direction and whole-unit continuity.",
+      "review_confidence": 0.97,
+      "hard_valid": {
+        "L0": true,
+        "L1": true
+      },
+      "hard_failure_reasons": {
+        "L0": [],
+        "L1": []
+      }
+    }
+  ]
+}

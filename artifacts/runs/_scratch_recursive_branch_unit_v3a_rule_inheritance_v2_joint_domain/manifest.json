@@ -1,0 +1,76 @@
+{
+  "artifacts": [
+    "planning_failure_4101.json",
+    "planning_failure_4103.json",
+    "contact_sheet.png",
+    "contact_sheet_debug.png",
+    "contact_sheet_units.png",
+    "contact_sheet_repeat_2x.png",
+    "seed_variation.json",
+    "visual_review.json"
+  ],
+  "claim_boundary": "This retained failure tests rule inheritance on frozen v23 L1/L2. It does not reject recursive growth with capacity-aware L2 planning.",
+  "created_at_utc": "2026-07-21T18:05:10.804528+00:00",
+  "decision": "V3A frozen-L1-L2 recursion does not advance to edge-goal propagation.",
+  "generation_policy": {
+    "candidate_count": 1,
+    "repair_count": 0,
+    "resample_count": 0,
+    "retry_count": 0,
+    "validation_feedback_consumed": false
+  },
+  "geometry_kernel_id": "whole_local_bezier_plus_rule_inheriting_tertiary_v3a",
+  "issues_by_seed": {
+    "4101": [
+      "unit.7.tertiary.1: empty joint parent/side domain; secondary_7a_lat:-1:clearance:secondary_6b_lat; secondary_7a_lat:1:chord_envelope_or_flower,visible_envelope; secondary_7b_lat:-1:clearance:primary_7_free; secondary_7b_lat:1:clearance:secondary_6b_lat"
+    ],
+    "4102": [],
+    "4103": [
+      "unit.1.tertiary.2: empty joint parent/side domain; secondary_1b_lat:-1:chord_envelope_or_flower,visible_envelope; secondary_1b_lat:1:clearance:secondary_1b_lat"
+    ]
+  },
+  "output_dir": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\_scratch_recursive_branch_unit_v3a_rule_inheritance_v2_joint_domain",
+  "plan_id": "proto_sw_1_3_recursive_branch_units_v3a_rule_inheritance",
+  "planning_failed_seed_ids": [
+    4101,
+    4103
+  ],
+  "planning_failures": {
+    "4101": {
+      "candidate_count": 1,
+      "failure_type": "PlanningFailure",
+      "message": "unit.7.tertiary.1: empty joint parent/side domain; secondary_7a_lat:-1:clearance:secondary_6b_lat; secondary_7a_lat:1:chord_envelope_or_flower,visible_envelope; secondary_7b_lat:-1:clearance:primary_7_free; secondary_7b_lat:1:clearance:secondary_6b_lat",
+      "repair_count": 0,
+      "resample_count": 0,
+      "retry_count": 0,
+      "seed": 4101
+    },
+    "4103": {
+      "candidate_count": 1,
+      "failure_type": "PlanningFailure",
+      "message": "unit.1.tertiary.2: empty joint parent/side domain; secondary_1b_lat:-1:chord_envelope_or_flower,visible_envelope; secondary_1b_lat:1:clearance:secondary_1b_lat",
+      "repair_count": 0,
+      "resample_count": 0,
+      "retry_count": 0,
+      "seed": 4103
+    }
+  },
+  "profile": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\run57_reproduction\\01_skeleton_analysis\\proto_sw_1_3\\skeleton_profile.json",
+  "rule_id": "parent_relative_recursive_child_rule_v3a",
+  "schema": "recursive_branch_unit_v3a_attempt_manifest_v2",
+  "seed_variation_pass": false,
+  "seeds": [
+    4101,
+    4102,
+    4103
+  ],
+  "structural_valid_by_seed": {
+    "4101": false,
+    "4102": true,
+    "4103": false
+  },
+  "successful_seed_ids": [
+    4102
+  ],
+  "visual_status": "fail_structural_before_complete_visual_review"
+}

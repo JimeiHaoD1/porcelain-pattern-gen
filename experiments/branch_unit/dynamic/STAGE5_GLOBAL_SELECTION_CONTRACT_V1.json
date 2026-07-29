@@ -1,0 +1,97 @@
+{
+  "schema": "dynamic_branch_stage5_global_selection_contract_v1",
+  "contract_id": "global_complete_unit_constraint_selection_v1",
+  "stage": "5",
+  "scope": {
+    "branch_skeleton_only": true,
+    "leaves_present": false,
+    "buds_present": false,
+    "curl_heads_present": false,
+    "new_curve_generation_present": false,
+    "curve_mutation_present": false,
+    "candidate_deletion_present": false
+  },
+  "required_inputs": {
+    "explicit_stage4_approval_required": true,
+    "approved_stage4_candidate_pool_is_immutable": true,
+    "all_fifteen_tasks_required": true,
+    "intrinsically_invalid_candidates_are_preserved_but_not_selectable": true
+  },
+  "selection": {
+    "candidate_count_per_lane": 1,
+    "eligible_candidate_rule": "intrinsic_diagnostics.valid == true",
+    "solver": "deterministic_constraint_backtracking",
+    "stop_rule": "first_complete_legal_assignment_in_declared_order",
+    "best_of_n_visual_ranking_used": false,
+    "composite_visual_score_used": false,
+    "validation_guided_retry_used": false,
+    "validation_guided_resample_used": false,
+    "automatic_repair_used": false,
+    "automatic_deletion_used": false,
+    "silent_fallback_used": false
+  },
+  "hard_constraints": {
+    "one_complete_unit_per_approved_lane": true,
+    "selected_candidate_must_be_intrinsically_valid": true,
+    "cross_unit_curve_crossing_allowed": false,
+    "periodic_repeat_crossing_allowed": false,
+    "repeat_shifts_checked": [
+      -1.0,
+      0.0,
+      1.0
+    ],
+    "approved_l1_to_l1_geometry_rechecked": false,
+    "descendant_against_other_unit_l1_checked": true,
+    "descendant_against_other_unit_descendant_checked": true
+  },
+  "deterministic_order": {
+    "lane_order": "fewest_eligible_candidates_then_source_lane_id",
+    "candidate_order": [
+      "declared_role_stratum_priority",
+      "cross_unit_conflict_degree",
+      "candidate_id"
+    ],
+    "role_stratum_priority": {
+      "flower_support": [
+        "lower_wrap_c",
+        "lower_wrap_s",
+        "compact_wrap"
+      ],
+      "terminal_flower_support": [
+        "subordinate_c",
+        "subordinate_s",
+        "compact_subordinate"
+      ],
+      "frontier": [
+        "long_c",
+        "long_s",
+        "outer_hook"
+      ],
+      "primary_sweep": [
+        "nested_s",
+        "staggered_c",
+        "open_asymmetric",
+        "balanced_s",
+        "open_c",
+        "compact_c"
+      ],
+      "balance": [
+        "balanced_s",
+        "nested_s",
+        "staggered_c",
+        "open_asymmetric",
+        "open_c",
+        "compact_c"
+      ]
+    }
+  },
+  "output": {
+    "conflict_graph_saved": true,
+    "selected_complete_composition_saved_when_feasible": true,
+    "infeasible_task_saved_with_blocking_conflicts": true,
+    "single_repeat_preview_saved": true,
+    "triple_repeat_preview_saved": true,
+    "review_state": "global_unit_selection_pending_visual_review",
+    "numeric_checks_cannot_auto_approve_visual_gate": true
+  }
+}

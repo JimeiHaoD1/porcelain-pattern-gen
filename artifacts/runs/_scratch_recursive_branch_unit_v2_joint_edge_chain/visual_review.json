@@ -1,0 +1,45 @@
+{
+  "schema": "recursive_branch_unit_visual_review_v1",
+  "review_scope": [
+    "three full-strip renders",
+    "three hierarchy debug renders",
+    "twenty-one per-Unit crops",
+    "three horizontal 2x repeats"
+  ],
+  "verdict": "FAIL",
+  "improvements_over_v1": [
+    "The five edge paths no longer form dominant U-shaped return loops.",
+    "All fifteen edge-heirs are shorter than their secondary parent; V1 had twelve of fifteen longer than the parent.",
+    "No direct flower-reserve intrusion is reported; V1 reported twelve such issues.",
+    "Top and bottom edge contacts share a consistent envelope and do not protrude beyond it.",
+    "The three seeds produce visibly different branch placement, direction, length and tertiary allocation."
+  ],
+  "remaining_visual_failures": [
+    "Many secondary roots stay too close to the primary after attachment, creating doubled or fused strokes.",
+    "Several carrier secondaries read as continuations of the primary instead of lateral descendants.",
+    "Most tertiary branches read as small hooks or ticks rather than useful third-level growth.",
+    "Descendants cluster around a few roots while large regions around the flower reserves remain empty.",
+    "The full strip lacks a coherent alternating fan rhythm across neighbouring BranchUnits.",
+    "Seed 4102 contains out-of-bounds lower growth and seed 4103 remains locally tangled near the lower trough.",
+    "The 2x repeat preserves the same local failures and reveals crowded seam-adjacent growth rather than a balanced repeat."
+  ],
+  "quantitative_comparison": {
+    "v1_edge_heir_actual_to_parent": {
+      "median": 1.342,
+      "maximum": 2.955,
+      "count_over_1": 12,
+      "total": 15
+    },
+    "v2_edge_heir_actual_to_parent": {
+      "median": 0.586,
+      "maximum": 0.979,
+      "count_over_1": 0,
+      "total": 15
+    },
+    "v1_direct_flower_intrusion_issue_count": 12,
+    "v2_direct_flower_intrusion_issue_count": 0,
+    "v1_parent_recontact_issue_count": 30,
+    "v2_parent_recontact_issue_count": 31
+  },
+  "decision": "Recursive topology remains worth testing, but V2 does not pass. A next iteration must solve root departure and sibling fan allocation before adding more branches or depth."
+}

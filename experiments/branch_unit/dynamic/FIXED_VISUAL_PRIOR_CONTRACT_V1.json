@@ -1,0 +1,50 @@
+{
+  "schema": "dynamic_branch_fixed_visual_prior_contract_v1",
+  "contract_id": "fixed_visual_prior_from_v23_v1",
+  "source": {
+    "baseline_id": "fixed_depth_7_12_2_v23",
+    "prototype_id": "proto_sw_1_3",
+    "seeds": [
+      4101,
+      4102,
+      4103
+    ],
+    "strict_cross_prototype_claim": false
+  },
+  "required_feature_groups": [
+    "primary_geometry",
+    "primary_root_rhythm",
+    "descendant_geometry",
+    "role_conditioned_descendant_ratios",
+    "curve_shape",
+    "unit_load"
+  ],
+  "role_conditions": [
+    "primary_free",
+    "primary_balance",
+    "primary_flower",
+    "secondary_lateral",
+    "secondary_frontier",
+    "secondary_flower_wrap",
+    "tertiary_lateral"
+  ],
+  "statistics": {
+    "quantiles": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "normalized_length_unit": "repeat_width",
+    "angles_unit": "degrees"
+  },
+  "policies": {
+    "baseline_files_are_immutable": true,
+    "missing_or_invalid_records_are_fatal": true,
+    "silent_default_values_allowed": false,
+    "automatic_repair_allowed": false,
+    "cross_prototype_fixed_baseline_claimed": false,
+    "visual_prior_is_a_distribution_not_a_fixed_topology": true
+  }
+}

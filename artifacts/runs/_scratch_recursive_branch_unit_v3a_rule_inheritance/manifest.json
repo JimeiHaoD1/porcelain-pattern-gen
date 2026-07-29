@@ -1,0 +1,69 @@
+{
+  "artifacts": [
+    "contact_sheet.png",
+    "contact_sheet_debug.png",
+    "contact_sheet_units.png",
+    "contact_sheet_repeat_2x.png",
+    "seed_variation.json",
+    "visual_review.json"
+  ],
+  "claim_boundary": "This artifact tests bounded recursive planning only. Structural validity and seed variation do not imply visual success.",
+  "created_at_utc": "2026-07-21T17:52:23.962105+00:00",
+  "generation_policy": {
+    "candidate_count": 1,
+    "repair_count": 0,
+    "resample_count": 0,
+    "retry_count": 0,
+    "validation_feedback_consumed": false
+  },
+  "geometry_kernel_id": "whole_local_bezier_plus_rule_inheriting_tertiary_v3a",
+  "issues_by_seed": {
+    "4101": [],
+    "4102": [
+      "curve_clearance:secondary_6b_lat:tertiary_7_7a_r1"
+    ],
+    "4103": []
+  },
+  "output_dir": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\_scratch_recursive_branch_unit_v3a_rule_inheritance",
+  "plan_id": "proto_sw_1_3_recursive_branch_units_v3a_rule_inheritance",
+  "profile": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\run57_reproduction\\01_skeleton_analysis\\proto_sw_1_3\\skeleton_profile.json",
+  "schema": "recursive_branch_unit_dev_manifest_v1",
+  "seed_variation_pass": false,
+  "seeds": [
+    4101,
+    4102,
+    4103
+  ],
+  "structural_valid_by_seed": {
+    "4101": true,
+    "4102": false,
+    "4103": true
+  },
+  "topology_by_seed": {
+    "4101": {
+      "levels": {
+        "1": 7,
+        "2": 12,
+        "3": 6
+      },
+      "maximum_depth": 3
+    },
+    "4102": {
+      "levels": {
+        "1": 7,
+        "2": 12,
+        "3": 7
+      },
+      "maximum_depth": 3
+    },
+    "4103": {
+      "levels": {
+        "1": 7,
+        "2": 12,
+        "3": 8
+      },
+      "maximum_depth": 3
+    }
+  },
+  "visual_status": "fail_manual_review"
+}

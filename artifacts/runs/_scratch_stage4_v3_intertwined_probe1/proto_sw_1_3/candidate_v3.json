@@ -1,0 +1,1475 @@
+{
+  "schema": "dynamic_branch_intertwined_unit_curve_candidate_v3",
+  "stage4_version": "v3_intertwined",
+  "curve_contract_id": "dynamic_branchunit_long_sweep_intertwined_compilation_stage4_v3",
+  "candidate_id": "proto_sw_1_3__seed_4101__raw_1__plan_v4__stage4_v3_raw_1",
+  "task_id": "proto_sw_1_3__seed_4101__raw_1",
+  "prototype_id": "proto_sw_1_3",
+  "seed": 4101,
+  "classification": {
+    "flower_branch_relation": {
+      "family_id": "SW-1_valley_filling",
+      "generation_control": true,
+      "label_en": "valley filling and flower-side wrapping",
+      "label_zh": "谷部填充与花旁包绕"
+    },
+    "pattern_skeleton_class": {
+      "generation_control_in_stage_3_v1": false,
+      "legacy_value": "single_wave",
+      "professional_value": "unassigned"
+    }
+  },
+  "instance_priors": {
+    "density_class": "sparse",
+    "primary_sweep_class": "few_long_sweeps",
+    "side_rhythm": "sparse_asymmetric_alternation",
+    "flower_relation_emphasis": "support_without_mandatory_wrap",
+    "source_observation_counts_used_as_fixed_targets": false
+  },
+  "coordinate_system": {
+    "canvas_bounds": [
+      0.0,
+      0.0,
+      1.0,
+      1.1875
+    ],
+    "coordinate_system": "repeat_width_isotropic",
+    "horizontal_domain": "one_period_with_ghost_neighbors",
+    "repeat_x_range": [
+      0.0,
+      1.0
+    ]
+  },
+  "branch_units": [
+    {
+      "branch_unit_id": "BU01",
+      "primary_curve_id": "BU01.L1",
+      "actual_l2_count": 2,
+      "actual_l3_count": 1,
+      "l2_specs": [
+        {
+          "curve_id": "BU01.L2.1",
+          "level": "L2",
+          "parent_curve_id": "BU01.L1",
+          "mount_fraction": 0.4,
+          "length_class": "long",
+          "target_chord_length": 0.179858555,
+          "turn_sign": 1,
+          "shape_mode": "C"
+        },
+        {
+          "curve_id": "BU01.L2.2",
+          "level": "L2",
+          "parent_curve_id": "BU01.L1",
+          "mount_fraction": 0.6,
+          "length_class": "medium",
+          "target_chord_length": 0.154195604,
+          "turn_sign": -1,
+          "shape_mode": "C"
+        }
+      ],
+      "l3_specs": [
+        {
+          "curve_id": "BU01.L3.1",
+          "level": "L3",
+          "parent_curve_id": "BU01.L2.1",
+          "mount_fraction": 0.58,
+          "target_chord_length": 0.099567151,
+          "turn_sign": -1,
+          "shape_mode": "C"
+        }
+      ],
+      "child_rhythm_policy": "sparse_asymmetric_alternation",
+      "selected_side_pattern": [
+        1,
+        -1
+      ],
+      "source_child_count_envelope": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "topology_selected_before_final_diagnostics": true,
+      "curve_ids": [
+        "BU01.L1",
+        "BU01.L2.1",
+        "BU01.L2.2",
+        "BU01.L3.1"
+      ],
+      "selected_pattern_id": "BU01.pattern_2",
+      "selected_local_score": 25.50743452,
+      "selection_trace": {
+        "dependent_context_rows": [
+          {
+            "curve_id": "BU01.L2.1",
+            "context_score": 12.514401349,
+            "context": {
+              "backbone": 0.0,
+              "flowers": 0.0,
+              "bounds": 0.0,
+              "other_primaries": 12.514401349,
+              "parent_recontact": 0.0
+            }
+          },
+          {
+            "curve_id": "BU01.L2.2",
+            "context_score": 12.49303317,
+            "context": {
+              "backbone": 0.0,
+              "flowers": 0.0,
+              "bounds": 0.0,
+              "other_primaries": 12.49303317,
+              "parent_recontact": 0.0
+            }
+          },
+          {
+            "curve_id": "BU01.L3.1",
+            "context_score": 0.0,
+            "orientation_candidate_count": 2
+          }
+        ]
+      }
+    },
+    {
+      "branch_unit_id": "BU02",
+      "primary_curve_id": "BU02.L1",
+      "actual_l2_count": 1,
+      "actual_l3_count": 0,
+      "l2_specs": [
+        {
+          "curve_id": "BU02.L2.1",
+          "level": "L2",
+          "parent_curve_id": "BU02.L1",
+          "mount_fraction": 0.6,
+          "length_class": "long",
+          "target_chord_length": 0.176022666,
+          "turn_sign": -1,
+          "shape_mode": "S"
+        }
+      ],
+      "l3_specs": [],
+      "child_rhythm_policy": "sparse_asymmetric_alternation",
+      "selected_side_pattern": [
+        -1
+      ],
+      "source_child_count_envelope": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "topology_selected_before_final_diagnostics": true,
+      "curve_ids": [
+        "BU02.L1",
+        "BU02.L2.1"
+      ],
+      "selected_pattern_id": "BU02.pattern_2",
+      "selected_local_score": 27.096544984,
+      "selection_trace": {
+        "dependent_context_rows": [
+          {
+            "curve_id": "BU02.L2.1",
+            "context_score": 27.096544984,
+            "context": {
+              "backbone": 14.499998586,
+              "flowers": 0.0,
+              "bounds": 0.0,
+              "other_primaries": 12.596546398,
+              "parent_recontact": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "branch_unit_id": "BU03",
+      "primary_curve_id": "BU03.L1",
+      "actual_l2_count": 1,
+      "actual_l3_count": 0,
+      "l2_specs": [
+        {
+          "curve_id": "BU03.L2.1",
+          "level": "L2",
+          "parent_curve_id": "BU03.L1",
+          "mount_fraction": 0.6,
+          "length_class": "long",
+          "target_chord_length": 0.170939613,
+          "turn_sign": 1,
+          "shape_mode": "S"
+        }
+      ],
+      "l3_specs": [],
+      "child_rhythm_policy": "sparse_asymmetric_alternation",
+      "selected_side_pattern": [
+        1
+      ],
+      "source_child_count_envelope": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "topology_selected_before_final_diagnostics": true,
+      "curve_ids": [
+        "BU03.L1",
+        "BU03.L2.1"
+      ],
+      "selected_pattern_id": "BU03.pattern_1",
+      "selected_local_score": 12.571685284,
+      "selection_trace": {
+        "dependent_context_rows": [
+          {
+            "curve_id": "BU03.L2.1",
+            "context_score": 12.571685284,
+            "context": {
+              "backbone": 0.0,
+              "flowers": 0.0,
+              "bounds": 0.0,
+              "other_primaries": 12.571685284,
+              "parent_recontact": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "branch_unit_id": "BU04",
+      "primary_curve_id": "BU04.L1",
+      "actual_l2_count": 2,
+      "actual_l3_count": 0,
+      "l2_specs": [
+        {
+          "curve_id": "BU04.L2.1",
+          "level": "L2",
+          "parent_curve_id": "BU04.L1",
+          "mount_fraction": 0.4,
+          "length_class": "long",
+          "target_chord_length": 0.16254247,
+          "turn_sign": 1,
+          "shape_mode": "C"
+        },
+        {
+          "curve_id": "BU04.L2.2",
+          "level": "L2",
+          "parent_curve_id": "BU04.L1",
+          "mount_fraction": 0.6,
+          "length_class": "medium",
+          "target_chord_length": 0.144110178,
+          "turn_sign": 1,
+          "shape_mode": "S"
+        }
+      ],
+      "l3_specs": [],
+      "child_rhythm_policy": "sparse_asymmetric_alternation",
+      "selected_side_pattern": [
+        1,
+        1
+      ],
+      "source_child_count_envelope": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "topology_selected_before_final_diagnostics": true,
+      "curve_ids": [
+        "BU04.L1",
+        "BU04.L2.1",
+        "BU04.L2.2"
+      ],
+      "selected_pattern_id": "BU04.pattern_1",
+      "selected_local_score": 39.961665693,
+      "selection_trace": {
+        "dependent_context_rows": [
+          {
+            "curve_id": "BU04.L2.1",
+            "context_score": 12.579421676,
+            "context": {
+              "backbone": 0.0,
+              "flowers": 0.0,
+              "bounds": 0.0,
+              "other_primaries": 12.579421676,
+              "parent_recontact": 0.0
+            }
+          },
+          {
+            "curve_id": "BU04.L2.2",
+            "context_score": 12.54349194,
+            "context": {
+              "backbone": 0.0,
+              "flowers": 0.0,
+              "bounds": 0.0,
+              "other_primaries": 12.54349194,
+              "parent_recontact": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "branch_unit_id": "BU05",
+      "primary_curve_id": "BU05.L1",
+      "actual_l2_count": 1,
+      "actual_l3_count": 0,
+      "l2_specs": [
+        {
+          "curve_id": "BU05.L2.1",
+          "level": "L2",
+          "parent_curve_id": "BU05.L1",
+          "mount_fraction": 0.6,
+          "length_class": "long",
+          "target_chord_length": 0.160381141,
+          "turn_sign": 1,
+          "shape_mode": "C"
+        }
+      ],
+      "l3_specs": [],
+      "child_rhythm_policy": "sparse_asymmetric_alternation",
+      "selected_side_pattern": [
+        1
+      ],
+      "source_child_count_envelope": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "topology_selected_before_final_diagnostics": true,
+      "curve_ids": [
+        "BU05.L1",
+        "BU05.L2.1"
+      ],
+      "selected_pattern_id": "BU05.pattern_1",
+      "selected_local_score": 12.546798444,
+      "selection_trace": {
+        "dependent_context_rows": [
+          {
+            "curve_id": "BU05.L2.1",
+            "context_score": 12.546798444,
+            "context": {
+              "backbone": 0.0,
+              "flowers": 0.0,
+              "bounds": 0.0,
+              "other_primaries": 12.546798444,
+              "parent_recontact": 0.0
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "branch_curves": [
+    {
+      "curve_id": "BU01.L1",
+      "branch_curve_id": "BU01.L1",
+      "branch_unit_id": "BU01",
+      "hierarchy_level": 1,
+      "level": "L1",
+      "parent_curve_id": "backbone",
+      "parent_kind": "backbone",
+      "mount_fraction": 0.025,
+      "structural_role": "primary_sweep",
+      "semantic_function": "valley_space_primary_sweep",
+      "width": 3.0,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.023364102,
+            0.50547598
+          ],
+          "p1": [
+            -0.071189188,
+            0.489741457
+          ],
+          "p2": [
+            -0.065388396,
+            0.467016571
+          ],
+          "p3": [
+            0.040766477,
+            0.43730132
+          ]
+        },
+        {
+          "p0": [
+            0.040766477,
+            0.43730132
+          ],
+          "p1": [
+            0.14692135,
+            0.407586069
+          ],
+          "p2": [
+            0.217044613,
+            0.351827376
+          ],
+          "p3": [
+            0.251136264,
+            0.270025242
+          ]
+        }
+      ],
+      "source_stage3_path_points": [
+        [
+          0.023364102,
+          0.50547598
+        ],
+        [
+          0.244727259,
+          0.276650305
+        ]
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "long_intertwined_primary_sweep_v3",
+        "shape_mode": "C",
+        "entry_opening_degrees": 52.127936757,
+        "exit_release_degrees": 21.426029873,
+        "macro_tip": [
+          0.244727259,
+          0.276650305
+        ],
+        "final_tip": [
+          0.251136264,
+          0.270025242
+        ],
+        "macro_direction_preserved": true,
+        "narrow_occupancy_bow_cap_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.327593052,
+        "path_length": 0.450450416,
+        "arc_ratio": 1.375030433,
+        "maximum_deviation_ratio": 0.211858883,
+        "absolute_turn_degrees": 205.768289525
+      }
+    },
+    {
+      "curve_id": "BU01.L2.1",
+      "branch_curve_id": "BU01.L2.1",
+      "branch_unit_id": "BU01",
+      "hierarchy_level": 2,
+      "level": "L2",
+      "parent_curve_id": "BU01.L1",
+      "parent_kind": "branch_curve",
+      "mount_fraction": 0.4,
+      "structural_role": "secondary_branch",
+      "semantic_function": "intertwined_unit_child_rhythm",
+      "width": 2.1,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.048919493,
+            0.434943809
+          ],
+          "p1": [
+            0.080206565,
+            0.455994956
+          ],
+          "p2": [
+            0.102650617,
+            0.475376118
+          ],
+          "p3": [
+            0.116251649,
+            0.493087295
+          ]
+        },
+        {
+          "p0": [
+            0.116251649,
+            0.493087295
+          ],
+          "p1": [
+            0.12985268,
+            0.510798473
+          ],
+          "p2": [
+            0.142201064,
+            0.540241801
+          ],
+          "p3": [
+            0.153296801,
+            0.58141728
+          ]
+        }
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "parent_local_open_fork_sweep_v3",
+        "actual_parent_curve_id": "BU01.L1",
+        "mount_fraction_is_parent_arc_length_fraction": true,
+        "parent_local_reference_tangent": [
+          0.958360332,
+          -0.285561682
+        ],
+        "entry_opening_degrees": 50.52660989,
+        "travel_additional_turn_degrees": 20.592062435,
+        "exit_release_degrees": 20.392251351,
+        "turn_sign": 1,
+        "shape_mode": "C",
+        "target_chord_length": 0.179858555,
+        "exact_parent_tangent_continuity_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.179858556,
+        "path_length": 0.185641325,
+        "arc_ratio": 1.032151759,
+        "maximum_deviation_ratio": 0.117604531,
+        "absolute_turn_degrees": 40.82932862
+      }
+    },
+    {
+      "curve_id": "BU01.L2.2",
+      "branch_curve_id": "BU01.L2.2",
+      "branch_unit_id": "BU01",
+      "hierarchy_level": 2,
+      "level": "L2",
+      "parent_curve_id": "BU01.L1",
+      "parent_kind": "branch_curve",
+      "mount_fraction": 0.6,
+      "structural_role": "secondary_branch",
+      "semantic_function": "intertwined_unit_child_rhythm",
+      "width": 2.1,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.131991633,
+            0.400556968
+          ],
+          "p1": [
+            0.128977427,
+            0.36908181
+          ],
+          "p2": [
+            0.123456971,
+            0.343331567
+          ],
+          "p3": [
+            0.115430265,
+            0.323306238
+          ]
+        },
+        {
+          "p0": [
+            0.115430265,
+            0.323306238
+          ],
+          "p1": [
+            0.107403559,
+            0.30328091
+          ],
+          "p2": [
+            0.086819181,
+            0.284755347
+          ],
+          "p3": [
+            0.053677131,
+            0.267729549
+          ]
+        }
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "parent_local_open_fork_sweep_v3",
+        "actual_parent_curve_id": "BU01.L1",
+        "mount_fraction_is_parent_arc_length_fraction": true,
+        "parent_local_reference_tangent": [
+          0.874120501,
+          -0.485709121
+        ],
+        "entry_opening_degrees": 66.411284132,
+        "travel_additional_turn_degrees": 25.05320056,
+        "exit_release_degrees": 32.286013147,
+        "turn_sign": -1,
+        "shape_mode": "C",
+        "target_chord_length": 0.154195604,
+        "exact_parent_tangent_continuity_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.154195605,
+        "path_length": 0.16403317,
+        "arc_ratio": 1.063799258,
+        "maximum_deviation_ratio": 0.166381542,
+        "absolute_turn_degrees": 57.110867021
+      }
+    },
+    {
+      "curve_id": "BU01.L3.1",
+      "branch_curve_id": "BU01.L3.1",
+      "branch_unit_id": "BU01",
+      "hierarchy_level": 3,
+      "level": "L3",
+      "parent_curve_id": "BU01.L2.1",
+      "parent_kind": "branch_curve",
+      "mount_fraction": 0.58,
+      "structural_role": "tertiary_branch",
+      "semantic_function": "intertwined_unit_child_rhythm",
+      "width": 1.45,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.126179709,
+            0.508502117
+          ],
+          "p1": [
+            0.146875132,
+            0.5134437
+          ],
+          "p2": [
+            0.163285554,
+            0.516820366
+          ],
+          "p3": [
+            0.175410977,
+            0.518632116
+          ]
+        },
+        {
+          "p0": [
+            0.175410977,
+            0.518632116
+          ],
+          "p1": [
+            0.1875364,
+            0.520443867
+          ],
+          "p2": [
+            0.204249455,
+            0.514981951
+          ],
+          "p3": [
+            0.225550143,
+            0.502246369
+          ]
+        }
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "parent_local_open_fork_sweep_v3",
+        "actual_parent_curve_id": "BU01.L2.1",
+        "mount_fraction_is_parent_arc_length_fraction": true,
+        "parent_local_reference_tangent": [
+          0.484421917,
+          0.874834502
+        ],
+        "entry_opening_degrees": 47.595958837,
+        "travel_additional_turn_degrees": 17.031670747,
+        "exit_release_degrees": 27.272772549,
+        "turn_sign": -1,
+        "shape_mode": "C",
+        "target_chord_length": 0.099567151,
+        "exact_parent_tangent_continuity_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.099567151,
+        "path_length": 0.103941789,
+        "arc_ratio": 1.043936563,
+        "maximum_deviation_ratio": 0.13973954,
+        "absolute_turn_degrees": 44.159449751
+      }
+    },
+    {
+      "curve_id": "BU02.L1",
+      "branch_curve_id": "BU02.L1",
+      "branch_unit_id": "BU02",
+      "hierarchy_level": 1,
+      "level": "L1",
+      "parent_curve_id": "backbone",
+      "parent_kind": "backbone",
+      "mount_fraction": 0.3315,
+      "structural_role": "flower_support",
+      "semantic_function": "support_and_wrap",
+      "width": 3.0,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.268405734,
+            0.955056871
+          ],
+          "p1": [
+            0.264680173,
+            0.936248008
+          ],
+          "p2": [
+            0.263819283,
+            0.920841825
+          ],
+          "p3": [
+            0.265823065,
+            0.908838321
+          ]
+        },
+        {
+          "p0": [
+            0.265823065,
+            0.908838321
+          ],
+          "p1": [
+            0.267826847,
+            0.896834817
+          ],
+          "p2": [
+            0.276497026,
+            0.883091204
+          ],
+          "p3": [
+            0.2918336,
+            0.867607482
+          ]
+        }
+      ],
+      "source_stage3_path_points": [
+        [
+          0.268405734,
+          0.955056871
+        ],
+        [
+          0.2918336,
+          0.867607482
+        ]
+      ],
+      "flower_relation_intents": [
+        {
+          "flower_id": "flower_1",
+          "relation": "support_and_wrap",
+          "approach": "long_trough_sweep_to_flower_collar",
+          "flower_core_entry_allowed": false,
+          "origin_policy": "wave_trough_support",
+          "root_to_flower_boundary_reach": 0.090533201,
+          "contact_point": [
+            0.2918336,
+            0.867607482
+          ]
+        }
+      ],
+      "compiler_trace": {
+        "compiler": "long_intertwined_primary_sweep_v3",
+        "shape_mode": "C",
+        "entry_opening_degrees": 55.095708923,
+        "exit_release_degrees": 29.728972835,
+        "macro_tip": [
+          0.2918336,
+          0.867607482
+        ],
+        "final_tip": [
+          0.2918336,
+          0.867607482
+        ],
+        "macro_direction_preserved": true,
+        "narrow_occupancy_bow_cap_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.090533201,
+        "path_length": 0.095989945,
+        "arc_ratio": 1.060273401,
+        "maximum_deviation_ratio": 0.161560586,
+        "absolute_turn_degrees": 55.712124585
+      }
+    },
+    {
+      "curve_id": "BU02.L2.1",
+      "branch_curve_id": "BU02.L2.1",
+      "branch_unit_id": "BU02",
+      "hierarchy_level": 2,
+      "level": "L2",
+      "parent_curve_id": "BU02.L1",
+      "parent_kind": "branch_curve",
+      "mount_fraction": 0.6,
+      "structural_role": "secondary_branch",
+      "semantic_function": "intertwined_unit_child_rhythm",
+      "width": 2.1,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.269095563,
+            0.898297793
+          ],
+          "p1": [
+            0.244262275,
+            0.863941773
+          ],
+          "p2": [
+            0.220027209,
+            0.850619528
+          ],
+          "p3": [
+            0.196390363,
+            0.858331057
+          ]
+        },
+        {
+          "p0": [
+            0.196390363,
+            0.858331057
+          ],
+          "p1": [
+            0.172753518,
+            0.866042586
+          ],
+          "p2": [
+            0.145115222,
+            0.851945521
+          ],
+          "p3": [
+            0.113475476,
+            0.816039861
+          ]
+        }
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "parent_local_open_fork_sweep_v3",
+        "actual_parent_curve_id": "BU02.L1",
+        "mount_fraction_is_parent_arc_length_fraction": true,
+        "parent_local_reference_tangent": [
+          0.401551332,
+          -0.915836518
+        ],
+        "entry_opening_degrees": 59.535427444,
+        "travel_additional_turn_degrees": 26.279656884,
+        "exit_release_degrees": 20.753674695,
+        "turn_sign": -1,
+        "shape_mode": "S",
+        "target_chord_length": 0.176022666,
+        "exact_parent_tangent_continuity_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.176022666,
+        "path_length": 0.187268955,
+        "arc_ratio": 1.063891144,
+        "maximum_deviation_ratio": 0.081946549,
+        "absolute_turn_degrees": 137.180895991
+      }
+    },
+    {
+      "curve_id": "BU03.L1",
+      "branch_curve_id": "BU03.L1",
+      "branch_unit_id": "BU03",
+      "hierarchy_level": 1,
+      "level": "L1",
+      "parent_curve_id": "backbone",
+      "parent_kind": "backbone",
+      "mount_fraction": 0.4435,
+      "structural_role": "flower_support",
+      "semantic_function": "support_and_wrap",
+      "width": 3.0,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.429897027,
+            0.947476547
+          ],
+          "p1": [
+            0.502025968,
+            0.974460125
+          ],
+          "p2": [
+            0.540423348,
+            0.961855428
+          ],
+          "p3": [
+            0.545089167,
+            0.909662455
+          ]
+        },
+        {
+          "p0": [
+            0.545089167,
+            0.909662455
+          ],
+          "p1": [
+            0.549754986,
+            0.857469482
+          ],
+          "p2": [
+            0.590959116,
+            0.825915894
+          ],
+          "p3": [
+            0.668701557,
+            0.815001689
+          ]
+        }
+      ],
+      "source_stage3_path_points": [
+        [
+          0.429897027,
+          0.947476547
+        ],
+        [
+          0.668701557,
+          0.815001689
+        ]
+      ],
+      "flower_relation_intents": [
+        {
+          "flower_id": "flower_2",
+          "relation": "support_and_wrap",
+          "approach": "long_trough_sweep_to_flower_collar",
+          "flower_core_entry_allowed": false,
+          "origin_policy": "wave_trough_support",
+          "root_to_flower_boundary_reach": 0.273088249,
+          "contact_point": [
+            0.668701557,
+            0.815001689
+          ]
+        }
+      ],
+      "compiler_trace": {
+        "compiler": "long_intertwined_primary_sweep_v3",
+        "shape_mode": "C",
+        "entry_opening_degrees": 48.869292276,
+        "exit_release_degrees": 21.02748001,
+        "macro_tip": [
+          0.668701557,
+          0.815001689
+        ],
+        "final_tip": [
+          0.668701557,
+          0.815001689
+        ],
+        "macro_direction_preserved": true,
+        "narrow_occupancy_bow_cap_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.273088249,
+        "path_length": 0.316833062,
+        "arc_ratio": 1.16018563,
+        "maximum_deviation_ratio": 0.184882024,
+        "absolute_turn_degrees": 180.640789415
+      }
+    },
+    {
+      "curve_id": "BU03.L2.1",
+      "branch_curve_id": "BU03.L2.1",
+      "branch_unit_id": "BU03",
+      "hierarchy_level": 2,
+      "level": "L2",
+      "parent_curve_id": "BU03.L1",
+      "parent_kind": "branch_curve",
+      "mount_fraction": 0.6,
+      "structural_role": "secondary_branch",
+      "semantic_function": "intertwined_unit_child_rhythm",
+      "width": 2.1,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.558423712,
+            0.869375949
+          ],
+          "p1": [
+            0.595359918,
+            0.864993965
+          ],
+          "p2": [
+            0.620030446,
+            0.871294112
+          ],
+          "p3": [
+            0.632435296,
+            0.88827639
+          ]
+        },
+        {
+          "p0": [
+            0.632435296,
+            0.88827639
+          ],
+          "p1": [
+            0.644840146,
+            0.905258669
+          ],
+          "p2": [
+            0.675780506,
+            0.911373627
+          ],
+          "p3": [
+            0.725256377,
+            0.906621264
+          ]
+        }
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "parent_local_open_fork_sweep_v3",
+        "actual_parent_curve_id": "BU03.L1",
+        "mount_fraction_is_parent_arc_length_fraction": true,
+        "parent_local_reference_tangent": [
+          0.535539047,
+          -0.844510467
+        ],
+        "entry_opening_degrees": 50.853774172,
+        "travel_additional_turn_degrees": 19.350636436,
+        "exit_release_degrees": 18.071550821,
+        "turn_sign": 1,
+        "shape_mode": "S",
+        "target_chord_length": 0.170939613,
+        "exact_parent_tangent_continuity_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.170939614,
+        "path_length": 0.178213809,
+        "arc_ratio": 1.04255418,
+        "maximum_deviation_ratio": 0.071220033,
+        "absolute_turn_degrees": 118.389132453
+      }
+    },
+    {
+      "curve_id": "BU04.L1",
+      "branch_curve_id": "BU04.L1",
+      "branch_unit_id": "BU04",
+      "hierarchy_level": 1,
+      "level": "L1",
+      "parent_curve_id": "backbone",
+      "parent_kind": "backbone",
+      "mount_fraction": 0.7625,
+      "structural_role": "primary_sweep",
+      "semantic_function": "valley_space_primary_sweep",
+      "width": 3.0,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.671294891,
+            0.469771141
+          ],
+          "p1": [
+            0.597250467,
+            0.479096063
+          ],
+          "p2": [
+            0.54385025,
+            0.481581398
+          ],
+          "p3": [
+            0.511094242,
+            0.477227144
+          ]
+        },
+        {
+          "p0": [
+            0.511094242,
+            0.477227144
+          ],
+          "p1": [
+            0.478338233,
+            0.472872891
+          ],
+          "p2": [
+            0.431466973,
+            0.430472532
+          ],
+          "p3": [
+            0.370480463,
+            0.350026067
+          ]
+        }
+      ],
+      "source_stage3_path_points": [
+        [
+          0.671294891,
+          0.469771141
+        ],
+        [
+          0.393956406,
+          0.359371126
+        ]
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "long_intertwined_primary_sweep_v3",
+        "shape_mode": "C",
+        "entry_opening_degrees": 43.590572089,
+        "exit_release_degrees": 31.128216399,
+        "macro_tip": [
+          0.393956406,
+          0.359371126
+        ],
+        "final_tip": [
+          0.370480463,
+          0.350026067
+        ],
+        "macro_direction_preserved": true,
+        "narrow_occupancy_bow_cap_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.323771838,
+        "path_length": 0.353698517,
+        "arc_ratio": 1.092431386,
+        "maximum_deviation_ratio": 0.209391859,
+        "absolute_turn_degrees": 59.874031578
+      }
+    },
+    {
+      "curve_id": "BU04.L2.1",
+      "branch_curve_id": "BU04.L2.1",
+      "branch_unit_id": "BU04",
+      "hierarchy_level": 2,
+      "level": "L2",
+      "parent_curve_id": "BU04.L1",
+      "parent_kind": "branch_curve",
+      "mount_fraction": 0.4,
+      "structural_role": "secondary_branch",
+      "semantic_function": "intertwined_unit_child_rhythm",
+      "width": 2.1,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.530266167,
+            0.478888267
+          ],
+          "p1": [
+            0.505633428,
+            0.45166627
+          ],
+          "p2": [
+            0.487850051,
+            0.430388172
+          ],
+          "p3": [
+            0.476916038,
+            0.415053974
+          ]
+        },
+        {
+          "p0": [
+            0.476916038,
+            0.415053974
+          ],
+          "p1": [
+            0.465982025,
+            0.399719776
+          ],
+          "p2": [
+            0.464525224,
+            0.370348321
+          ],
+          "p3": [
+            0.472545636,
+            0.326939608
+          ]
+        }
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "parent_local_open_fork_sweep_v3",
+        "actual_parent_curve_id": "BU04.L1",
+        "mount_fraction_is_parent_arc_length_fraction": true,
+        "parent_local_reference_tangent": [
+          -0.998739152,
+          -0.050200664
+        ],
+        "entry_opening_degrees": 44.981074972,
+        "travel_additional_turn_degrees": 21.341214966,
+        "exit_release_degrees": 31.268413967,
+        "turn_sign": 1,
+        "shape_mode": "C",
+        "target_chord_length": 0.16254247,
+        "exact_parent_tangent_continuity_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.16254247,
+        "path_length": 0.173406024,
+        "arc_ratio": 1.066835173,
+        "maximum_deviation_ratio": 0.174964157,
+        "absolute_turn_degrees": 52.463284048
+      }
+    },
+    {
+      "curve_id": "BU04.L2.2",
+      "branch_curve_id": "BU04.L2.2",
+      "branch_unit_id": "BU04",
+      "hierarchy_level": 2,
+      "level": "L2",
+      "parent_curve_id": "BU04.L1",
+      "parent_kind": "branch_curve",
+      "mount_fraction": 0.6,
+      "structural_role": "secondary_branch",
+      "semantic_function": "intertwined_unit_child_rhythm",
+      "width": 2.1,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.46565075,
+            0.454242221
+          ],
+          "p1": [
+            0.47228878,
+            0.422558885
+          ],
+          "p2": [
+            0.485096939,
+            0.402211276
+          ],
+          "p3": [
+            0.504075226,
+            0.393199397
+          ]
+        },
+        {
+          "p0": [
+            0.504075226,
+            0.393199397
+          ],
+          "p1": [
+            0.523053514,
+            0.384187517
+          ],
+          "p2": [
+            0.534214358,
+            0.362905641
+          ],
+          "p3": [
+            0.537557757,
+            0.329353768
+          ]
+        }
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "parent_local_open_fork_sweep_v3",
+        "actual_parent_curve_id": "BU04.L1",
+        "mount_fraction_is_parent_arc_length_fraction": true,
+        "parent_local_reference_tangent": [
+          -0.789143397,
+          -0.614209003
+        ],
+        "entry_opening_degrees": 63.938513599,
+        "travel_additional_turn_degrees": 18.099059378,
+        "exit_release_degrees": 24.241378592,
+        "turn_sign": 1,
+        "shape_mode": "S",
+        "target_chord_length": 0.144110178,
+        "exact_parent_tangent_continuity_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.144110178,
+        "path_length": 0.150201787,
+        "arc_ratio": 1.0422705,
+        "maximum_deviation_ratio": 0.077332208,
+        "absolute_turn_degrees": 110.278324955
+      }
+    },
+    {
+      "curve_id": "BU05.L1",
+      "branch_curve_id": "BU05.L1",
+      "branch_unit_id": "BU05",
+      "hierarchy_level": 1,
+      "level": "L1",
+      "parent_curve_id": "backbone",
+      "parent_kind": "backbone",
+      "mount_fraction": 0.9,
+      "structural_role": "primary_sweep",
+      "semantic_function": "valley_space_primary_sweep",
+      "width": 3.0,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.86755352,
+            0.379083379
+          ],
+          "p1": [
+            0.850817547,
+            0.316837753
+          ],
+          "p2": [
+            0.836204198,
+            0.265203348
+          ],
+          "p3": [
+            0.823713472,
+            0.224180163
+          ]
+        },
+        {
+          "p0": [
+            0.823713472,
+            0.224180163
+          ],
+          "p1": [
+            0.811222746,
+            0.183156978
+          ],
+          "p2": [
+            0.819890529,
+            0.131548463
+          ],
+          "p3": [
+            0.849716821,
+            0.069354619
+          ]
+        }
+      ],
+      "source_stage3_path_points": [
+        [
+          0.86755352,
+          0.379083379
+        ],
+        [
+          0.849716821,
+          0.069354619
+        ]
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "long_intertwined_primary_sweep_v3",
+        "shape_mode": "C",
+        "entry_opening_degrees": 60.721142139,
+        "exit_release_degrees": 28.916887892,
+        "macro_tip": [
+          0.849716821,
+          0.069354619
+        ],
+        "final_tip": [
+          0.849716821,
+          0.069354619
+        ],
+        "macro_direction_preserved": true,
+        "narrow_occupancy_bow_cap_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.310241926,
+        "path_length": 0.321546514,
+        "arc_ratio": 1.036437975,
+        "maximum_deviation_ratio": 0.123740337,
+        "absolute_turn_degrees": 44.224750764
+      }
+    },
+    {
+      "curve_id": "BU05.L2.1",
+      "branch_curve_id": "BU05.L2.1",
+      "branch_unit_id": "BU05",
+      "hierarchy_level": 2,
+      "level": "L2",
+      "parent_curve_id": "BU05.L1",
+      "parent_kind": "branch_curve",
+      "mount_fraction": 0.6,
+      "structural_role": "secondary_branch",
+      "semantic_function": "intertwined_unit_child_rhythm",
+      "width": 2.1,
+      "cubic_segments": [
+        {
+          "p0": [
+            0.818374893,
+            0.192777096
+          ],
+          "p1": [
+            0.842204861,
+            0.167567312
+          ],
+          "p2": [
+            0.863183562,
+            0.149770036
+          ],
+          "p3": [
+            0.881310996,
+            0.139385268
+          ]
+        },
+        {
+          "p0": [
+            0.881310996,
+            0.139385268
+          ],
+          "p1": [
+            0.89943843,
+            0.129000501
+          ],
+          "p2": [
+            0.927086065,
+            0.124583105
+          ],
+          "p3": [
+            0.964253903,
+            0.126133082
+          ]
+        }
+      ],
+      "flower_relation_intents": [],
+      "compiler_trace": {
+        "compiler": "parent_local_open_fork_sweep_v3",
+        "actual_parent_curve_id": "BU05.L1",
+        "mount_fraction_is_parent_arc_length_fraction": true,
+        "parent_local_reference_tangent": [
+          -0.046089819,
+          -0.9989373
+        ],
+        "entry_opening_degrees": 46.030000341,
+        "travel_additional_turn_degrees": 22.058660713,
+        "exit_release_degrees": 26.940997393,
+        "turn_sign": 1,
+        "shape_mode": "C",
+        "target_chord_length": 0.160381141,
+        "exact_parent_tangent_continuity_used": false
+      },
+      "shape_metrics": {
+        "chord_length": 0.16038114,
+        "path_length": 0.167819823,
+        "arc_ratio": 1.046381282,
+        "maximum_deviation_ratio": 0.141561092,
+        "absolute_turn_degrees": 48.810688405
+      }
+    }
+  ],
+  "unit_topology_digest": "5cf28ba0847383811f89c5b9a1eed2c7a7bdb5fb7a34aa83b963e1dd91d10aec",
+  "selection_trace": {
+    "primary_set": {
+      "candidate_set_count": 32,
+      "selected_variant_indices": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "selected_score": 0.0,
+      "single_forward_global_selection": true
+    },
+    "complete_unit_set": {
+      "schema": "dynamic_branch_complete_unit_set_selection_trace_v2",
+      "candidate_set_count": 128,
+      "selected_variant_indices": [
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      "selected_pattern_ids": [
+        "BU01.pattern_2",
+        "BU02.pattern_2",
+        "BU03.pattern_1",
+        "BU04.pattern_1",
+        "BU05.pattern_1"
+      ],
+      "selected_score": 117.684128925,
+      "selection_is_forward_global_planning_not_retry": true
+    },
+    "unit_candidate_counts": [
+      4,
+      2,
+      2,
+      4,
+      2
+    ],
+    "single_forward_generation": true,
+    "validation_guided_retry_used": false,
+    "automatic_repair_used": false,
+    "automatic_deletion_used": false
+  },
+  "stage_boundary": {
+    "branch_skeleton_only": true,
+    "leaves_present": false,
+    "buds_present": false,
+    "curl_heads_present": false,
+    "editor_integration_present": false
+  },
+  "review": {
+    "status": "original_pending_review",
+    "criteria": [
+      "sw1_support_visibly_originates_in_the_wave_trough",
+      "sw1_1_units_are_long_and_dense_enough",
+      "sw1_3_has_five_complete_units_and_legible_children",
+      "branches_read_as_long_intertwined_vine_sweeps_without_crossing",
+      "no_radial_chicken_foot_clusters",
+      "hierarchy_and_flower_breathing_space_remain_legible"
+    ],
+    "numeric_checks_cannot_auto_approve": true
+  },
+  "input_refs": {
+    "stage3_plan_digest": "c4e25293ed0752f2ef61fd3e953e2727c8f086ca342530e7e28a1f166cb496db",
+    "prototype_analysis_digest": "7a0d46b72974be92cc847816d5678687b31b0e5aa312c2c1b5aceeaefc9123c1"
+  },
+  "candidate_digest": "cbb1cbe5a0f5ae00e25937fa4ec30316eb485eb7dc00cfa20c8512f232507f4d"
+}

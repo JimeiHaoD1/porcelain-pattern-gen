@@ -1,0 +1,66 @@
+{
+  "all_structurally_valid": false,
+  "created_utc": "2026-07-21T12:21:45.907395+00:00",
+  "formal_experiment": false,
+  "generation_policy": {
+    "candidate_count": 1,
+    "repair_count": 0,
+    "resample_count": 0,
+    "retry_count": 0,
+    "validation_feedback_consumed": false
+  },
+  "generator": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\whole_local_branch.py",
+  "geometry_kernel_id": "whole_local_true_lateral_branch_units_n12_v8",
+  "plan_id": "proto_sw_1_3_J0c_true_lateral_units_7_12_2_v12",
+  "protocol": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\WHOLE_LOCAL_N12_DEV_PROTOCOL.md",
+  "prototype_id": "proto_sw_1_3",
+  "repeat_seams": [
+    "left",
+    "right"
+  ],
+  "runner": "D:\\sdxl\\chanzhi_sw_clean\\experiments\\branch_unit\\run_whole_local_n12_dev.py",
+  "schema": "whole_local_true_lateral_n12_dev_v2",
+  "seeds": [
+    {
+      "geometry_hash": "b3771edcb30e1f1b0e67b6f058a0521c64607f83b2d1bcad9c4a2bed230ab795",
+      "issues": [
+        "secondary_2b_lat:out_of_bounds",
+        "curve_clearance:secondary_6b_lat:secondary_7b_lat"
+      ],
+      "plan_digest": "6d85b0cbc372a6c8e88f2ca3e278fa062260e3c496a45d3e7b248e79bc7948ff",
+      "seed": 4101,
+      "valid": false
+    },
+    {
+      "geometry_hash": "25d6505b77810bf4e6278936d7cc439669386b2c9504822b2e9288562a09dd34",
+      "issues": [
+        "curve_clearance:secondary_6b_lat:secondary_7b_lat"
+      ],
+      "plan_digest": "e7bb6af35dc8043bc6dbecdbace2150df1d4679a6173e18989a283e8cdf6e3fc",
+      "seed": 4102,
+      "valid": false
+    },
+    {
+      "geometry_hash": "75e370b2933828e600360a694ef99e3dcf850ee200e3741d17b4e321bbb90210",
+      "issues": [
+        "secondary_3b_lat:lateral_chord_direction_not_sideways",
+        "tertiary_6a_1:flower_intrusion:flower_1"
+      ],
+      "plan_digest": "10e0834ae89a4a002fa374ae91de4a52f128942b02d1d730b3a67502fa1cd31a",
+      "seed": 4103,
+      "valid": false
+    }
+  ],
+  "source_profile": "D:\\sdxl\\chanzhi_sw_clean\\artifacts\\runs\\run57_reproduction\\01_skeleton_analysis\\proto_sw_1_3\\skeleton_profile.json",
+  "standard_proofs_pass": false,
+  "strict_edge_sides": [
+    "top",
+    "bottom"
+  ],
+  "topology": {
+    "primary": 7,
+    "secondary": 12,
+    "tertiary": 2
+  },
+  "visual_gate": "pending_mount_variation_review"
+}

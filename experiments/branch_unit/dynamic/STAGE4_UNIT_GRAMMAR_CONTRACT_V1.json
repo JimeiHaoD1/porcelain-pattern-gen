@@ -1,0 +1,228 @@
+{
+  "schema": "dynamic_branch_stage4_unit_grammar_contract_v1",
+  "contract_id": "complete_unit_grammar_and_legal_candidate_pool_v1",
+  "scope": {
+    "prototype_ids": [
+      "proto_sw_1_1",
+      "proto_sw_1_3",
+      "proto_sw_2_3",
+      "proto_sw_3_1",
+      "proto_sw_3_2"
+    ],
+    "seeds": [
+      4101,
+      4102,
+      4103
+    ],
+    "task_count": 15,
+    "branch_skeleton_only": true,
+    "leaves_present": false,
+    "buds_present": false,
+    "curl_heads_present": false
+  },
+  "required_inputs": {
+    "stage3b_schema": "dynamic_branch_stage3b_l1_flow_manifest_v1",
+    "stage3b_approval_schema": "dynamic_branch_stage3b_approval_v1",
+    "stage3b_approval_status": "l1_flow_approved_for_unit_generation",
+    "stage3a_prior_schema": "dynamic_branch_fixed_visual_prior_v1",
+    "stage2_analysis_schema": "dynamic_branch_prototype_analysis_v1",
+    "approved_l1_geometry_is_immutable": true,
+    "old_stage3_layout_consumed": false,
+    "old_stage4_geometry_consumed": false
+  },
+  "grammar": {
+    "Y-C": {
+      "roles": [
+        "primary_sweep",
+        "balance"
+      ],
+      "l2_count": 1,
+      "l3_count_options": [
+        0,
+        1
+      ]
+    },
+    "Y-2C": {
+      "roles": [
+        "primary_sweep",
+        "balance"
+      ],
+      "l2_count": 2,
+      "l3_count_options": [
+        0,
+        1
+      ]
+    },
+    "Frontier-Y-C": {
+      "roles": [
+        "frontier"
+      ],
+      "l2_count": 1,
+      "l3_count_options": [
+        0,
+        1
+      ]
+    },
+    "FlowerSupport-C": {
+      "roles": [
+        "flower_support"
+      ],
+      "l2_count": 1,
+      "l3_count_options": [
+        0
+      ]
+    },
+    "TerminalSupport-C": {
+      "roles": [
+        "terminal_flower_support"
+      ],
+      "l2_count": 1,
+      "l3_count_options": [
+        0
+      ]
+    }
+  },
+  "candidate_coverage": {
+    "ordinary_grammar_strata": {
+      "Y-C": [
+        "compact_c",
+        "balanced_s",
+        "open_c"
+      ],
+      "Y-2C": [
+        "staggered_c",
+        "nested_s",
+        "open_asymmetric"
+      ]
+    },
+    "frontier_strata": [
+      "long_c",
+      "long_s",
+      "outer_hook"
+    ],
+    "flower_support_strata": [
+      "lower_wrap_c",
+      "lower_wrap_s",
+      "compact_wrap"
+    ],
+    "terminal_support_strata": [
+      "subordinate_c",
+      "subordinate_s",
+      "compact_subordinate"
+    ],
+    "l3_stratum": "tertiary_echo",
+    "enumeration_stops_when_declared_grammar_role_strata_are_covered": true,
+    "best_of_n_selection_in_stage4": false,
+    "global_candidate_selection_in_stage4": false
+  },
+  "sampling": {
+    "method": "seeded_scrambled_halton_quantile_mapping",
+    "generated_once": true,
+    "role_conditioned_empirical_distributions": true,
+    "independent_uniform_sampling_allowed": false,
+    "global_latents_inherited_from_stage3b": [
+      "openness",
+      "sweep_amplitude",
+      "asymmetry",
+      "flow_phase",
+      "curl_energy"
+    ],
+    "validation_guided_retry_allowed": false,
+    "validation_guided_resample_allowed": false,
+    "automatic_repair_allowed": false,
+    "automatic_deletion_allowed": false,
+    "silent_fallback_allowed": false
+  },
+  "geometry": {
+    "curve_type": "cubic_bezier",
+    "l1_source": "approved_stage3b_lane",
+    "mount_fraction_range": [
+      0.30,
+      0.78
+    ],
+    "minimum_sibling_mount_separation": 0.14,
+    "entry_opening_degrees_range": [
+      38.0,
+      68.0
+    ],
+    "c_entry_opening_degrees_range": [
+      38.0,
+      52.0
+    ],
+    "s_entry_opening_degrees_range": [
+      38.0,
+      48.0
+    ],
+    "s_internal_turn_degrees_range": [
+      38.0,
+      48.0
+    ],
+    "flower_wrap_c_entry_opening_degrees_range": [
+      52.0,
+      64.0
+    ],
+    "c_internal_turn_degrees_range": [
+      8.0,
+      18.0
+    ],
+    "c_handle_ratio_range": [
+      0.3,
+      0.42
+    ],
+    "minimum_immediate_departure_distance": 0.006,
+    "ordinary_child_parent_length_ratio_range": [
+      0.38,
+      0.82
+    ],
+    "frontier_child_parent_length_ratio_range": [
+      0.38,
+      0.95
+    ],
+    "support_child_parent_length_ratio_range": [
+      0.28,
+      0.68
+    ],
+    "flower_support_child_parent_length_ratio_range": [
+      0.42,
+      0.66
+    ],
+    "terminal_support_child_parent_length_ratio_range": [
+      0.34,
+      0.76
+    ],
+    "tertiary_parent_length_ratio_range": [
+      0.24,
+      0.58
+    ],
+    "occupancy_radius": 0.010
+  },
+  "intrinsic_hard_constraints": [
+    "valid_parent_graph",
+    "finite_cubic_geometry",
+    "exact_parent_attachment",
+    "minimum_child_mount_separation",
+    "immediate_child_departure",
+    "no_unit_self_crossing",
+    "no_non_root_backbone_crossing",
+    "ordinary_descendants_outside_flower_reserves",
+    "support_terminal_contact_preserved",
+    "role_conditioned_hierarchy_bounds",
+    "no_periodic_self_crossing"
+  ],
+  "failure_policy": {
+    "invalid_candidates_are_preserved_with_reasons": true,
+    "every_approved_l1_lane_requires_a_feasible_complete_unit_candidate": true,
+    "missing_feasible_lane_is_stage_failure": true,
+    "coverage_ceiling_reached_before_completion_is_stage_failure": true
+  },
+  "output": {
+    "schema": "dynamic_branch_stage4_unit_candidate_inventory_v1",
+    "review_state": "unit_candidate_pool_pending_visual_review",
+    "complete_candidate_inventory_required": true,
+    "per_lane_context_atlas_required": true,
+    "role_grammar_atlas_required": true,
+    "proto_sw_1_3_fixed_baseline_comparison_required": true,
+    "whole_composition_selection_present": false,
+    "numeric_checks_can_approve_visual_gate": false
+  }
+}

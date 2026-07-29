@@ -1,0 +1,69 @@
+{
+  "candidate_policy": {
+    "automatic_deletion_allowed": false,
+    "automatic_repair_allowed": false,
+    "one_raw_plan": true,
+    "validation_guided_resample_allowed": false,
+    "validation_guided_retry_allowed": false
+  },
+  "family_id": "SW-3_tangent_terminal",
+  "initial_layout_constraints": {
+    "direction_neighborhood_s": 0.15,
+    "maximum_local_direction_difference_degrees_by_density_class": {
+      "dense": 90.0,
+      "light": 90.0,
+      "moderate": 90.0,
+      "primary_sweep_led": 90.0,
+      "sparse": 90.0
+    },
+    "minimum_periodic_root_spacing_by_density_class": {
+      "dense": 0.065,
+      "light": 0.1,
+      "moderate": 0.075,
+      "primary_sweep_led": 0.1,
+      "sparse": 0.1
+    },
+    "minimum_symbolic_intent_clearance": 0.035,
+    "occupancy_radius_clearance_factor": 0.42,
+    "one_selected_root_per_density_bin": true,
+    "opposite_side_same_root_exception_allowed": false,
+    "role_density_field_consumed_by_global_selection": true,
+    "sw3_remote_terminal_support": {
+      "candidates_per_arc_direction": 4,
+      "maximum_arc_distance_from_nearest_flower_mount": 0.48,
+      "minimum_arc_distance_from_nearest_flower_mount": 0.32,
+      "minimum_departure_alignment": 0.12,
+      "minimum_root_to_flower_boundary_reach": 0.22,
+      "near_flower_stub_allowed": false,
+      "preferred_arc_distance": 0.4
+    },
+    "symbolic_intent_polyline_clearance_is_hard_constraint": true,
+    "symbolic_intent_polyline_crossing_allowed": false
+  },
+  "inputs": {
+    "morphology_digest": "97c9074288ea0d4ab902306bbcf09d3cae2ef13ad91f7d48be8fb3d2a6c030c8",
+    "morphology_profile_path": "artifacts/runs/dynamic_branch_stage25_morphology_v1/proto_sw_3_1/morphology_profile.json",
+    "morphology_profile_sha256": "75388ea2adae4e6bc6cbc3d5d9aca4d90baff48e5b5bf21ad8fb7739abae0c4c",
+    "prototype_analysis_digest": "352a1ab386d17351ac0fd538ffb693507fb6b7e18a29f7096b978face9bb50fd",
+    "prototype_analysis_path": "artifacts/runs/dynamic_branch_stage2_analysis_v1/proto_sw_3_1/prototype_analysis.json",
+    "prototype_analysis_sha256": "f3a3045538c03bb7432b094161ea358b37022a58f0efb2e8898a4325546c9815",
+    "strict_p0_digest": "4258b3cc96056193da1a9e0de9a52e20282ba74e74755c0c1e39df3fa0fffa19",
+    "strict_p0_path": "artifacts/runs/dynamic_branch_stage1_inputs_v1/proto_sw_3_1/strict_p0_v2.json",
+    "strict_p0_sha256": "dcd52f893519e4bbb577b2acf6f6d899d96d3e31aa1d376dc7ebd09e2127749d"
+  },
+  "plan_contract_id": "dynamic_branchunit_symbolic_plan_stage3_v2",
+  "plan_contract_sha256": "18a351e40fdea2078e4418abb2cca76b0b6bfc8da1601a58f235aef5f9a67d69",
+  "prototype_id": "proto_sw_3_1",
+  "raw_candidate_index": 1,
+  "schema": "dynamic_branch_stage3_input_snapshot_v2",
+  "scope": {
+    "branch_skeleton_only": true,
+    "buds_in_current_or_later_scope": false,
+    "curl_heads_in_current_or_later_scope": false,
+    "curve_compilation_deferred": true,
+    "leaves_in_current_or_later_scope": false,
+    "terminal_intent_means_branch_tip_direction_only": true
+  },
+  "seed": 4103,
+  "task_id": "proto_sw_3_1__seed_4103__raw_1"
+}

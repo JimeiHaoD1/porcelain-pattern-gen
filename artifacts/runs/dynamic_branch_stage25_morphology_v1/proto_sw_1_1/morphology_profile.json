@@ -1,0 +1,114 @@
+{
+  "classification": {
+    "flower_branch_relation": {
+      "family_id": "SW-1_valley_filling",
+      "generation_control": true,
+      "label_en": "valley filling and flower-side wrapping",
+      "label_zh": "谷部填充与花旁包绕"
+    },
+    "pattern_skeleton_class": {
+      "generation_control_in_stage_3_v1": false,
+      "legacy_value": "single_wave",
+      "professional_value": "unassigned"
+    }
+  },
+  "evidence": {
+    "legacy_branch_geometry_consumed": false,
+    "legacy_node_rule_used_only_for_family_provenance": true,
+    "legacy_unit_type_consumed": false,
+    "sources": {
+      "legacy_annotation": "newpipe/data/prototype_library/chanzhi/prototypes/proto_sw_1_1.json",
+      "legacy_node_rule": "SW-1_valley_filling",
+      "source_image": "chanzhi_sw_clean/artifacts/analysis/prototype_source_images/proto_sw_1_1.source.png"
+    }
+  },
+  "family_rule": {
+    "flower_binding": "valley_adjacent_wrap_support",
+    "forbidden_patterns": [
+      "uniform_blank_space_filling",
+      "flower_floating_without_support",
+      "branch_crossing_through_flower_core",
+      "prototype_id_specific_fixed_topology"
+    ],
+    "growth_direction_policy": [
+      "grow_toward_a_flower_flank_without_entering_the_flower_reserve",
+      "alternate_two_sides_when_space_allows",
+      "preserve_visible_long_short_and_dense_open_rhythm"
+    ],
+    "preferred_attachment_contexts": [
+      "valley_flank",
+      "flower_side_corridor",
+      "alternating_open_side"
+    ],
+    "required_relationships": [
+      "each_flower_reads_as_supported_from_a_valley_or_valley_flank",
+      "blank_valley_space_is_organized_by_branch_units_not_uniformly_filled",
+      "flower_reserve_keeps_a_clear_breathing_ring"
+    ],
+    "role_policy": {
+      "optional": [
+        "wrap_flower",
+        "primary_sweep",
+        "secondary_sprig"
+      ],
+      "required_per_flower": [
+        "flower_support"
+      ]
+    },
+    "visual_guide_mode": "paired_flower_flank_support"
+  },
+  "generation_boundary": {
+    "candidate_slots_present": false,
+    "curve_geometry_present": false,
+    "dynamic_branch_plan_present": false,
+    "evidence_counts_are_generation_targets": false,
+    "source_branch_geometry_copied": false,
+    "strict_p0_modified": false,
+    "visual_guides_are_non_selecting_semantic_annotations": true
+  },
+  "instance_priors": {
+    "count_usage": "evidence_prior_not_fixed_generation_target",
+    "density_class": "dense",
+    "description_zh": "短支枝较密，上下交替接近平衡，花旁同时存在支撑与包绕关系。",
+    "flower_relation_emphasis": "support_plus_wrap",
+    "primary_sweep_class": "structural_support_dominant",
+    "side_rhythm": "near_balanced_frequent_alternation",
+    "source_observation_counts": {
+      "branch_guide_count": 27,
+      "branch_side_counts": {
+        "down": 13,
+        "up": 14
+      },
+      "flower_anchor_count": 2,
+      "primary_branch_count": 0,
+      "structural_role_counts": {
+        "flower_support": 2,
+        "wrap_flower": 2
+      }
+    }
+  },
+  "morphology_contract_id": "sw_flower_branch_morphology_stage25_v1",
+  "morphology_digest": "170185714c501e29411e4b8158f639e73fc4d8855b7ad15ebeab4115b5c970ba",
+  "policy_id": "flower_branch_relation_plus_instance_priors_v1",
+  "prototype_id": "proto_sw_1_1",
+  "review": {
+    "allowed_states": [
+      "morphology_pending_review",
+      "morphology_approved",
+      "morphology_needs_revision",
+      "morphology_rejected"
+    ],
+    "criteria": [
+      "family_assignment_matches_source",
+      "flower_branch_binding_matches_source",
+      "required_relationships_match_source",
+      "instance_density_and_rhythm_match_source",
+      "forbidden_patterns_are_correct",
+      "no_old_branch_geometry_is_being_copied"
+    ],
+    "status": "morphology_pending_review",
+    "visual_gate_required": true
+  },
+  "schema": "dynamic_branch_morphology_profile_v1",
+  "source_stage2_analysis_digest": "32cb0f0e6f1a8dbeefec4576a7d199e93d0cd7bf585a702ba11f7e581772da02"
+}

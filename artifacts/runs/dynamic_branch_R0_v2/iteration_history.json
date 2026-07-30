@@ -1,0 +1,27 @@
+[
+  {
+    "changes_made": [
+      "Replayed the unchanged Stage 3B and Stage 5 pipeline twice.",
+      "Bound read-only measurements to the frozen R v2 contract.",
+      "Added an independent frozen-hash and stage-scope audit."
+    ],
+    "failed_metrics": [],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/reporting/finalize_R0_v2.py",
+      "tests/branch_unit_R/test_R0_reporting.py",
+      "artifacts/runs/dynamic_branch_R0_v2/**"
+    ],
+    "iteration": 1,
+    "protected_metrics": [
+      "baseline_geometry_changed == false",
+      "baseline_selection_changed == false",
+      "geometry_digest_run1 == geometry_digest_run2",
+      "selection_digest_run1 == selection_digest_run2"
+    ],
+    "result": "PASSED",
+    "root_cause_layer": "",
+    "root_causes": [],
+    "stage": "R0",
+    "stage_start_commit": "8963c1764dbeb9ff4a66c7237e2afd5d24b6528f"
+  }
+]

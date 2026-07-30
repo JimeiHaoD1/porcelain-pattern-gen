@@ -199,6 +199,30 @@ def test_R2B_region_plan_independently_satisfies_frozen_geometry() -> None:
     ) >= 25.0
     assert _horizontal_progress(support["guide_centerline"]) >= 0.20
     assert _horizontal_progress(wrap["guide_centerline"]) >= 0.20
+    troughs = [
+        row
+        for row in analysis["backbone"]["extrema"]
+        if row["kind"] == "trough"
+    ]
+    assert troughs
+    wrap_entry_s = 0.5 * sum(
+        float(value) for value in wrap["entry_s_range"]
+    )
+    trough_distance = min(
+        min(
+            abs(wrap_entry_s - float(row["s"])),
+            1.0 - abs(wrap_entry_s - float(row["s"])),
+        )
+        for row in troughs
+    )
+    assert trough_distance <= 0.05
+    assert wrap["source_geometry"]["origin_feature_kind"] == "trough"
+    assert (
+        wrap["source_geometry"]["origin_feature_id"]
+        in {str(row["feature_id"]) for row in troughs}
+    )
+    assert wrap["source_geometry"]["origin_feature_arc_distance"] == 0.0
+    assert wrap["guide_centerline"][0] == troughs[0]["point"]
 
     flower = analysis["flowers"][0]
     cx, cy = [float(value) for value in flower["center"]]

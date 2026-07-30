@@ -1,27 +1,34 @@
 {
   "stage": "R2B",
-  "iteration": 4,
+  "iteration": 5,
   "failure_codes": [
-    "anti_template_validator_confuses_target_sector_field_with_sector_geometry"
+    "user_visual_rejection_wrap_rooted_on_backbone_mid_slope"
   ],
-  "root_cause_layer": "validator",
-  "root_cause": "The anti-template test searched raw source text for the substring sector and falsely treated the required metadata field target_sector as a sector geometry primitive. All 37 region geometry metrics still passed.",
-  "proposed_change": "Inspect parsed Python identifiers/calls for an actual sector or rectangle geometry primitive instead of rejecting the frozen target_sector metadata field. Do not change region geometry or acceptance thresholds.",
+  "root_cause_layer": "region",
+  "root_cause": "The R2B wrap entry used a distance offset from the flower-nearest backbone point, which placed the orange wrap channel on the middle of a backbone slope instead of near the other detected wave trough.",
+  "proposed_change": "Derive the wrap entry from the Stage-2 detected trough that is distinct from the support entry, then route the wrap channel from that trough through the lower outer flower perimeter. Preserve the frozen topology, region-only generation order, and all existing thresholds.",
   "files_to_modify": [
+    "experiments/branch_unit/dynamic/role_region_plan.py",
     "tests/branch_unit_R/test_R2B_frozen.py",
     "experiments/branch_unit/dynamic/diagnostics/region_finalize_R2B_v2.py"
   ],
   "metrics_expected_to_improve": [
-    "R2B_regression_test_pass"
+    "wrap_entry_trough_arc_distance",
+    "wrap_entry_feature_kind_is_trough",
+    "visual_wrap_origin_is_not_mid_slope"
   ],
   "metrics_that_must_not_regress": [
     "all_37_R2B_geometry_metrics",
-    "region_plan_digest",
-    "frozen_contract_unchanged"
+    "frozen_contract_unchanged",
+    "topology_contract_digest",
+    "new_branch_curve_count",
+    "region_plan_reproducibility"
   ],
   "forbidden_shortcuts": [
-    "remove_required_target_sector_metadata",
-    "drop_anti_template_test",
-    "change_region_geometry_to_satisfy_false_positive"
+    "seed_specific_wrap_root",
+    "fixed_coordinate_wrap_root",
+    "change_frozen_thresholds",
+    "use_branch_geometry_or_selection_as_region_input",
+    "change_only_root_s_metadata_without_moving_geometry"
   ]
 }

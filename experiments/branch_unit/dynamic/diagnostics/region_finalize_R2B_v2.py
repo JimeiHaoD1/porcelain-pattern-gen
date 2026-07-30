@@ -207,6 +207,21 @@ def _metric_rows(
         _guide_angle(support["guide_centerline"]),
         _guide_angle(wrap["guide_centerline"]),
     )
+    troughs = [
+        row
+        for row in analysis["backbone"]["extrema"]
+        if row["kind"] == "trough"
+    ]
+    wrap_entry_s = 0.5 * sum(
+        float(value) for value in wrap["entry_s_range"]
+    )
+    wrap_entry_trough_arc_distance = min(
+        min(
+            abs(wrap_entry_s - float(row["s"])),
+            1.0 - abs(wrap_entry_s - float(row["s"])),
+        )
+        for row in troughs
+    )
     values: dict[str, object] = {
         "new_branch_curve_count": _recursive_key_count(
             plan,
@@ -303,6 +318,14 @@ def _metric_rows(
             _horizontal_progress(wrap["guide_centerline"]),
             9,
         ),
+        "wrap_entry_feature_kind_is_trough": wrap["source_geometry"][
+            "origin_feature_kind"
+        ]
+        == "trough",
+        "wrap_entry_trough_arc_distance": round(
+            wrap_entry_trough_arc_distance,
+            9,
+        ),
         "role_region_flower_forbidden_entry_count": (
             _flower_forbidden_entry_count(
                 plan,
@@ -350,6 +373,8 @@ def _metric_rows(
         "support_wrap_guide_direction_difference_deg": {"minimum": 25.0},
         "horizontal_guide_progress_ratio_support": {"minimum": 0.20},
         "horizontal_guide_progress_ratio_wrap": {"minimum": 0.20},
+        "wrap_entry_feature_kind_is_trough": True,
+        "wrap_entry_trough_arc_distance": {"maximum": 0.05},
         "role_region_flower_forbidden_entry_count": 0,
         "role_region_out_of_bounds_point_count": 0,
         "region_plan_digest_run1_equals_run2": True,
@@ -360,7 +385,11 @@ def _metric_rows(
         passed = (
             float(value) >= float(target["minimum"])
             if isinstance(target, Mapping) and "minimum" in target
-            else value == target
+            else (
+                float(value) <= float(target["maximum"])
+                if isinstance(target, Mapping) and "maximum" in target
+                else value == target
+            )
         )
         rows.append(
             {
@@ -961,6 +990,13 @@ def main() -> None:
                 },
                 {
                     "iteration": 5,
+                    "status": "FAILED_RETRYING",
+                    "failure_code": "user_visual_rejection_wrap_rooted_on_backbone_mid_slope",
+                    "root_cause_layer": "region",
+                    "change": "Moved the wrap region entry to the distinct Stage-2 detected trough and rebuilt its lower outer guide.",
+                },
+                {
+                    "iteration": 6,
                     "status": "PASSED",
                     "region_plan_digest": plan["region_plan_digest"],
                     "metric_pass_count": sum(
@@ -996,6 +1032,7 @@ def main() -> None:
         "- Exactly one support, wrap, balance, flower-forbidden, and backbone-protection region.\n"
         "- Region creation uses Stage-2 analysis plus R2A topology only; new branch curve count is zero.\n"
         "- Support and wrap have distinct entries and guides, share one service flower, and form a soft boundary interlock.\n"
+        "- The wrap entry is rooted at the distinct Stage-2 detected trough, not at the middle of a backbone slope.\n"
         "- Role channels are closed, non-self-crossing, in bounds, outside the flower forbidden region, and reproducible.\n"
         "- The visual artifact contains only the backbone, flower, hard regions, role channels, guides, entry intervals, exits, ids, unit boundary, and seams.\n",
         encoding="utf-8",

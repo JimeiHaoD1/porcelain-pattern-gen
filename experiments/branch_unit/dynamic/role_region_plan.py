@@ -592,11 +592,28 @@ def build_sw1_role_region_plan(
         (1.0, support_half_width * 0.54),
     ]
 
-    nearest_s = float(flower["nearest_backbone_s"])
-    wrap_s = max(
-        0.0,
-        nearest_s - max(3.0 * support_span, 1.35 * protection_rx),
-    )
+    trough_features = [
+        row
+        for row in analysis["backbone"]["extrema"]
+        if row["kind"] == "trough"
+    ]
+    if not trough_features:
+        raise RoleRegionPlanError(
+            "SW1 wrap planning requires a Stage-2 detected trough"
+        )
+
+    def trough_separation(feature: Mapping[str, Any]) -> tuple[float, float, str]:
+        feature_s = float(feature["s"])
+        separation = abs(feature_s - support_s)
+        periodic_separation = min(separation, 1.0 - separation)
+        return (
+            periodic_separation,
+            float(feature["prominence"]),
+            str(feature["feature_id"]),
+        )
+
+    wrap_origin_feature = max(trough_features, key=trough_separation)
+    wrap_s = float(wrap_origin_feature["s"])
     wrap_entry = _entry_range(wrap_s, max(0.018, 0.22 * support_span))
     if not (
         wrap_entry[1] < support_entry[0]
@@ -605,34 +622,33 @@ def build_sw1_role_region_plan(
         raise RoleRegionPlanError("support and wrap entry intervals overlap")
     wrap_root, wrap_tangent = _backbone_at_s(backbone, wrap_s)
     wrap_half_width = minor_radius * 0.145
-    wrap_left = (
+    wrap_lower_right = (
+        center[0] + protection_rx + 1.30 * wrap_half_width,
+        center[1] + protection_ry + 1.05 * wrap_half_width,
+    )
+    wrap_lower = (
+        center[0] + 0.08 * protection_rx,
+        center[1] + protection_ry + 1.12 * wrap_half_width,
+    )
+    wrap_left_lower = (
         center[0] - protection_rx - 1.25 * wrap_half_width,
-        center[1] + 0.14 * protection_ry,
+        center[1] + 0.38 * protection_ry,
     )
     wrap_tangent = _oriented_tangent(
         wrap_tangent,
-        _sub(wrap_left, wrap_root),
+        _sub(wrap_lower_right, wrap_root),
     )
-    wrap_chord = _distance(wrap_root, wrap_left)
+    wrap_chord = _distance(wrap_root, wrap_lower_right)
     wrap_exit = (
-        min(
-            canvas[2] - 1.6 * wrap_half_width,
-            center[0] + 2.45 * protection_rx,
-        ),
-        center[1] + 0.04 * protection_ry,
+        center[0] - protection_rx - 1.05 * wrap_half_width,
+        center[1] - 0.10 * protection_ry,
     )
     wrap_anchors = [
         wrap_root,
         _add(wrap_root, _mul(wrap_tangent, max(0.05, 0.22 * wrap_chord))),
-        wrap_left,
-        (
-            center[0] + 0.08 * protection_rx,
-            center[1] + protection_ry + 1.05 * wrap_half_width,
-        ),
-        (
-            center[0] + protection_rx + 1.15 * wrap_half_width,
-            center[1] + 0.30 * protection_ry,
-        ),
+        wrap_lower_right,
+        wrap_lower,
+        wrap_left_lower,
         wrap_exit,
     ]
     wrap_widths = [
@@ -682,6 +698,19 @@ def build_sw1_role_region_plan(
         analysis=analysis,
         source_region_ids=[str(support["region_id"])],
         protection_flower=flower,
+    )
+    wrap["source_geometry"].update(
+        {
+            "origin_feature_id": str(
+                wrap_origin_feature["feature_id"]
+            ),
+            "origin_feature_kind": str(wrap_origin_feature["kind"]),
+            "origin_feature_s": _round(wrap_s),
+            "origin_feature_arc_distance": 0.0,
+            "origin_policy": (
+                "most_separated_stage2_detected_trough_from_support_entry"
+            ),
+        }
     )
 
     support_guide = [

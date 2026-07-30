@@ -2227,6 +2227,546 @@ def _validate_inputs(
     return prototype_id, family_id
 
 
+def _role_region_width(
+    region: Mapping[str, Any],
+    fraction: float,
+) -> float:
+    profile = [
+        (float(row["u"]), float(row["half_width"]))
+        for row in region["width_profile"]
+    ]
+    u = max(0.0, min(1.0, fraction))
+    if u <= profile[0][0]:
+        return profile[0][1]
+    for (left_u, left_width), (right_u, right_width) in zip(
+        profile,
+        profile[1:],
+    ):
+        if u <= right_u:
+            local = (u - left_u) / (right_u - left_u)
+            return left_width + (right_width - left_width) * local
+    return profile[-1][1]
+
+
+def _wrap_region_stop_index(
+    guide: Sequence[Point],
+    flower: Mapping[str, Any],
+    maximum_span_degrees: float = 175.0,
+) -> int:
+    center = _point(flower["center"], "R2C flower center")
+    rx = float(flower["rx"])
+    ry = float(flower["ry"])
+    angles = [
+        math.atan2(
+            (point[1] - center[1]) / ry,
+            (point[0] - center[0]) / rx,
+        )
+        for point in guide
+    ]
+    unwrapped = [angles[0]]
+    for angle in angles[1:]:
+        while angle - unwrapped[-1] > math.pi:
+            angle -= 2.0 * math.pi
+        while angle - unwrapped[-1] < -math.pi:
+            angle += 2.0 * math.pi
+        unwrapped.append(angle)
+    valid = [
+        index
+        for index in range(1, len(unwrapped))
+        if 90.0
+        <= math.degrees(
+            max(unwrapped[: index + 1]) - min(unwrapped[: index + 1])
+        )
+        <= maximum_span_degrees
+    ]
+    if not valid:
+        raise GlobalL1FlowError(
+            "frozen wrap region has no 90-175 degree connected guide prefix"
+        )
+    return max(valid)
+
+
+def _offset_region_guide(
+    region: Mapping[str, Any],
+    offset_fraction: float,
+    *,
+    stop_index: int | None = None,
+    terminal_point: Point | None = None,
+) -> list[Point]:
+    full_guide = [
+        _point(value, "R2C role region guide")
+        for value in region["guide_centerline"]
+    ]
+    guide = (
+        full_guide
+        if stop_index is None
+        else full_guide[: stop_index + 1]
+    )
+    if len(guide) < 4:
+        raise GlobalL1FlowError("R2C region guide is too short")
+    result: list[Point] = []
+    for index, point in enumerate(guide):
+        before = guide[max(0, index - 1)]
+        after = guide[min(len(guide) - 1, index + 1)]
+        tangent = _unit(
+            _sub(after, before),
+            f"R2C region guide tangent {index}",
+        )
+        normal = (-tangent[1], tangent[0])
+        fade = min(
+            1.0,
+            index / 3.0,
+            (len(guide) - 1 - index) / 3.0,
+        )
+        full_fraction = index / max(1, len(full_guide) - 1)
+        offset = (
+            offset_fraction
+            * _role_region_width(region, full_fraction)
+            * fade
+        )
+        result.append(_add(point, _mul(normal, offset)))
+    if terminal_point is not None:
+        result.append(terminal_point)
+    return result
+
+
+def _region_path_segments(
+    path: Sequence[Point],
+    *,
+    maximum_knot_gap: int = 4,
+    knot_indices: Sequence[int] | None = None,
+) -> list[dict[str, list[float]]]:
+    if knot_indices is None:
+        resolved_knot_indices = list(
+            range(0, len(path), maximum_knot_gap)
+        )
+        if resolved_knot_indices[-1] != len(path) - 1:
+            resolved_knot_indices.append(len(path) - 1)
+    else:
+        resolved_knot_indices = list(knot_indices)
+        if (
+            not resolved_knot_indices
+            or resolved_knot_indices[0] != 0
+            or resolved_knot_indices[-1] != len(path) - 1
+            or resolved_knot_indices != sorted(set(resolved_knot_indices))
+        ):
+            raise GlobalL1FlowError("invalid R2C path knot indices")
+    segments: list[dict[str, list[float]]] = []
+    for left_index, right_index in zip(
+        resolved_knot_indices,
+        resolved_knot_indices[1:],
+    ):
+        start = path[left_index]
+        end = path[right_index]
+        start_before = path[max(0, left_index - 1)]
+        start_after = path[min(len(path) - 1, left_index + 1)]
+        end_before = path[max(0, right_index - 1)]
+        end_after = path[min(len(path) - 1, right_index + 1)]
+        start_tangent = _unit(
+            _sub(start_after, start_before),
+            "R2C start tangent",
+        )
+        end_tangent = _unit(
+            _sub(end_after, end_before),
+            "R2C end tangent",
+        )
+        chord = _distance(start, end)
+        segments.append(
+            _hermite_segment(
+                start,
+                end,
+                start_tangent,
+                end_tangent,
+                chord / 3.0,
+                chord / 3.0,
+            )
+        )
+    return segments
+
+
+def _region_l1_candidate(
+    *,
+    prototype_id: str,
+    role: str,
+    region: Mapping[str, Any],
+    flower: Mapping[str, Any],
+    offset_fraction: float,
+    candidate_index: int,
+) -> dict[str, Any]:
+    if role not in {"flower_support", "flower_wrap"}:
+        raise GlobalL1FlowError(f"unsupported R2C role: {role}")
+    if role == "flower_support":
+        center = _point(flower["center"], "R2C support flower center")
+        terminal = (
+            center[0],
+            center[1] + float(flower["ry"]),
+        )
+        path = _offset_region_guide(
+            region,
+            offset_fraction,
+            terminal_point=terminal,
+        )
+        knot_indices = None
+    else:
+        full_guide = [
+            _point(value, "R2C wrap region guide")
+            for value in region["guide_centerline"]
+        ]
+        stop_index = _wrap_region_stop_index(full_guide, flower)
+        path = _offset_region_guide(
+            region,
+            offset_fraction,
+            stop_index=stop_index,
+        )
+        center = _point(flower["center"], "R2C wrap flower center")
+        rx = float(flower["rx"])
+        ry = float(flower["ry"])
+        engagement_index = next(
+            (
+                index
+                for index, point in enumerate(path[1:], start=1)
+                if math.hypot(
+                    (point[0] - center[0]) / rx,
+                    (point[1] - center[1]) / ry,
+                )
+                <= 1.80
+            ),
+            None,
+        )
+        if engagement_index is None:
+            raise GlobalL1FlowError(
+                "R2C wrap guide never engages the flower service band"
+            )
+        knot_indices = [
+            0,
+            engagement_index,
+            *range(engagement_index + 3, len(path), 3),
+        ]
+        if knot_indices[-1] != len(path) - 1:
+            knot_indices.append(len(path) - 1)
+    segments = _region_path_segments(path, knot_indices=knot_indices)
+    centerline = _sample_segments(segments, samples_per_segment=18)
+    flower_service_start_index: int | None = None
+    flower_service_centerline: list[Point] | None = None
+    if role == "flower_wrap":
+        center = _point(flower["center"], "R2C wrap service center")
+        rx = float(flower["rx"])
+        ry = float(flower["ry"])
+        flower_service_start_index = next(
+            (
+                index
+                for index, point in enumerate(centerline)
+                if math.hypot(
+                    (point[0] - center[0]) / rx,
+                    (point[1] - center[1]) / ry,
+                )
+                <= 1.80
+            ),
+            None,
+        )
+        if flower_service_start_index is None:
+            raise GlobalL1FlowError(
+                "R2C wrap curve never enters its declared flower service phase"
+            )
+        flower_service_centerline = centerline[
+            flower_service_start_index:
+        ]
+    entry = [float(value) for value in region["entry_s_range"]]
+    root_s = 0.5 * (entry[0] + entry[1])
+    candidate_id = (
+        f"{prototype_id}__{region['service_flower_id']}__{role}"
+        f"__region_candidate_{candidate_index}"
+    )
+    geometry_digest = canonical_digest(segments)
+    return {
+        "candidate_id": candidate_id,
+        "curve_id": candidate_id.replace("__region_candidate_", "__L1_"),
+        "slot_id": f"{role}__{region['service_flower_id']}",
+        "role": role,
+        "semantic_role": role,
+        "level": "L1",
+        "parent": "backbone",
+        "parent_curve_id": None,
+        "service_flower_id": str(region["service_flower_id"]),
+        "flower_id": str(region["service_flower_id"]),
+        "region_id": str(region["region_id"]),
+        "source_region_plan_digest": str(region["region_plan_digest"]),
+        "region_plan_regenerated_after_curve_generation": False,
+        "root_s": round(root_s, 9),
+        "root": _round_point(centerline[0]),
+        "target": _round_point(centerline[-1]),
+        "segments": segments,
+        "centerline": [_round_point(point) for point in centerline],
+        "flower_service_centerline": (
+            [
+                _round_point(point)
+                for point in flower_service_centerline
+            ]
+            if flower_service_centerline is not None
+            else None
+        ),
+        "flower_service_start_index": flower_service_start_index,
+        "flower_service_phase_policy": (
+            "first_preselection_centerline_sample_with_normalized_rho_lte_1_80"
+            if role == "flower_wrap"
+            else None
+        ),
+        "root_feature_id": region["source_geometry"].get(
+            "origin_feature_id"
+        ),
+        "root_feature_kind": region["source_geometry"].get(
+            "origin_feature_kind"
+        ),
+        "root_feature_s": region["source_geometry"].get(
+            "origin_feature_s"
+        ),
+        "root_feature_arc_distance": region["source_geometry"].get(
+            "origin_feature_arc_distance"
+        ),
+        "planning_length": round(_polyline_length(centerline), 9),
+        "offset_fraction": round(offset_fraction, 9),
+        "geometry_digest": geometry_digest,
+        "selected": False,
+        "generation_policy": {
+            "region_guide_consumed": True,
+            "variable_width_consumed": True,
+            "posthoc_region_fit_used": False,
+            "validation_guided_retry_used": False,
+            "seed_specific_control_points_used": False,
+        },
+    }
+
+
+def _polyline_crossing_count(
+    first: Sequence[Sequence[float]],
+    second: Sequence[Sequence[float]],
+) -> int:
+    first_points = [_point(value, "first R2C polyline") for value in first]
+    second_points = [_point(value, "second R2C polyline") for value in second]
+
+    def properly_intersects(
+        first_start: Point,
+        first_end: Point,
+        second_start: Point,
+        second_end: Point,
+    ) -> bool:
+        epsilon = 1e-9
+        first_delta = _sub(first_end, first_start)
+        second_delta = _sub(second_end, second_start)
+        denominator = _cross(first_delta, second_delta)
+        if abs(denominator) <= epsilon:
+            return False
+        offset = _sub(second_start, first_start)
+        first_t = _cross(offset, second_delta) / denominator
+        second_t = _cross(offset, first_delta) / denominator
+        return (
+            epsilon < first_t < 1.0 - epsilon
+            and epsilon < second_t < 1.0 - epsilon
+        )
+
+    return sum(
+        properly_intersects(
+            first_points[left - 1],
+            first_points[left],
+            second_points[right - 1],
+            second_points[right],
+        )
+        for left in range(1, len(first_points))
+        for right in range(1, len(second_points))
+    )
+
+
+def _R2C_candidate_hard_rejections(
+    candidate: Mapping[str, Any],
+    analysis: Mapping[str, Any],
+    flower: Mapping[str, Any],
+) -> list[str]:
+    points = [
+        _point(value, "R2C candidate centerline")
+        for value in candidate["centerline"]
+    ]
+    backbone = [
+        _point(row["point"], "R2C backbone")
+        for row in analysis["backbone"]["samples"]
+    ]
+    reasons: list[str] = []
+    if _polyline_crossing_count(
+        [_round_point(point) for point in points[1:]],
+        [_round_point(point) for point in backbone],
+    ):
+        reasons.append("non_root_backbone_crossing")
+    if _polyline_crossing_count(
+        [_round_point(point) for point in points],
+        [_round_point(point) for point in points],
+    ):
+        reasons.append("unit_self_crossing")
+    center = _point(flower["center"], "R2C legality flower center")
+    rx = float(flower["rx"])
+    ry = float(flower["ry"])
+    intrusion_points = (
+        points[:-1]
+        if candidate["role"] == "flower_support"
+        else points
+    )
+    if any(
+        math.hypot(
+            (point[0] - center[0]) / rx,
+            (point[1] - center[1]) / ry,
+        )
+        < 1.0 - 1e-9
+        for point in intrusion_points
+    ):
+        reasons.append("flower_core_intrusion")
+    x_min, y_min, x_max, y_max = [
+        float(value)
+        for value in analysis["coordinate_system"]["canvas_bounds"]
+    ]
+    if any(
+        not (
+            x_min <= point[0] <= x_max
+            and y_min <= point[1] <= y_max
+        )
+        for point in points
+    ):
+        reasons.append("out_of_bounds")
+    return reasons
+
+
+def generate_sw1_region_l1_pair(
+    analysis: Mapping[str, Any],
+    region_plan: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Generate and solve the frozen two-role R2C L1 pair exactly once."""
+
+    validate_role_region_plan(region_plan)
+    if analysis.get("prototype_id") != "proto_sw_1_1":
+        raise GlobalL1FlowError("R2C frozen instance is proto_sw_1_1")
+    if region_plan.get("source_analysis_digest") != analysis.get(
+        "analysis_digest"
+    ):
+        raise GlobalL1FlowError("R2C analysis/region plan digest mismatch")
+    flower_id = str(region_plan["service_flower_id"])
+    flower = next(
+        row
+        for row in analysis["flowers"]
+        if row["flower_id"] == flower_id
+    )
+    regions = {str(row["role"]): row for row in region_plan["regions"]}
+    support_candidates = [
+        _region_l1_candidate(
+            prototype_id="proto_sw_1_1",
+            role="flower_support",
+            region=regions["support_region"],
+            flower=flower,
+            offset_fraction=offset,
+            candidate_index=index,
+        )
+        for index, offset in enumerate((0.40, 0.60, 0.80), start=1)
+    ]
+    wrap_candidates = [
+        _region_l1_candidate(
+            prototype_id="proto_sw_1_1",
+            role="flower_wrap",
+            region=regions["wrap_region"],
+            flower=flower,
+            offset_fraction=offset,
+            candidate_index=index,
+        )
+        for index, offset in enumerate((-0.80, -0.60, -0.40), start=1)
+    ]
+    for candidate in [*support_candidates, *wrap_candidates]:
+        candidate["hard_rejections"] = _R2C_candidate_hard_rejections(
+            candidate,
+            analysis,
+            flower,
+        )
+    legal_pairs: list[tuple[float, dict[str, Any], dict[str, Any]]] = []
+    for support in support_candidates:
+        for wrap in wrap_candidates:
+            if support["hard_rejections"] or wrap["hard_rejections"]:
+                continue
+            crossing_count = _polyline_crossing_count(
+                support["centerline"],
+                wrap["centerline"],
+            )
+            if crossing_count:
+                continue
+            score = (
+                abs(float(support["offset_fraction"]) - 0.60)
+                + abs(float(wrap["offset_fraction"]) + 0.60)
+                + 0.01
+                * (
+                    float(support["planning_length"])
+                    + float(wrap["planning_length"])
+                )
+            )
+            legal_pairs.append((score, support, wrap))
+    if not legal_pairs:
+        raise GlobalL1FlowError(
+            "R2C frozen support/wrap regions have no non-crossing L1 pair"
+        )
+    _, selected_support, selected_wrap = min(
+        legal_pairs,
+        key=lambda row: (
+            row[0],
+            row[1]["candidate_id"],
+            row[2]["candidate_id"],
+        ),
+    )
+    selected_ids = {
+        str(selected_support["candidate_id"]),
+        str(selected_wrap["candidate_id"]),
+    }
+    all_candidates = [*support_candidates, *wrap_candidates]
+    for candidate in all_candidates:
+        candidate["selected"] = str(candidate["candidate_id"]) in selected_ids
+    selected = [selected_support, selected_wrap]
+    return {
+        "schema": "dynamic_branch_R2C_sw1_region_l1_pair_v2",
+        "prototype_id": "proto_sw_1_1",
+        "service_flower_id": flower_id,
+        "source_region_plan_digest": str(
+            region_plan["region_plan_digest"]
+        ),
+        "region_plan_regenerated_after_curve_generation": False,
+        "stage_scope": {
+            "selected_L1_count": 2,
+            "support_L1_count": 1,
+            "wrap_L1_count": 1,
+            "L2_count": 0,
+            "L3_count": 0,
+        },
+        "candidate_count_per_region": {
+            str(regions["support_region"]["region_id"]): len(
+                support_candidates
+            ),
+            str(regions["wrap_region"]["region_id"]): len(wrap_candidates),
+        },
+        "candidate_inventory": all_candidates,
+        "selected_curves": selected,
+        "solver": {
+            "mode": "single_forward_region_pair_solve",
+            "pair_count": len(support_candidates) * len(wrap_candidates),
+            "legal_pair_count": len(legal_pairs),
+            "validation_guided_retry_used": False,
+            "best_of_n_render_selection_used": False,
+        },
+        "pair_digest": canonical_digest(
+            {
+                "source_region_plan_digest": region_plan[
+                    "region_plan_digest"
+                ],
+                "selected_geometry_digests": [
+                    row["geometry_digest"] for row in selected
+                ],
+                "candidate_geometry_digests": [
+                    row["geometry_digest"] for row in all_candidates
+                ],
+            }
+        ),
+    }
+
+
 def generate_global_l1_flow_plan(
     strict_p0: Mapping[str, Any],
     analysis: Mapping[str, Any],
@@ -2253,6 +2793,7 @@ def generate_global_l1_flow_plan(
         [row["flower_id"] for row in analysis["flowers"]],
     )
     role_region_plan = None
+    region_driven_sw1_pair = None
     if prototype_id == "proto_sw_1_1":
         role_region_plan = build_sw1_role_region_plan(
             analysis,
@@ -2260,6 +2801,10 @@ def generate_global_l1_flow_plan(
             str(analysis["flowers"][0]["flower_id"]),
         )
         validate_role_region_plan(role_region_plan)
+        region_driven_sw1_pair = generate_sw1_region_l1_pair(
+            analysis,
+            role_region_plan,
+        )
     slots = _make_slots(analysis, morphology, count_derivation, latents, seed)
     pools: dict[str, list[dict[str, Any]]] = {}
     inventory_rows: list[dict[str, Any]] = []
@@ -2369,6 +2914,7 @@ def generate_global_l1_flow_plan(
         "motion_policy": str(motion_policy["mode"]),
         "prototype_topology": prototype_topology,
         "role_region_plan": role_region_plan,
+        "region_driven_sw1_pair": region_driven_sw1_pair,
         "count_derivation": count_derivation,
         "slots": [
             {

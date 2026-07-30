@@ -1,0 +1,34 @@
+{
+  "stage": "R2C",
+  "iteration": 7,
+  "failure_codes": [
+    "full_path_rho_stats_include_trough_departure_phase"
+  ],
+  "root_cause_layer": "measurement_scope",
+  "root_cause": "After moving the true curve root to the distant detected trough, the full L1 centerline correctly contains a trough-to-flower departure phase with rho near 4. The flower-edge rho statistic treated that non-wrap departure phase as if it were already wrapping the flower, raising mean_rho to 1.612 while the actual flower service phase remains inside the frozen band.",
+  "proposed_change": "Keep the complete trough-rooted centerline for rendering, channel coverage, crossings, and bounds. Deterministically mark the flower service phase at the first pre-selection guide point with rho <= 1.80 and apply the unchanged wrap span/rho formulas only to that declared phase. Store both point sets and the phase rule in every candidate.",
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/global_l1_flow.py",
+    "tests/branch_unit_R/test_R2C_frozen.py",
+    "experiments/branch_unit/dynamic/diagnostics/region_finalize_R2C_v2.py"
+  ],
+    "metrics_expected_to_improve": [
+    "wrap_mean_rho",
+    "wrap_rho_cv"
+  ],
+  "metrics_that_must_not_regress": [
+    "full_centerline_root_equals_detected_trough",
+    "wrap_span_deg",
+    "minimum_rho",
+    "channel_coverage_uses_full_centerline",
+    "crossings_use_full_centerline",
+    "source_region_plan_digest"
+  ],
+  "forbidden_shortcuts": [
+    "delete_the_trough_departure_from_the_rendered_curve",
+    "choose_phase_start_after_selection",
+    "change_thresholds",
+    "score_only_passing_candidates",
+    "posthoc_region_fit"
+  ]
+}

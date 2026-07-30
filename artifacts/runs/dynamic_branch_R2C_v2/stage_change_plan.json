@@ -1,0 +1,45 @@
+{
+  "stage": "R2C",
+  "stage_start_commit": "73048e3c0ed58ea67a5a576a172499917ca33957",
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/global_l1_flow.py",
+    "experiments/branch_unit/dynamic/branch_unit_grammar_v1.py",
+    "experiments/branch_unit/dynamic/role_region_plan.py",
+    "experiments/branch_unit/dynamic/diagnostics/region_*",
+    "tests/branch_unit_R/test_R2C_*",
+    "artifacts/runs/dynamic_branch_R2C_*"
+  ],
+  "reason_by_file": {
+    "experiments/branch_unit/dynamic/global_l1_flow.py": "Generate three deterministic geometry candidates per frozen support/wrap region, solve one legal independent L1 sibling pair, and attach it to the normal L1 plan before downstream hierarchy generation.",
+    "experiments/branch_unit/dynamic/branch_unit_grammar_v1.py": "Accept the independent L1 flower_wrap role in downstream grammar without compiling it as a support child.",
+    "experiments/branch_unit/dynamic/role_region_plan.py": "Expose read-only region geometry helpers needed to measure variable width and guide progress without regenerating the R2B plan.",
+    "experiments/branch_unit/dynamic/diagnostics/region_*": "Independently recompute every frozen R2C metric and render curve-over-region evidence.",
+    "tests/branch_unit_R/test_R2C_*": "Verify topology, frozen digest consumption, candidate diversity, channel/flower metrics, crossings, bounds, and generation order.",
+    "artifacts/runs/dynamic_branch_R2C_*": "Store the candidate inventory, selected pair, replay, metrics, audits, visual evidence, and checkpoint report."
+  },
+  "expected_metrics_to_improve": [
+    "support_channel_coverage",
+    "support_mean_guide_alignment",
+    "support_p10_guide_alignment",
+    "support_contact_error",
+    "wrap_channel_coverage",
+    "wrap_mean_guide_alignment",
+    "wrap_p10_guide_alignment",
+    "wrap_span_deg",
+    "mean_rho",
+    "rho_cv"
+  ],
+  "protected_metrics": [
+    "source_region_plan_digest == 880a0a03c3cf4321ed750eadb15d02d07e50f98442f55b61ed24ca7e71541688",
+    "support.level == L1",
+    "wrap.level == L1",
+    "support.parent_curve_id == null",
+    "wrap.parent_curve_id == null",
+    "support_wrap_crossing_count == 0",
+    "flower_core_intrusion_count == 0",
+    "backbone_crossing_count == 0",
+    "out_of_bounds_length == 0",
+    "posthoc_region_fit_detected == false"
+  ],
+  "frozen_R2B_region_plan_digest": "880a0a03c3cf4321ed750eadb15d02d07e50f98442f55b61ed24ca7e71541688"
+}

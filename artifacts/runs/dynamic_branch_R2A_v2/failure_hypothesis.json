@@ -1,0 +1,22 @@
+{
+  "failure_codes": [
+    "report_frozen_path_encoding_error"
+  ],
+  "files_to_modify": [
+    "artifacts/runs/dynamic_branch_R2A_*"
+  ],
+  "forbidden_shortcuts": [
+    "role_label_as_geometry_evidence",
+    "core_role_as_L2",
+    "forced_SW3_wrap"
+  ],
+  "iteration": 1,
+  "metrics_expected_to_improve": [
+    "required_artifact_missing_count"
+  ],
+  "metrics_that_must_not_regress": [],
+  "proposed_change": "Use ASCII-safe frozen-file discovery by verified SHA256 during artifact finalization; do not alter implementation, topology, metrics, or thresholds.",
+  "root_cause": "PowerShell here-string transport replaced Chinese frozen filenames with question marks before Python opened them. Topology generation and all R2A acceptance metrics had already passed; only final report packaging stopped.",
+  "root_cause_layer": "validator",
+  "stage": "R2A"
+}

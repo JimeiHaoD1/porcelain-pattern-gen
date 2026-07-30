@@ -1,0 +1,72 @@
+{
+  "schema": "dynamic_branch_R_stage_change_plan_v2",
+  "stage": "R2A",
+  "start_commit": "6c3e09f5e0270b5705cdc96e489976258a633b2a",
+  "frozen_inputs": {
+    "goal_sha256": "071547dc89259b17e285b14c5c06b5ca9ec73b2fb82ffd79904cff4932d8421e",
+    "acceptance_contract_sha256": "b815fccf1e47ae8cb7575498a0b89fb311e99d573d0dbb280ba62a4735d2e77a",
+    "role_spec_sha256": "70c4fb6e5c12e34424a3f477d5d5a3a23f0583617743f961ba370f99a8a85872",
+    "prototype_role_table_sha256": "36dc2aa6be4f404cb44905f01239fb28c3033b2f72834644bb9ca5d587150928",
+    "topology_contract_digest": "195e214afd784983e4d4b236795b22b0058ca2c8fd16121c8c78effc89003a36"
+  },
+  "scope": "Integrate the frozen SW1, SW2, and SW3 role topology into the existing L1 planning and BranchUnit grammar data flow. This stage creates and validates role slots only; it does not generate role regions or optimize role curves.",
+  "whitelist": [
+    "experiments/branch_unit/dynamic/global_l1_flow.py",
+    "experiments/branch_unit/dynamic/branch_unit_grammar_v1.py",
+    "experiments/branch_unit/dynamic/topology_contract_loader.py",
+    "tests/branch_unit_R/test_R2A_*",
+    "artifacts/runs/dynamic_branch_R2A_*"
+  ],
+  "planned_changes": [
+    {
+      "file": "experiments/branch_unit/dynamic/topology_contract_loader.py",
+      "purpose": "Load the committed frozen role table by verified byte hash, validate its canonical topology digest, and materialize per-prototype independent L1 topology slots."
+    },
+    {
+      "file": "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "purpose": "Attach the verified topology contract and topology slots to every formal L1 plan before geometry solving, without changing R1 curve generation."
+    },
+    {
+      "file": "experiments/branch_unit/dynamic/branch_unit_grammar_v1.py",
+      "purpose": "Stop compiling the SW1 core wrap role as an L2 child and stop consuming the legacy SW3 forced-wrap channel."
+    },
+    {
+      "file": "tests/branch_unit_R/test_R2A_frozen.py",
+      "purpose": "Independently recompute family relations from slot level, parent, service flower, and prototype identity; assert every frozen R2A predicate and reject unsupported topologies."
+    }
+  ],
+  "acceptance": {
+    "SW1": [
+      "support_role_slot_exists",
+      "wrap_role_slot_exists",
+      "support.level == L1",
+      "wrap.level == L1",
+      "support.parent == backbone",
+      "wrap.parent == backbone",
+      "support_and_wrap_are_siblings",
+      "wrap_as_support_child == false"
+    ],
+    "SW3": [
+      "remote_support_role_slot_exists",
+      "remote_support.level == L1",
+      "remote_support.parent == backbone",
+      "forced_wrap_slot_exists == false"
+    ],
+    "SW2": [
+      "forced_SW1_topology == false",
+      "forced_SW3_topology == false"
+    ],
+    "common": [
+      "topology_contract_digest_matches_frozen",
+      "unsupported_role_topology_count == 0"
+    ]
+  },
+  "anti_shortcut": [
+    "No R1 threshold or motion-policy change.",
+    "No role-region generation.",
+    "No new role-curve generation.",
+    "No core role represented by an L2 or L3 descendant.",
+    "No implementation-emitted pass label is accepted as topology evidence."
+  ],
+  "status": "planned"
+}

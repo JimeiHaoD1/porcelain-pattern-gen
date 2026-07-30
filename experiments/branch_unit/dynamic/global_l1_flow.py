@@ -18,6 +18,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 from fixed_visual_prior import canonical_digest, validate_fixed_visual_prior
 from prototype_analysis import derive_loop_growth_region
+from topology_contract_loader import materialize_prototype_topology
 
 
 SCHEMA = "dynamic_branch_global_l1_flow_plan_v1"
@@ -2246,6 +2247,10 @@ def generate_global_l1_flow_plan(
     motion_policy = _motion_policy(contract)
     latents = _global_latents(prototype_id, seed)
     count_derivation = _derive_lane_count(prototype_id, analysis, morphology, prior)
+    prototype_topology = materialize_prototype_topology(
+        prototype_id,
+        [row["flower_id"] for row in analysis["flowers"]],
+    )
     slots = _make_slots(analysis, morphology, count_derivation, latents, seed)
     pools: dict[str, list[dict[str, Any]]] = {}
     inventory_rows: list[dict[str, Any]] = []
@@ -2353,6 +2358,7 @@ def generate_global_l1_flow_plan(
         },
         "global_latents": latents,
         "motion_policy": str(motion_policy["mode"]),
+        "prototype_topology": prototype_topology,
         "count_derivation": count_derivation,
         "slots": [
             {

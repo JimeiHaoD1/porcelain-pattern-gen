@@ -325,16 +325,6 @@ def _candidate_strata(
             for stratum in coverage["flower_support_strata"]
         ]
     if role == "terminal_flower_support":
-        if (
-            "flower_wrap_channel" in lane
-            and "TerminalSupport-Wrap" in contract["grammar"]
-        ):
-            return [
-                ("TerminalSupport-Wrap", str(stratum), False)
-                for stratum in coverage[
-                    "terminal_support_wrap_strata"
-                ]
-            ]
         return [
             ("TerminalSupport-C", str(stratum), False)
             for stratum in coverage["terminal_support_strata"]
@@ -350,6 +340,21 @@ def _role_condition(role: str, level: int) -> str:
     if role == "flower_support":
         return "secondary_flower_wrap"
     return "secondary_lateral"
+
+
+def _child_semantic_role(
+    role: str,
+    guide_channel: Mapping[str, Any] | None,
+) -> str:
+    if role == "flower_support":
+        return "flower_support_echo"
+    if guide_channel is not None:
+        return "flower_wrap"
+    if role == "terminal_flower_support":
+        return "terminal_subordinate"
+    if role == "frontier":
+        return "frontier_extension"
+    return "lateral_subordinate"
 
 
 def _local_density_scale(
@@ -1276,7 +1281,8 @@ def _diagnose_candidate(
             enters = False
             for flower in analysis["flowers"]:
                 is_wrap_target = (
-                    curve["semantic_role"] == "flower_wrap"
+                    curve["semantic_role"]
+                    in {"flower_wrap", "flower_support_echo"}
                     and flower["flower_id"] == target_flower_id
                 )
                 if _ellipse_value(
@@ -1447,16 +1453,7 @@ def _build_candidate(
             mount_fraction=mount,
             sign=sign,
             role=role,
-            semantic_role=(
-                "flower_wrap"
-                if role == "flower_support"
-                or guide_channel is not None
-                else "terminal_subordinate"
-                if role == "terminal_flower_support"
-                else "frontier_extension"
-                if role == "frontier"
-                else "lateral_subordinate"
-            ),
+            semantic_role=_child_semantic_role(role, guide_channel),
             level=2,
             prior=prior,
             contract=contract,
@@ -1501,7 +1498,7 @@ def _build_candidate(
     flower_relation = {
         "flower_id": lane["flower_id"],
         "policy": (
-            "sw1_trough_support_with_single_wrap"
+            "sw1_trough_support_with_local_echo"
             if role == "flower_support"
             else "sw3_remote_support_with_guided_flower_wrap"
             if guide_channel is not None

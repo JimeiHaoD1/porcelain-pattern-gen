@@ -1,0 +1,107 @@
+{
+  "entrypoint": "global_l1_flow.generate_global_l1_flow_plan",
+  "plan_digest": "1f4a3033aa8932ea8b50995dedceb0dce27f12257343623f423696873b48a405",
+  "prototype_id": "proto_sw_1_1",
+  "prototype_topology": {
+    "family": "SW1",
+    "hard_relations": {
+      "support_and_wrap_are_siblings": true,
+      "support_and_wrap_service_same_flower": true,
+      "support_and_wrap_use_different_regions": true,
+      "support_and_wrap_use_different_roots": true,
+      "wrap_must_not_be_child_of_support": true
+    },
+    "prototype_id": "proto_sw_1_1",
+    "required_region_role": null,
+    "schema": "dynamic_branch_R_prototype_topology_v2",
+    "slots": [
+      {
+        "curve_id": null,
+        "level": "L1",
+        "materialization_state": "topology_only",
+        "parent": "backbone",
+        "parent_curve_id": null,
+        "region_id": null,
+        "region_role": "support_region",
+        "role": "flower_support",
+        "service_flower_id": "flower_1",
+        "sibling_group_id": "proto_sw_1_1__flower_1",
+        "slot_id": "flower_support__flower_1"
+      },
+      {
+        "curve_id": null,
+        "level": "L1",
+        "materialization_state": "topology_only",
+        "parent": "backbone",
+        "parent_curve_id": null,
+        "region_id": null,
+        "region_role": "wrap_region",
+        "role": "flower_wrap",
+        "service_flower_id": "flower_1",
+        "sibling_group_id": "proto_sw_1_1__flower_1",
+        "slot_id": "flower_wrap__flower_1"
+      },
+      {
+        "curve_id": null,
+        "level": "L1",
+        "materialization_state": "topology_only",
+        "parent": "backbone",
+        "parent_curve_id": null,
+        "region_id": null,
+        "region_role": "balance_region",
+        "role": "balance",
+        "service_flower_id": "flower_1",
+        "sibling_group_id": "proto_sw_1_1__flower_1",
+        "slot_id": "balance__flower_1"
+      },
+      {
+        "curve_id": null,
+        "level": "L1",
+        "materialization_state": "topology_only",
+        "parent": "backbone",
+        "parent_curve_id": null,
+        "region_id": null,
+        "region_role": "support_region",
+        "role": "flower_support",
+        "service_flower_id": "flower_2",
+        "sibling_group_id": "proto_sw_1_1__flower_2",
+        "slot_id": "flower_support__flower_2"
+      },
+      {
+        "curve_id": null,
+        "level": "L1",
+        "materialization_state": "topology_only",
+        "parent": "backbone",
+        "parent_curve_id": null,
+        "region_id": null,
+        "region_role": "wrap_region",
+        "role": "flower_wrap",
+        "service_flower_id": "flower_2",
+        "sibling_group_id": "proto_sw_1_1__flower_2",
+        "slot_id": "flower_wrap__flower_2"
+      },
+      {
+        "curve_id": null,
+        "level": "L1",
+        "materialization_state": "topology_only",
+        "parent": "backbone",
+        "parent_curve_id": null,
+        "region_id": null,
+        "region_role": "balance_region",
+        "role": "balance",
+        "service_flower_id": "flower_2",
+        "sibling_group_id": "proto_sw_1_1__flower_2",
+        "slot_id": "balance__flower_2"
+      }
+    ],
+    "source_sha256": "36dc2aa6be4f404cb44905f01239fb28c3033b2f72834644bb9ca5d587150928",
+    "stage_scope": {
+      "curves_materialized": false,
+      "regions_materialized": false,
+      "topology_materialized": true
+    },
+    "topology_contract_digest": "195e214afd784983e4d4b236795b22b0058ca2c8fd16121c8c78effc89003a36"
+  },
+  "seed": 4101,
+  "topology_is_inside_plan": true
+}

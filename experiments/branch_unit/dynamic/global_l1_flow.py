@@ -1284,6 +1284,13 @@ def _fixed_warp_candidates(
     seed: int,
     motion_policy: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
+    # The tangent-led R path must derive geometry from the current backbone,
+    # flower reserves, and measured free space.  The legacy paired prior stores
+    # seed-indexed cubic geometry and is therefore not a legal R candidate
+    # source, even when its endpoint happens to satisfy the numeric motion
+    # checks.
+    if motion_policy["mode"] == "tangent_led_v1":
+        return []
     if analysis["prototype_id"] != "proto_sw_1_3":
         return []
     templates = prior["paired_primary_templates"][str(seed)]

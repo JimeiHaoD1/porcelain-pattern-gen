@@ -1,0 +1,34 @@
+{
+  "conditional_files_if_acceptance_fails": [
+    "experiments/branch_unit/dynamic/global_l1_flow.py",
+    "experiments/branch_unit/dynamic/contracts/runtime/global_l1_flow_R1_v2.json"
+  ],
+  "expected_metrics_to_improve": [],
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/diagnostics/l1_finalize_R1_v2.py",
+    "tests/branch_unit_R/test_R1_frozen.py",
+    "artifacts/runs/dynamic_branch_R1_v2/**"
+  ],
+  "protected_metrics": [
+    "root_tangent_error_deg <= 15",
+    "maximum_tangent_error_to_selected_flow_first_15pct <= 20",
+    "out_of_bounds_length == 0",
+    "L1_L1_crossing_count == 0",
+    "periodic_L1_crossing_count == 0",
+    "non_root_backbone_crossing_count == 0"
+  ],
+  "reason_by_file": {
+    "artifacts/runs/dynamic_branch_R1_v2/**": "Publish the complete five-prototype three-seed R1 evidence.",
+    "experiments/branch_unit/dynamic/contracts/runtime/global_l1_flow_R1_v2.json": "Only if the implementation requires a frozen-runtime policy representation without changing thresholds.",
+    "experiments/branch_unit/dynamic/diagnostics/l1_finalize_R1_v2.py": "Independently bind R1 geometry measurements to the frozen v2 contract and stage audit.",
+    "experiments/branch_unit/dynamic/global_l1_flow.py": "Only if frozen R1 measurements expose a mechanism-level L1 motion failure.",
+    "tests/branch_unit_R/test_R1_frozen.py": "Verify every frozen R1 threshold and required gate."
+  },
+  "stage": "R1",
+  "stage_start_commit": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+  "stage_status": "PASSED",
+  "whitelist_check": {
+    "frozen_goal_section": "R1 whitelist",
+    "pass": true
+  }
+}

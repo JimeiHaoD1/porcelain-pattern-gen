@@ -1,0 +1,56 @@
+[
+  {
+    "changes_made": [],
+    "failed_metrics": [
+      "fixed_coordinate_template_detected",
+      "seed_specific_patch_detected"
+    ],
+    "files_changed": [
+      "artifacts/runs/dynamic_branch_R1_v2_iteration1_fixed_prior/**"
+    ],
+    "iteration": 1,
+    "protected_metrics": [
+      "root_tangent_error_deg <= 15",
+      "maximum_tangent_error_to_selected_flow_first_15pct <= 20",
+      "out_of_bounds_length == 0",
+      "L1_L1_crossing_count == 0",
+      "periodic_L1_crossing_count == 0",
+      "non_root_backbone_crossing_count == 0"
+    ],
+    "result": "FAILED_RETRYING",
+    "root_cause_layer": "geometry",
+    "root_causes": [
+      "R1 admitted seed-indexed fixed_warp_visual_prior cubics for proto_sw_1_3."
+    ],
+    "stage": "R1",
+    "stage_start_commit": "770a57eeca63bcdb5c0be505ee7a65b2313b8096"
+  },
+  {
+    "changes_made": [
+      "Disabled seed-indexed fixed geometry candidates for tangent_led_v1.",
+      "Recomputed all fifteen cases twice.",
+      "Verified zero fixed-prior source channels in every published plan and inventory."
+    ],
+    "failed_metrics": [],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/diagnostics/l1_finalize_R1_v2.py",
+      "tests/branch_unit_R/test_R1_frozen.py",
+      "artifacts/runs/dynamic_branch_R1_v2/**"
+    ],
+    "iteration": 2,
+    "protected_metrics": [
+      "root_tangent_error_deg <= 15",
+      "maximum_tangent_error_to_selected_flow_first_15pct <= 20",
+      "out_of_bounds_length == 0",
+      "L1_L1_crossing_count == 0",
+      "periodic_L1_crossing_count == 0",
+      "non_root_backbone_crossing_count == 0"
+    ],
+    "result": "PASSED",
+    "root_cause_layer": "geometry",
+    "root_causes": [],
+    "stage": "R1",
+    "stage_start_commit": "770a57eeca63bcdb5c0be505ee7a65b2313b8096"
+  }
+]

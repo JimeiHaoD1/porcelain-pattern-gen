@@ -1,0 +1,38 @@
+{
+  "failure_codes": [
+    "FIXED_COORDINATE_TEMPLATE_DETECTED",
+    "SEED_SPECIFIC_FIXED_PRIOR_CONSUMED"
+  ],
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/global_l1_flow.py"
+  ],
+  "forbidden_shortcuts": [
+    "Do not replace the fixed prior with another prototype-specific coordinate table.",
+    "Do not change frozen thresholds.",
+    "Do not increase random retries.",
+    "Do not delete selected failing curves.",
+    "Do not skip proto_sw_1_3."
+  ],
+  "iteration": 1,
+  "metrics_expected_to_improve": [
+    "fixed_coordinate_template_detected == false",
+    "seed_specific_patch_detected == false"
+  ],
+  "metrics_that_must_not_regress": [
+    "root_tangent_error_deg <= 15",
+    "maximum_tangent_error_to_selected_flow_first_15pct <= 20",
+    "ordinary horizontal_progress_ratio >= 0.30",
+    "support horizontal_progress_ratio >= 0.20",
+    "out_of_bounds_length == 0",
+    "L1_L1_crossing_count == 0",
+    "periodic_L1_crossing_count == 0",
+    "non_root_backbone_crossing_count == 0",
+    "proto_sw_3_2 vertical_long_lane_count == 0"
+  ],
+  "proposed_change": "Disable fixed_warp_visual_prior candidates whenever the active motion policy is tangent_led_v1, preserving the legacy implementation only outside the R execution path.",
+  "resolved": true,
+  "resolved_iteration": 2,
+  "root_cause": "The tangent-led R1 path still admitted proto_sw_1_3 candidates compiled from seed-indexed fixed_warp_visual_prior cubics. Five published plan/inventory files contain that source channel, and the selected seed-4101 plan consumes it.",
+  "root_cause_layer": "geometry",
+  "stage": "R1"
+}

@@ -1,0 +1,252 @@
+[
+  {
+    "changes_made": [
+      "Added two-cubic tangent-led root, bend, and settle motion.",
+      "Added explicit motion features and hard candidate rejection."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "backbone_clearance_at_25pct",
+      "maximum_tangent_error_to_selected_flow_deg"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py"
+    ],
+    "iteration": 1,
+    "result": "FAIL",
+    "root_causes": [
+      "Legacy normal-led departure kept lanes beside the backbone.",
+      "SW-1 support turned before a stable tangent-led departure."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Routed SW-1 support through a below-flower waypoint."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "proto_sw_1_1.seed_4101.support_2.backbone_clearance_at_25pct"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json"
+    ],
+    "iteration": 2,
+    "result": "FAIL",
+    "root_causes": [
+      "Direct support targeting cut toward the flower too early."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Added SW-1-specific departure length and clearance ranges."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "proto_sw_1_3.support_1.maximum_tangent_error_to_selected_flow_deg"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json"
+    ],
+    "iteration": 3,
+    "result": "FAIL",
+    "root_causes": [
+      "SW-1 departure chord was too short for its deep trough turn."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Raised the contract departure chord fraction from 0.20 to 0.22."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "ordinary.maximum_tangent_error_to_selected_flow_deg"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json"
+    ],
+    "iteration": 4,
+    "result": "FAIL",
+    "root_causes": [
+      "Generic departure occupied too little of the first 15 percent."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Enumerated ten region fractions and three legal radial scales."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "global_root_coverage"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json"
+    ],
+    "iteration": 5,
+    "result": "FAIL",
+    "root_causes": [
+      "Candidate roots were sampled too sparsely for six-lane layouts."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Enumerated both tangent flow directions and contract-based trough offsets."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "proto_sw_1_3.seed_4101.support_1.feasible_candidate_count"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json"
+    ],
+    "iteration": 6,
+    "result": "FAIL",
+    "root_causes": [
+      "A single preferred backbone flow direction excluded legal trough mounts."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Added deterministic root-bin, side, and flow-stratified candidate retention."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "proto_sw_2_3.seed_4101.global_solve_feasibility"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json"
+    ],
+    "iteration": 7,
+    "result": "FAIL",
+    "root_causes": [
+      "Score-only candidate truncation erased spatial root diversity."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Retained sufficient deterministic geometry depth per spatial group.",
+      "Preserved beam states by root-occupancy signature.",
+      "Added exact-safe segment bounding-box distance pruning."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "proto_sw_2_3.seed_4102.ordinary_4.global_solve_feasibility"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json"
+    ],
+    "iteration": 8,
+    "result": "FAIL",
+    "root_causes": [
+      "One curve per spatial group did not preserve enough compatible geometry."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Raised the deterministic per-slot expansion cap to 98 candidates for six-lane layouts."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "proto_sw_2_3.seed_4103.ordinary_4.global_solve_feasibility"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json"
+    ],
+    "iteration": 9,
+    "result": "FAIL",
+    "root_causes": [
+      "Candidate caps of 70 and 84 preserved seed 4102 but still truncated the seed 4103 legal combination."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Added full segment-intersection rejection after the root exclusion arc.",
+      "Materialized the stage summary before artifact presence evaluation."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "proto_sw_3_1.seed_4102.ordinary_2.non_root_backbone_crossing_count",
+      "proto_sw_3_2.seed_4101.support_1.non_root_backbone_crossing_count",
+      "proto_sw_3_2.seed_4103.support_1.non_root_backbone_crossing_count",
+      "required_artifact_missing_count"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json",
+      "experiments/branch_unit/dynamic/run_R1_l1_motion.py"
+    ],
+    "iteration": 10,
+    "result": "FAIL",
+    "root_causes": [
+      "Point-clearance sampling did not prove that the segments between samples never crossed the backbone.",
+      "The artifact presence check ran before stage_summary.md was materialized."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Enumerated contract-based SW-3 waypoint widths and below-flower margins.",
+      "Let the existing global solver select separated non-crossing support channels."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [
+      "proto_sw_3_2.seed_4101.support_2.global_solve_feasibility",
+      "proto_sw_3_2.seed_4103.support_2.global_solve_feasibility"
+    ],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json"
+    ],
+    "iteration": 11,
+    "result": "FAIL",
+    "root_causes": [
+      "Both flower supports shared one waypoint width and height, leaving less than the legal lane clearance across the periodic seam."
+    ],
+    "stage": "R1"
+  },
+  {
+    "changes_made": [
+      "Ran all five prototypes and all three fixed seeds.",
+      "Replayed the full matrix twice and generated R1 evidence artifacts."
+    ],
+    "commit_before": "770a57eeca63bcdb5c0be505ee7a65b2313b8096",
+    "failed_metrics": [],
+    "files_changed": [
+      "experiments/branch_unit/dynamic/global_l1_flow.py",
+      "experiments/branch_unit/dynamic/run_stage3b_l1_flow.py",
+      "experiments/branch_unit/dynamic/R1_L1_MOTION_CONTRACT_V1.json",
+      "experiments/branch_unit/dynamic/run_R1_l1_motion.py"
+    ],
+    "iteration": 12,
+    "result": "PASS",
+    "root_causes": [],
+    "stage": "R1"
+  }
+]

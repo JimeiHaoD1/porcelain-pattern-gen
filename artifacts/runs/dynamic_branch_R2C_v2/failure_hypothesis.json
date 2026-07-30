@@ -1,34 +1,35 @@
 {
   "stage": "R2C",
-  "iteration": 7,
+  "iteration": 8,
   "failure_codes": [
-    "full_path_rho_stats_include_trough_departure_phase"
+    "automatic_wrap_correction_still_fails_user_visual_intent"
   ],
-  "root_cause_layer": "measurement_scope",
-  "root_cause": "After moving the true curve root to the distant detected trough, the full L1 centerline correctly contains a trough-to-flower departure phase with rho near 4. The flower-edge rho statistic treated that non-wrap departure phase as if it were already wrapping the flower, raising mean_rho to 1.612 while the actual flower service phase remains inside the frozen band.",
-  "proposed_change": "Keep the complete trough-rooted centerline for rendering, channel coverage, crossings, and bounds. Deterministically mark the flower service phase at the first pre-selection guide point with rho <= 1.80 and apply the unchanged wrap span/rho formulas only to that declared phase. Store both point sets and the phase rule in every candidate.",
+  "root_cause_layer": "visual_intent",
+  "root_cause": "The numeric and topology constraints do not yet encode the user's intended full BranchUnit flow. Continued automatic correction would keep guessing the desired wrap trajectory even when metrics pass.",
+  "proposed_change": "Pause automatic geometry changes and export one complete editable SVG containing the full backbone, all flowers, the current global L1 context, the editable support-wrap target group, and the frozen role-region plan as named toggleable layers. Await the user's editor revision before translating the visual delta back into rules.",
   "files_to_modify": [
-    "experiments/branch_unit/dynamic/global_l1_flow.py",
-    "tests/branch_unit_R/test_R2C_frozen.py",
-    "experiments/branch_unit/dynamic/diagnostics/region_finalize_R2C_v2.py"
+    "experiments/branch_unit/dynamic/diagnostics/region_export_editable_R2C_v2.py",
+    "tests/branch_unit_R/test_R2C_editable_svg.py",
+    "artifacts/runs/dynamic_branch_R2C_v2/editable_full_branchunit.svg",
+    "artifacts/runs/dynamic_branch_R2C_v2/editor_handoff.json"
   ],
-    "metrics_expected_to_improve": [
-    "wrap_mean_rho",
-    "wrap_rho_cv"
+  "metrics_expected_to_improve": [
+    "editable_full_svg_complete",
+    "region_planning_layer_present",
+    "semantic_target_paths_addressable",
+    "user_revision_traceability"
   ],
   "metrics_that_must_not_regress": [
-    "full_centerline_root_equals_detected_trough",
-    "wrap_span_deg",
-    "minimum_rho",
-    "channel_coverage_uses_full_centerline",
-    "crossings_use_full_centerline",
-    "source_region_plan_digest"
+    "current_pair_digest",
+    "frozen_region_plan_digest",
+    "frozen_contract_hashes",
+    "existing_R2C_acceptance_artifacts"
   ],
   "forbidden_shortcuts": [
-    "delete_the_trough_departure_from_the_rendered_curve",
-    "choose_phase_start_after_selection",
-    "change_thresholds",
-    "score_only_passing_candidates",
-    "posthoc_region_fit"
+    "claim_the_current_curve_is_visually_approved",
+    "omit_region_planning_from_the_svg",
+    "flatten_semantic_layers",
+    "continue_to_R2D_before_user_edit",
+    "change_geometry_while_preparing_the_handoff"
   ]
 }

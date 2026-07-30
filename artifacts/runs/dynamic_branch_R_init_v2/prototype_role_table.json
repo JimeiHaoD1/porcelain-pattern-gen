@@ -1,0 +1,87 @@
+{
+  "schema": "dynamic_branch_R_frozen_prototype_role_table_v2",
+  "source": [
+    "branchunit_R/动态_BranchUnit_回环区域优化线_R_冻结验收合同_v2.md",
+    "branchunit_R/动态_BranchUnit_回环区域角色与划分规范_v2.md"
+  ],
+  "families": {
+    "SW1": {
+      "prototype_ids": ["proto_sw_1_1", "proto_sw_1_3"],
+      "required_l1_roles": [
+        {
+          "role": "flower_support",
+          "region_role": "support_region",
+          "level": "L1",
+          "parent": "backbone",
+          "parent_curve_id": null,
+          "maximum_l1_count_per_flower": 1
+        },
+        {
+          "role": "flower_wrap",
+          "region_role": "wrap_region",
+          "level": "L1",
+          "parent": "backbone",
+          "parent_curve_id": null,
+          "maximum_l1_count_per_flower": 1
+        },
+        {
+          "role": "balance",
+          "region_role": "balance_region",
+          "level": "L1",
+          "parent": "backbone",
+          "parent_curve_id": null,
+          "maximum_l1_count_per_flower": 1
+        }
+      ],
+      "hard_relations": {
+        "support_and_wrap_are_siblings": true,
+        "support_and_wrap_service_same_flower": true,
+        "support_and_wrap_use_different_roots": true,
+        "support_and_wrap_use_different_regions": true,
+        "wrap_must_not_be_child_of_support": true
+      }
+    },
+    "SW2": {
+      "prototype_ids": ["proto_sw_2_3"],
+      "required_region_role": "axis_flow_region",
+      "hard_relations": {
+        "preserve_axis_penetrating_identity": true,
+        "force_SW1_topology": false,
+        "force_SW3_topology": false,
+        "guess_fixed_axis_region_template_before_morphology_audit": false
+      }
+    },
+    "SW3": {
+      "prototype_ids": ["proto_sw_3_1", "proto_sw_3_2"],
+      "required_l1_roles": [
+        {
+          "role": "remote_flower_support",
+          "region_role": "remote_support_region",
+          "level": "L1",
+          "parent": "backbone",
+          "parent_curve_id": null,
+          "maximum_l1_count_per_flower": 1
+        },
+        {
+          "role": "balance",
+          "region_role": "balance_region",
+          "level": "L1",
+          "parent": "backbone",
+          "parent_curve_id": null,
+          "maximum_l1_count_per_flower": 1
+        }
+      ],
+      "hard_relations": {
+        "remote_support_required": true,
+        "flower_wrap_required": false,
+        "forced_wrap_generation": false,
+        "wrap_as_support_child": false
+      }
+    }
+  },
+  "global_hard_rules": {
+    "core_roles_are_independent_L1": true,
+    "L2_must_not_replace_core_role": true,
+    "leaves_buds_curl_heads_before_R5": false
+  }
+}

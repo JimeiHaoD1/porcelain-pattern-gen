@@ -1,0 +1,173 @@
+{
+  "schema": "dynamic_branch_R_frozen_region_role_table_v2",
+  "source_role_spec_sha256": "70c4fb6e5c12e34424a3f477d5d5a3a23f0583617743f961ba370f99a8a85872",
+  "generation_order": [
+    "local_coordinate_frame",
+    "hard_constraint_regions",
+    "role_entry_intervals",
+    "guide_centerlines",
+    "variable_width_soft_channels",
+    "family_interlock",
+    "clip_and_capacity",
+    "freeze_before_branch_geometry"
+  ],
+  "priority_order": [
+    "hard_constraint",
+    "core_service",
+    "balance",
+    "settle",
+    "ordinary_fill"
+  ],
+  "regions": [
+    {
+      "role": "flower_forbidden_region",
+      "class": "hard_constraint",
+      "service_relation": "protect_flower_core",
+      "entry_source": null,
+      "path": "closed_expansion_of_flower_ellipse_from_center_rx_ry_and_padding",
+      "exit": null,
+      "adjacency": "support_may_approach_only_lower_target_sector; wrap_runs_outside; all_other_roles_excluded",
+      "families": ["SW1", "SW2", "SW3"],
+      "capacity": null,
+      "forbidden": ["shrink_to_pass_candidate", "axis_aligned_rectangle", "sector_substitute", "fixed_circle_substitute"]
+    },
+    {
+      "role": "backbone_protection_region",
+      "class": "hard_constraint",
+      "service_relation": "prevent_non_root_backbone_crossing_and_long_parallel_sliding",
+      "entry_source": "legal_root_contact_only",
+      "path": "variable_width_closed_band_derived_from_periodic_backbone_samples_and_normals",
+      "exit": "role_curve_must_leave_after_root_and_never_reenter",
+      "adjacency": "higher_priority_than_all_role_channels",
+      "families": ["SW1", "SW2", "SW3"],
+      "capacity": null,
+      "forbidden": ["ordinary_growth_channel", "axis_aligned_rectangle", "reentry_after_root"]
+    },
+    {
+      "role": "seam_guard_region",
+      "class": "hard_constraint",
+      "service_relation": "reserve_periodic_seam_entry_and_continuity",
+      "entry_source": "unit_periodic_seam",
+      "path": "left_and_right_seam_reserve",
+      "exit": "next_repeat_continuation_direction",
+      "adjacency": "settle_or_frontier_only",
+      "families": ["SW1", "SW2", "SW3"],
+      "capacity": null,
+      "forbidden": ["ordinary_branch_cut_at_seam", "discontinuous_settle_exit"]
+    },
+    {
+      "role": "existing_structure_protection_region",
+      "class": "hard_constraint",
+      "service_relation": "protect_StrictP0_structure",
+      "entry_source": null,
+      "path": "StrictP0_structure_protection_geometry",
+      "exit": null,
+      "adjacency": "removed_from_role_available_space",
+      "families": ["SW1", "SW2", "SW3"],
+      "capacity": null,
+      "forbidden": ["consume_old_branch_geometry", "shrink_to_fit_candidate"]
+    },
+    {
+      "role": "support_region",
+      "class": "core_service",
+      "service_relation": "backbone_trough_to_flower_lower_support_sector",
+      "entry_source": "target_flower_nearby_trough_or_trough_flank_s_interval_not_nearest_point",
+      "path": ["inherit_backbone_tangent", "bend_into_below_flower_space", "settle_at_flower_lower_sector"],
+      "exit": "flower_lower_connection_sector",
+      "adjacency": "same_flower_as_wrap; independent_L1_sibling; generated_before_wrap",
+      "families": ["SW1"],
+      "capacity": {"maximum_l1_count": 1, "maximum_l2_count": 0},
+      "forbidden": ["nearest_point_shortcut", "vertical_rise", "straight_connection", "backbone_sliding", "L2_core_replacement", "flower_core_entry", "same_entry_as_wrap"]
+    },
+    {
+      "role": "wrap_region",
+      "class": "core_service",
+      "service_relation": "organized_flower_outer_enclosure_and_return",
+      "entry_source": "independent_side_or_lower_side_backbone_s_interval",
+      "path": ["inherit_backbone_tangent", "enter_from_flower_side_lower_space", "follow_outer_flower_edge_for_quarter_to_half_perimeter", "swing_out_or_return"],
+      "exit": "outward_swing_or_backbone_return_direction",
+      "adjacency": "same_flower_as_support; independent_L1_sibling; concave_convex_boundary_interlock",
+      "families": ["SW1"],
+      "capacity": {"maximum_l1_count": 1, "maximum_l2_count": 0},
+      "forbidden": ["support_L2", "fixed_radius_arc", "fixed_angle_arc", "endpoint_only_relation", "collision_only_avoidance", "mechanical_flower_outline", "mirror_support", "same_root_as_support"]
+    },
+    {
+      "role": "remote_support_region",
+      "class": "core_service",
+      "service_relation": "remote_backbone_entry_horizontal_sweep_to_flower_lower_sector",
+      "entry_source": "backbone_s_interval_far_from_nearest_flower_point",
+      "path": ["horizontal_sweep", "below_flower_passage", "lower_sector_contact"],
+      "exit": "flower_lower_connection_sector",
+      "adjacency": "balance_uses_opposite_remaining_space; wrap_not_forced",
+      "families": ["SW3"],
+      "capacity": {"maximum_l1_count": 1, "maximum_l2_count": 0},
+      "forbidden": ["nearest_point_connection", "forced_wrap", "fixed_two_segment_Hermite", "vertical_rise"]
+    },
+    {
+      "role": "balance_region",
+      "class": "balance",
+      "service_relation": "counterweight_core_service_group_without_flower_connection",
+      "entry_source": "largest_available_opposite_backbone_s_interval_after_core_regions",
+      "path": "horizontal_expansion_in_remaining_sector",
+      "exit": "open_space_away_from_flower_core",
+      "adjacency": "soft_interlock_without_covering_core_channel",
+      "families": ["SW1", "SW3"],
+      "capacity": {"maximum_l1_count": 1, "maximum_l2_count": 0},
+      "length_target_ratio_to_main_service": [0.5, 0.75],
+      "forbidden": ["vertical_lane", "equal_weight_mirror", "point_to_flower_core", "new_visual_center", "default_Y_fork", "core_channel_overlap"]
+    },
+    {
+      "role": "settle_region",
+      "class": "settle",
+      "service_relation": "reduce_curvature_and_density_for_repeat_continuation",
+      "entry_source": "unused_late_unit_backbone_interval",
+      "path": "late_unit_remaining_space_away_from_flower_core",
+      "exit": "backbone_or_next_repeat_continuation_direction",
+      "adjacency": "reserve_before_ordinary_fill",
+      "families": ["SW1", "SW2", "SW3"],
+      "capacity": {"maximum_l1_count": [0, 1], "maximum_l2_count": 0},
+      "forbidden": ["out_of_bounds", "large_curl", "seam_break", "next_entry_conflict", "multi_branch_fill"]
+    },
+    {
+      "role": "ordinary_fill_region",
+      "class": "ordinary_fill",
+      "service_relation": "use_only_final_residual_capacity_without_flower_service",
+      "entry_source": "remaining_backbone_interval_after_core_balance_and_settle",
+      "path": "residual_open_space",
+      "exit": "open_residual_direction",
+      "adjacency": "must_not_enter_core_or_settle_channels",
+      "families": ["SW1", "SW2", "SW3"],
+      "capacity": "derived_from_remaining_space_and_may_be_zero",
+      "forbidden": ["forced_existence", "new_visual_center", "flower_service", "core_channel_overlap", "settle_overlap"]
+    },
+    {
+      "role": "axis_flow_region",
+      "class": "core_service",
+      "service_relation": "preserve_SW2_axis_penetrating_main_motion",
+      "entry_source": "SW2_morphology_backbone_axis_and_blank_space_evidence",
+      "path": "horizontal_axis_penetrating_motion",
+      "exit": "axis_continuation_direction",
+      "adjacency": "flowers_contribute_structure_and_forbidden_boundaries_not_automatic_support_targets",
+      "families": ["SW2"],
+      "capacity": {"maximum_l1_count": 1, "maximum_l2_count": 0},
+      "forbidden": ["forced_SW1_topology", "forced_SW3_topology", "guessed_template_before_morphology_audit", "long_vertical_lane"]
+    }
+  ],
+  "R2B_fixed_instance": {
+    "prototype_id": "proto_sw_1_1",
+    "seed": 4101,
+    "service_flower_id": "flower_1",
+    "required_region_counts": {
+      "support_region": 1,
+      "wrap_region": 1,
+      "balance_region": 1,
+      "flower_forbidden_region": 1,
+      "backbone_protection_region_minimum": 1
+    },
+    "new_branch_curve_count": 0,
+    "seed_affects_geometry": false,
+    "branch_geometry_is_input": false,
+    "selected_candidate_is_input": false,
+    "stage5_selection_is_input": false
+  }
+}

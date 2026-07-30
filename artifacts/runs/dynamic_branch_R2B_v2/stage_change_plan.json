@@ -1,0 +1,43 @@
+{
+  "stage": "R2B",
+  "stage_start_commit": "d4ab9090005fb51d46ec9e37b42889fd02408966",
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/role_region_plan.py",
+    "experiments/branch_unit/dynamic/global_l1_flow.py",
+    "experiments/branch_unit/dynamic/diagnostics/region_*",
+    "tests/branch_unit_R/test_R2B_*",
+    "artifacts/runs/dynamic_branch_R2B_*"
+  ],
+  "reason_by_file": {
+    "experiments/branch_unit/dynamic/role_region_plan.py": "Implement the in-flow, curve-free role-region data layer for the frozen SW1 topology.",
+    "experiments/branch_unit/dynamic/global_l1_flow.py": "Request a frozen region plan before any role candidate geometry is generated and attach only its digest/region ids to later stages.",
+    "experiments/branch_unit/dynamic/diagnostics/region_*": "Independently compute R2B geometry predicates and render the required region-only evidence.",
+    "tests/branch_unit_R/test_R2B_*": "Recompute region validity, generation order, role distinction, and anti-template predicates without trusting implementation pass labels.",
+    "artifacts/runs/dynamic_branch_R2B_*": "Store the mandatory semantic checkpoint, frozen region plan, two-run replay, visual overlay, metrics, audits, and stage report."
+  },
+  "expected_metrics_to_improve": [
+    "support_region_count",
+    "wrap_region_count",
+    "balance_region_count",
+    "support_wrap_boundary_interlock_count",
+    "support_wrap_guide_direction_difference_deg",
+    "horizontal_guide_progress_ratio_support",
+    "horizontal_guide_progress_ratio_wrap"
+  ],
+  "protected_metrics": [
+    "new_branch_curve_count == 0",
+    "branch_geometry_used_as_region_input == false",
+    "selected_candidate_used_as_region_input == false",
+    "stage5_selection_used_as_region_input == false",
+    "frozen_contract_unchanged == true",
+    "topology_contract_digest_matches_frozen == true",
+    "seed_specific_control_points_used == false",
+    "fixed_circle_template_used == false"
+  ],
+  "frozen_hashes": {
+    "goal_sha256": "071547dc89259b17e285b14c5c06b5ca9ec73b2fb82ffd79904cff4932d8421e",
+    "acceptance_contract_sha256": "b815fccf1e47ae8cb7575498a0b89fb311e99d573d0dbb280ba62a4735d2e77a",
+    "role_spec_sha256": "70c4fb6e5c12e34424a3f477d5d5a3a23f0583617743f961ba370f99a8a85872",
+    "topology_contract_digest": "195e214afd784983e4d4b236795b22b0058ca2c8fd16121c8c78effc89003a36"
+  }
+}

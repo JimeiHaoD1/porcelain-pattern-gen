@@ -1,0 +1,27 @@
+{
+  "stage": "R2B",
+  "iteration": 4,
+  "failure_codes": [
+    "anti_template_validator_confuses_target_sector_field_with_sector_geometry"
+  ],
+  "root_cause_layer": "validator",
+  "root_cause": "The anti-template test searched raw source text for the substring sector and falsely treated the required metadata field target_sector as a sector geometry primitive. All 37 region geometry metrics still passed.",
+  "proposed_change": "Inspect parsed Python identifiers/calls for an actual sector or rectangle geometry primitive instead of rejecting the frozen target_sector metadata field. Do not change region geometry or acceptance thresholds.",
+  "files_to_modify": [
+    "tests/branch_unit_R/test_R2B_frozen.py",
+    "experiments/branch_unit/dynamic/diagnostics/region_finalize_R2B_v2.py"
+  ],
+  "metrics_expected_to_improve": [
+    "R2B_regression_test_pass"
+  ],
+  "metrics_that_must_not_regress": [
+    "all_37_R2B_geometry_metrics",
+    "region_plan_digest",
+    "frozen_contract_unchanged"
+  ],
+  "forbidden_shortcuts": [
+    "remove_required_target_sector_metadata",
+    "drop_anti_template_test",
+    "change_region_geometry_to_satisfy_false_positive"
+  ]
+}

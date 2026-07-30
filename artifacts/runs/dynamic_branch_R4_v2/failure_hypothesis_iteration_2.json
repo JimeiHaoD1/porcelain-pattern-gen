@@ -1,0 +1,16 @@
+{
+  "stage": "R4",
+  "iteration": 2,
+  "failure_codes": [
+    "settle_reads_as_short_pasted_wave",
+    "periodic_guard_render_bleeds_across_panels"
+  ],
+  "root_cause_layer": "generated_geometry_and_visualization",
+  "root_cause": "The settle guide is compiled into many small spans over a short chord, producing a decorative wiggle instead of a calm seam-directed exit. Neighbor guards are drawn without panel clipping.",
+  "proposed_change": "Move the settle root earlier in the lower-right corridor, compile the settle guide as one smooth cubic span, extend it toward the seam, and keep periodic validation in the intersection report rather than bleeding guard copies into the contact sheet.",
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/role_region_plan.py",
+    "experiments/branch_unit/dynamic/global_l1_flow.py",
+    "experiments/branch_unit/dynamic/diagnostics/global_generate_R4_visual.py"
+  ]
+}

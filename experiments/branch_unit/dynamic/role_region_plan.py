@@ -1326,13 +1326,177 @@ def validate_sw3_group_region_plan(plan: Mapping[str, Any]) -> None:
     roles = [str(row.get("role")) for row in plan["regions"]]
     if roles.count("balance_region") != 1:
         raise RoleRegionPlanError("R3 SW3 requires exactly one balance region")
-    if plan.get("stage_scope", {}).get("role_region_count") != 2:
+    if plan.get("stage_scope", {}).get("role_region_count") not in {2, 3}:
         raise RoleRegionPlanError("R3 SW3 region count mismatch")
     order = list(plan.get("generation_order", []))
-    if order.index("remote_support_region") > order.index("balance_region"):
+    core_step = (
+        "remote_support_region"
+        if "remote_support_region" in order
+        else "core_flower_group"
+    )
+    if order.index(core_step) > order.index("balance_region"):
         raise RoleRegionPlanError(
             "R3 SW3 balance must be planned after remote support"
         )
+
+
+def build_sw3_global_unit_region_plan(
+    analysis: Mapping[str, Any],
+    topology: Mapping[str, Any],
+    service_flower_id: str,
+) -> dict[str, Any]:
+    """Add an R4 seam-directed settle channel after the full core group."""
+
+    plan = build_sw3_group_region_plan(
+        analysis,
+        topology,
+        service_flower_id,
+    )
+    flower = next(
+        row
+        for row in analysis["flowers"]
+        if row["flower_id"] == service_flower_id
+    )
+    center = _point(flower["center"], "R4 flower center")
+    backbone = analysis["backbone"]["samples"]
+    bounds = [
+        float(value)
+        for value in analysis["coordinate_system"]["canvas_bounds"]
+    ]
+    nearest_s = float(flower["nearest_backbone_s"])
+    settle_s = (nearest_s - 0.275) % 1.0
+    settle_root, settle_tangent = _backbone_at_s(backbone, settle_s)
+    settle_target = (
+        bounds[2] - 0.010,
+        min(
+            bounds[3] - 0.075,
+            max(
+                center[1] + float(flower["protection_ry"]) + 0.07,
+                settle_root[1] - 0.030,
+            ),
+        ),
+    )
+    settle_tangent = _oriented_tangent(
+        settle_tangent,
+        _sub(settle_target, settle_root),
+    )
+    settle_chord = _distance(settle_root, settle_target)
+    normal_options = [
+        (-settle_tangent[1], settle_tangent[0]),
+        (settle_tangent[1], -settle_tangent[0]),
+    ]
+    settle_normal = max(
+        normal_options,
+        key=lambda normal: _distance(
+            _add(
+                _lerp(settle_root, settle_target, 0.48),
+                _mul(normal, 0.10 * settle_chord),
+            ),
+            center,
+        ),
+    )
+    settle_anchors = [
+        settle_root,
+        _add(
+            _add(
+                settle_root,
+                _mul(settle_tangent, 0.22 * settle_chord),
+            ),
+            _mul(settle_normal, 0.04 * settle_chord),
+        ),
+        _add(
+            _lerp(settle_root, settle_target, 0.54),
+            _mul(settle_normal, 0.10 * settle_chord),
+        ),
+        settle_target,
+    ]
+    half_width = min(float(flower["rx"]), float(flower["ry"])) * 0.105
+    settle = _role_region(
+        prototype_id=str(analysis["prototype_id"]),
+        family_id="SW3",
+        role="settle_region",
+        region_id=f"{analysis['prototype_id']}__unit_settle",
+        service_flower_id=service_flower_id,
+        entry_s_range=_entry_range(settle_s, 0.020),
+        anchors=settle_anchors,
+        width_profile=[
+            (0.0, half_width * 0.54),
+            (0.30, half_width * 0.88),
+            (0.60, half_width * 0.74),
+            (1.0, half_width * 0.38),
+        ],
+        target_relation="reduce_density_and_rejoin_seam_direction",
+        target_sector="right_seam_lower_entry",
+        capacity={"maximum_l1_count": 1, "maximum_l2_count": 0},
+        priority=40,
+        overlap_roles=[],
+        forbidden_ids=[
+            f"{analysis['prototype_id']}__{service_flower_id}"
+            "__flower_forbidden",
+            f"{analysis['prototype_id']}__backbone_protection_1",
+        ],
+        analysis=analysis,
+        source_region_ids=[
+            str(row["region_id"])
+            for row in plan["regions"]
+            if row["role"]
+            in {"remote_support_region", "balance_region"}
+        ],
+        protection_flower=flower,
+    )
+    settle["source_geometry"].update(
+        {
+            "core_and_balance_occupancy_computed_first": True,
+            "settle_root_s": _round(settle_s),
+            "terminal_policy": "right_seam_horizontal_continuation",
+            "topology_contract_digest": str(
+                topology["topology_contract_digest"]
+            ),
+        }
+    )
+    plan["plan_id"] = (
+        f"{analysis['prototype_id']}__global_unit_regions_v2"
+    )
+    plan["generation_order"] = [
+        "core_flower_group",
+        "compute_remaining_capacity",
+        "balance_region",
+        "reserve_seam_entry",
+        "settle_region",
+        "freeze_before_branch_geometry",
+    ]
+    plan["stage_scope"] = {
+        "new_branch_curve_count": 0,
+        "role_region_count": 3,
+        "hard_constraint_region_count": 2,
+        "region_plan_created_before_branch_geometry": True,
+    }
+    plan["regions"].append(settle)
+    plan["region_plan_digest"] = None
+    digest_source = json.loads(json.dumps(plan))
+    for region in digest_source["regions"]:
+        region["region_plan_digest"] = None
+    region_plan_digest = canonical_digest(digest_source)
+    plan["region_plan_digest"] = region_plan_digest
+    for region in plan["regions"]:
+        region["region_plan_digest"] = region_plan_digest
+    return plan
+
+
+def validate_sw3_global_unit_region_plan(
+    plan: Mapping[str, Any],
+) -> None:
+    validate_sw3_remote_support_region_plan(plan)
+    roles = [str(row.get("role")) for row in plan["regions"]]
+    if roles.count("balance_region") != 1:
+        raise RoleRegionPlanError("R4 requires exactly one balance region")
+    if roles.count("settle_region") != 1:
+        raise RoleRegionPlanError("R4 requires exactly one settle region")
+    if plan.get("stage_scope", {}).get("role_region_count") != 3:
+        raise RoleRegionPlanError("R4 role region count mismatch")
+    order = list(plan.get("generation_order", []))
+    if order.index("balance_region") > order.index("settle_region"):
+        raise RoleRegionPlanError("R4 settle must be planned after balance")
 
 
 def validate_role_region_plan(plan: Mapping[str, Any]) -> None:

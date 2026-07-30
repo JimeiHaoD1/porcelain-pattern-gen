@@ -21,9 +21,11 @@ from prototype_analysis import derive_loop_growth_region
 from role_region_plan import (
     build_sw1_role_region_plan,
     build_sw3_group_region_plan,
+    build_sw3_global_unit_region_plan,
     build_sw3_remote_support_region_plan,
     validate_role_region_plan,
     validate_sw3_group_region_plan,
+    validate_sw3_global_unit_region_plan,
     validate_sw3_remote_support_region_plan,
 )
 from topology_contract_loader import materialize_prototype_topology
@@ -2400,7 +2402,12 @@ def _region_l1_candidate(
     offset_fraction: float,
     candidate_index: int,
 ) -> dict[str, Any]:
-    if role not in {"flower_support", "flower_wrap", "balance"}:
+    if role not in {
+        "flower_support",
+        "flower_wrap",
+        "balance",
+        "settle",
+    }:
         raise GlobalL1FlowError(f"unsupported R2C role: {role}")
     if role == "flower_support":
         center = _point(flower["center"], "R2C support flower center")
@@ -2456,7 +2463,11 @@ def _region_l1_candidate(
             region,
             offset_fraction,
         )
-        knot_indices = None
+        knot_indices = (
+            [0, len(path) - 1]
+            if role == "settle"
+            else None
+        )
     segments = _region_path_segments(path, knot_indices=knot_indices)
     centerline = _sample_segments(segments, samples_per_segment=18)
     flower_service_start_index: int | None = None
@@ -3183,6 +3194,144 @@ def generate_sw3_region_l1_group(
                 "selected_geometry_digests": [
                     remote["geometry_digest"],
                     balance["geometry_digest"],
+                ],
+            }
+        ),
+    }
+
+
+def _generate_region_settle_l1(
+    *,
+    analysis: Mapping[str, Any],
+    region_plan: Mapping[str, Any],
+    occupied_curves: Sequence[Mapping[str, Any]],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    flower_id = str(region_plan["service_flower_id"])
+    flower = next(
+        row
+        for row in analysis["flowers"]
+        if row["flower_id"] == flower_id
+    )
+    region = next(
+        row
+        for row in region_plan["regions"]
+        if row["role"] == "settle_region"
+    )
+    candidates = [
+        _region_l1_candidate(
+            prototype_id=str(analysis["prototype_id"]),
+            role="settle",
+            region=region,
+            flower=flower,
+            offset_fraction=offset,
+            candidate_index=index,
+        )
+        for index, offset in enumerate((-0.42, 0.0, 0.42), start=1)
+    ]
+    backbone = [
+        row["point"] for row in analysis["backbone"]["samples"]
+    ]
+    for candidate in candidates:
+        candidate["flower_id"] = None
+        candidate["service_flower_id"] = None
+        candidate["slot_id"] = "settle__unit_exit"
+        rejections: list[str] = []
+        if _polyline_crossing_count(
+            candidate["centerline"],
+            candidate["centerline"],
+        ):
+            rejections.append("self_intersection")
+        if _polyline_crossing_count(
+            candidate["centerline"][1:],
+            backbone,
+        ):
+            rejections.append("backbone_intersection")
+        if any(
+            _polyline_crossing_count(
+                candidate["centerline"],
+                occupied["centerline"],
+            )
+            for occupied in occupied_curves
+        ):
+            rejections.append("occupied_branch_intersection")
+        candidate["hard_rejections"] = rejections
+        candidate["generation_policy"].update(
+            {
+                "core_and_balance_occupancy_consumed_first": True,
+                "seam_entry_reserved_before_curve": True,
+                "stage5_deletion_used": False,
+            }
+        )
+    legal = [
+        candidate
+        for candidate in candidates
+        if not candidate["hard_rejections"]
+    ]
+    if not legal:
+        raise GlobalL1FlowError(
+            "R4 settle region has no non-intersecting candidate"
+        )
+    selected = min(
+        legal,
+        key=lambda row: (
+            abs(float(row["offset_fraction"])),
+            str(row["candidate_id"]),
+        ),
+    )
+    selected["curve_id"] = "settle_1"
+    selected["selected"] = True
+    return selected, candidates
+
+
+def generate_sw3_global_unit_layout(
+    analysis: Mapping[str, Any],
+    region_plan: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Generate a complete SW3 L1 unit with a seam-directed settle exit."""
+
+    validate_sw3_global_unit_region_plan(region_plan)
+    group = generate_sw3_region_l1_group(analysis, region_plan)
+    occupied = list(group["selected_curves"])
+    settle, settle_candidates = _generate_region_settle_l1(
+        analysis=analysis,
+        region_plan=region_plan,
+        occupied_curves=occupied,
+    )
+    selected = [*occupied, settle]
+    return {
+        "schema": "dynamic_branch_R4_global_unit_layout_v2",
+        "prototype_id": str(analysis["prototype_id"]),
+        "family_id": "SW3",
+        "source_region_plan_digest": str(
+            region_plan["region_plan_digest"]
+        ),
+        "generation_order": [
+            "core_flower_group",
+            "balance",
+            "reserve_seam_entry",
+            "settle",
+        ],
+        "selected_curves": selected,
+        "candidate_inventory": [
+            *group["candidate_inventory"],
+            *settle_candidates,
+        ],
+        "stage_scope": {
+            "selected_L1_count": 3,
+            "remote_support_L1_count": 1,
+            "balance_L1_count": 1,
+            "ordinary_L1_count": 0,
+            "settle_L1_count": 1,
+            "L2_count": 0,
+            "L3_count": 0,
+        },
+        "selection_digest": canonical_digest(
+            {
+                "source_region_plan_digest": region_plan[
+                    "region_plan_digest"
+                ],
+                "selected_geometry_digests": [
+                    row["geometry_digest"] for row in selected
                 ],
             }
         ),

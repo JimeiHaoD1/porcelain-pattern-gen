@@ -1,0 +1,14 @@
+{
+  "stage": "R5",
+  "iteration": 2,
+  "failure_codes": [
+    "L2_mount_reads_as_terminal_fork",
+    "selected_L3_creates_default_mini_Y"
+  ],
+  "root_cause_layer": "hierarchy_geometry_and_visual_capacity",
+  "root_cause": "The L2 is mounted too late on the balance curve and the small selected L3 branches again at its tip, producing a generic Y-fork instead of a functional side echo.",
+  "proposed_change": "Move the L2 mount earlier, use the upper end of the allowed child length range for a readable side sweep, retain legal L3 candidates, and reject L3 visually for this unit because the residual lobe has no compositional capacity for another split.",
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/branch_unit_grammar_v1.py"
+  ]
+}

@@ -1765,3 +1765,311 @@ def validate_unit_candidate_inventory(
     role_counts = Counter(candidate["role"] for candidate in candidates)
     if not role_counts:
         raise UnitGrammarError("candidate inventory is empty")
+
+
+def _R5_l1_curve(source: Mapping[str, Any]) -> dict[str, Any]:
+    points = [
+        _point(value, f"{source['curve_id']}.centerline")
+        for value in source["centerline"]
+    ]
+    return {
+        "curve_id": str(source["curve_id"]),
+        "level": "L1",
+        "hierarchy_level": 1,
+        "parent_curve_id": None,
+        "mount_fraction": None,
+        "semantic_role": str(source["role"]),
+        "functional_reason": "frozen_core_or_unit_role",
+        "actual_length": _round(_polyline_length(points)),
+        "cubic_segments": [
+            dict(segment) for segment in source.get("segments", [])
+        ],
+        "centerline": [_round_point(point) for point in points],
+        "source_geometry_digest": str(source["geometry_digest"]),
+    }
+
+
+def _R5_compile_child(
+    *,
+    curve_id: str,
+    parent: Mapping[str, Any],
+    level: int,
+    mount_fraction: float,
+    length_ratio: float,
+    turn_sign: int,
+    functional_reason: str,
+) -> dict[str, Any]:
+    parent_points = [
+        _point(value, f"{parent['curve_id']}.centerline")
+        for value in parent["centerline"]
+    ]
+    root, tangent = _sample_polyline(parent_points, mount_fraction)
+    parent_length = _polyline_length(parent_points)
+    child_length = parent_length * length_ratio
+    side = _unit(
+        _rotate(tangent, turn_sign * 72.0),
+        f"{curve_id}.side",
+    )
+    exit_direction = _unit(
+        _rotate(tangent, turn_sign * 84.0),
+        f"{curve_id}.exit",
+    )
+    target = _add(
+        _add(root, _mul(tangent, 0.24 * child_length)),
+        _mul(side, 0.78 * child_length),
+    )
+    segment = _cubic(
+        root,
+        _add(root, _mul(tangent, 0.27 * child_length)),
+        _sub(target, _mul(exit_direction, 0.29 * child_length)),
+        target,
+    )
+    centerline = _sample_segments([segment], 42)
+    return {
+        "curve_id": curve_id,
+        "level": f"L{level}",
+        "hierarchy_level": level,
+        "parent_curve_id": str(parent["curve_id"]),
+        "mount_fraction": _round(mount_fraction),
+        "semantic_role": functional_reason,
+        "functional_reason": functional_reason,
+        "turn_sign": turn_sign,
+        "root_tangent_inherited": True,
+        "entry_opening_degrees": 0.0,
+        "intended_parent_length_ratio": _round(length_ratio),
+        "actual_length": _round(_polyline_length(centerline)),
+        "cubic_segments": [segment],
+        "centerline": [
+            _round_point(point) for point in centerline
+        ],
+        "capacity_evidence": {
+            "source": "R4_visual_residual_space",
+            "role_specific": True,
+        },
+    }
+
+
+def _R5_child_rejections(
+    child: Mapping[str, Any],
+    occupied: Sequence[Mapping[str, Any]],
+    analysis: Mapping[str, Any],
+) -> list[str]:
+    reasons: list[str] = []
+    root = _point(child["centerline"][0], "R5 child root")
+    for other in occupied:
+        allowed = (
+            root
+            if other["curve_id"] == child["parent_curve_id"]
+            else None
+        )
+        if _curve_crosses(child, other, allowed):
+            reasons.append(f"intersection_with__{other['curve_id']}")
+    child_points = [
+        _point(value, "R5 child centerline")
+        for value in child["centerline"]
+    ]
+    if _curve_crosses(child, child, None):
+        reasons.append("self_intersection")
+    x_min, y_min, x_max, y_max = [
+        float(value)
+        for value in analysis["coordinate_system"]["canvas_bounds"]
+    ]
+    if any(
+        not (x_min <= point[0] <= x_max and y_min <= point[1] <= y_max)
+        for point in child_points
+    ):
+        reasons.append("out_of_bounds")
+    if any(
+        _ellipse_value(point, flower, protection=False) < 1.0
+        for flower in analysis["flowers"]
+        for point in child_points
+    ):
+        reasons.append("flower_intrusion")
+    return reasons
+
+
+def generate_role_aware_hierarchy(
+    layout: Mapping[str, Any],
+    analysis: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Generate R5 L1-only, L2, and capacity-backed L3 variants."""
+
+    if layout.get("schema") != "dynamic_branch_R4_global_unit_layout_v2":
+        raise UnitGrammarError("R5 requires the accepted R4 layout")
+    if layout.get("prototype_id") != analysis.get("prototype_id"):
+        raise UnitGrammarError("R5 layout/analysis prototype mismatch")
+    l1_curves = [
+        _R5_l1_curve(source)
+        for source in layout["selected_curves"]
+    ]
+    balance = next(
+        curve
+        for curve in l1_curves
+        if curve["semantic_role"] == "balance"
+    )
+    l2_candidates = [
+        _R5_compile_child(
+            curve_id=f"{balance['curve_id']}.L2.balance_fill.{sign:+d}",
+            parent=balance,
+            level=2,
+            mount_fraction=0.43,
+            length_ratio=0.44,
+            turn_sign=sign,
+            functional_reason="balance_fill",
+        )
+        for sign in (-1, 1)
+    ]
+    for candidate in l2_candidates:
+        candidate["hard_rejections"] = _R5_child_rejections(
+            candidate,
+            l1_curves,
+            analysis,
+        )
+    legal_l2 = [
+        candidate
+        for candidate in l2_candidates
+        if not candidate["hard_rejections"]
+    ]
+    if not legal_l2:
+        raise UnitGrammarError("R5 has no legal balance-fill L2")
+
+    def visual_space_score(curve: Mapping[str, Any]) -> float:
+        tip = _point(curve["centerline"][-1], "R5 child tip")
+        flower_clearance = min(
+            math.sqrt(_ellipse_value(tip, flower, protection=True))
+            for flower in analysis["flowers"]
+        )
+        parent_points = [
+            _point(value, "R5 balance parent point")
+            for value in balance["centerline"]
+        ]
+        parent_clearance = min(
+            _distance(tip, point) for point in parent_points
+        )
+        return (
+            2.5 * parent_clearance
+            + flower_clearance
+            - 0.10 * abs(tip[0] - 0.5)
+        )
+
+    selected_l2 = max(
+        legal_l2,
+        key=lambda curve: (
+            visual_space_score(curve),
+            -int(curve["turn_sign"]),
+        ),
+    )
+    selected_l2["selected"] = True
+    l3_candidates = [
+        _R5_compile_child(
+            curve_id=f"{selected_l2['curve_id']}.L3.echo.{sign:+d}",
+            parent=selected_l2,
+            level=3,
+            mount_fraction=0.68,
+            length_ratio=0.30,
+            turn_sign=sign,
+            functional_reason="tertiary_echo_with_space_evidence",
+        )
+        for sign in (-1, 1)
+    ]
+    occupied_for_l3 = [*l1_curves, selected_l2]
+    for candidate in l3_candidates:
+        candidate["hard_rejections"] = _R5_child_rejections(
+            candidate,
+            occupied_for_l3,
+            analysis,
+        )
+    legal_l3 = [
+        candidate
+        for candidate in l3_candidates
+        if not candidate["hard_rejections"]
+    ]
+    for candidate in l3_candidates:
+        candidate["visual_capacity_gate"] = False
+        candidate["visual_rejection_reason"] = (
+            "additional split reads as a default mini-Y in this residual lobe"
+        )
+        candidate["selected"] = False
+    selected_l3 = None
+    selected_curves = [
+        *l1_curves,
+        selected_l2,
+        *([selected_l3] if selected_l3 is not None else []),
+    ]
+    variants = [
+        {
+            "variant_id": "L1_only",
+            "curve_ids": [curve["curve_id"] for curve in l1_curves],
+            "functional_reason": "preserve_sparse_unit",
+            "valid": True,
+        },
+        {
+            "variant_id": "L1_plus_balance_L2",
+            "curve_ids": [
+                *[curve["curve_id"] for curve in l1_curves],
+                selected_l2["curve_id"],
+            ],
+            "functional_reason": "balance_fill",
+            "valid": True,
+        },
+        {
+            "variant_id": "L1_plus_balance_L2_L3",
+            "curve_ids": [
+                curve["curve_id"] for curve in selected_curves
+            ],
+            "functional_reason": (
+                "tertiary_echo_with_space_evidence"
+                if legal_l3
+                else "geometry_not_available"
+            ),
+            "valid": bool(legal_l3),
+            "visual_accepted": False,
+        },
+    ]
+    return {
+        "schema": "dynamic_branch_R5_role_aware_hierarchy_v2",
+        "prototype_id": str(layout["prototype_id"]),
+        "source_R4_selection_digest": str(
+            layout["selection_digest"]
+        ),
+        "selected_variant_id": (
+            "L1_plus_balance_L2"
+        ),
+        "selected_curves": selected_curves,
+        "candidate_inventory": [
+            *l2_candidates,
+            *l3_candidates,
+        ],
+        "variants": variants,
+        "core_role_policy": {
+            "core_roles_remain_L1": True,
+            "L2_substitutes_core_role": False,
+            "secondary_wrap_used_as_core_wrap": False,
+            "support_wrap_visual_policy": (
+                "prefer_continuous_handoff_when_reference_flow_supports_it"
+            ),
+            "material_reference": (
+                "data/merged_real_data/8.png"
+            ),
+        },
+        "generation_policy": {
+            "role_reason_required": True,
+            "L3_capacity_evidence_required": True,
+            "Y_2C_default_used": False,
+            "leaf_bud_tendril_generated": False,
+            "failed_candidates_retained": True,
+        },
+        "hierarchy_digest": canonical_digest(
+            {
+                "source_R4_selection_digest": layout[
+                    "selection_digest"
+                ],
+                "selected_curve_ids": [
+                    curve["curve_id"] for curve in selected_curves
+                ],
+                "selected_geometry": [
+                    curve["cubic_segments"] for curve in selected_curves
+                ],
+            }
+        ),
+    }

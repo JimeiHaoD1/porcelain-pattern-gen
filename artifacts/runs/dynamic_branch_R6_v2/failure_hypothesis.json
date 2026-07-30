@@ -1,0 +1,19 @@
+{
+  "stage": "R6",
+  "iteration": 1,
+  "passing_prototypes": [
+    "proto_sw_3_1",
+    "proto_sw_1_1"
+  ],
+  "failure_codes": [
+    "proto_sw_3_2_no_legal_whole_layout",
+    "proto_sw_2_3_no_legal_whole_layout",
+    "proto_sw_1_3_no_legal_whole_layout"
+  ],
+  "root_cause_layer": "family_specific_generated_geometry",
+  "root_cause": "The first generic family routes do not yet respect the distinct multi-flower SW3, shallow axis-through SW2, and inverted SW1-3 envelopes. Their whole-layout candidates intersect before Stage 5 selection.",
+  "proposed_change": "Inspect intersection ownership per retained candidate, then alter the relevant family geometry itself. Do not delete roles, skip failed candidates, or repair only the selected seed.",
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/stage5_global_unit_selection.py"
+  ]
+}

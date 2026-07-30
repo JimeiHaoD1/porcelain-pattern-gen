@@ -1,0 +1,35 @@
+{
+  "schema": "dynamic_branch_R6_scored_selection_contract_v2",
+  "contract_id": "stage5_selection_R6_v2",
+  "prototype_order": [
+    "proto_sw_3_1",
+    "proto_sw_1_1",
+    "proto_sw_3_2",
+    "proto_sw_2_3",
+    "proto_sw_1_3"
+  ],
+  "seed_order": [
+    4101,
+    4102,
+    4103
+  ],
+  "selection_mode": "enumerate_all_legal_then_maximize_composite_score",
+  "score_weights": {
+    "role_completeness_score": 0.2,
+    "region_path_score": 0.16,
+    "hierarchy_score": 0.1,
+    "density_balance_score": 0.15,
+    "horizontal_rhythm_score": 0.14,
+    "flower_group_score": 0.17,
+    "settle_continuity_score": 0.08
+  },
+  "hard_test_scope": [
+    "self intersection",
+    "branch/backbone intersection",
+    "branch/branch intersection",
+    "periodic intersection"
+  ],
+  "all_other_acceptance": "visual",
+  "failed_candidates_retained": true,
+  "stage5_deletion_used": false
+}

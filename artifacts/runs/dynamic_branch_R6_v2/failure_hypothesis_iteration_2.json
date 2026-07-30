@@ -1,0 +1,22 @@
+{
+  "stage": "R6",
+  "iteration": 2,
+  "passing_prototypes": [
+    "proto_sw_1_1",
+    "proto_sw_2_3"
+  ],
+  "partial_prototypes": [
+    "proto_sw_3_2 seed 4101"
+  ],
+  "failure_codes": [
+    "shared_SW3_vertical_route_fix_regressed_SW3_1",
+    "SW3_2_seed_variants_still_cross",
+    "SW1_3_peak_origin_wrap_still_crosses"
+  ],
+  "root_cause_layer": "family_variant_geometry",
+  "root_cause": "A single vertical-corridor rule is insufficient for both SW3 orientations, and the inverted SW1-3 wrap needs an open-side route rather than the standard lower loop.",
+  "proposed_change": "Split SW3 corridor direction by root/target ordering, remove seed-dependent vertical corridor drift, and give inverted SW1 a flower-relative open-side wrap path. Preserve every failed whole-layout candidate.",
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/stage5_global_unit_selection.py"
+  ]
+}

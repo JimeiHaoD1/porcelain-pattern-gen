@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import copy
 import html
+import io
 import json
 import math
 import subprocess
@@ -170,6 +171,85 @@ def _channel_metrics(
     }
 
 
+def _region_path_metrics(
+    curve_points: Sequence[Point],
+    channel: Mapping[str, object],
+    flower: Mapping[str, object],
+) -> dict[str, float]:
+    trace = list(channel["region_capacity_trace"])
+    center = _point(flower["center"])
+    rx = float(flower["rx"])
+    ry = float(flower["ry"])
+    start_angle = float(channel["wrap_start_angle_deg"])
+    span = float(channel["wrap_span_deg"])
+    direction = int(channel["wrap_direction"])
+
+    def trace_bounds(fraction: float) -> tuple[float, float]:
+        scaled = max(0.0, min(1.0, fraction)) * (len(trace) - 1)
+        left_index = int(math.floor(scaled))
+        right_index = min(len(trace) - 1, left_index + 1)
+        local = scaled - left_index
+        return tuple(
+            float(trace[left_index][key])
+            + (
+                float(trace[right_index][key])
+                - float(trace[left_index][key])
+            )
+            * local
+            for key in ("inner_rho", "maximum_outer_rho")
+        )
+
+    total_length = 0.0
+    covered_length = 0.0
+    utilization_sum = 0.0
+    utilization_length = 0.0
+    rho_values: list[float] = []
+    for first, second in zip(curve_points, curve_points[1:]):
+        length = math.dist(first, second)
+        if length <= 1e-12:
+            continue
+        midpoint = (
+            (first[0] + second[0]) * 0.5,
+            (first[1] + second[1]) * 0.5,
+        )
+        nx = (midpoint[0] - center[0]) / rx
+        ny = (midpoint[1] - center[1]) / ry
+        rho = math.hypot(nx, ny)
+        angle = math.degrees(math.atan2(ny, nx)) % 360.0
+        signed_progress = direction * (angle - start_angle)
+        while signed_progress < -180.0:
+            signed_progress += 360.0
+        while signed_progress > 180.0:
+            signed_progress -= 360.0
+        fraction = signed_progress / span
+        inner_rho, outer_rho = trace_bounds(fraction)
+        in_angular_span = -0.025 <= fraction <= 1.025
+        in_region = (
+            in_angular_span
+            and rho >= inner_rho - 0.035
+            and rho <= outer_rho + 0.035
+        )
+        total_length += length
+        rho_values.append(rho)
+        if in_region:
+            covered_length += length
+            radial_depth = outer_rho - inner_rho
+            if radial_depth > 1e-12:
+                utilization_sum += (
+                    length * (rho - inner_rho) / radial_depth
+                )
+                utilization_length += length
+    return {
+        "region_centerline_coverage": covered_length / total_length,
+        "region_capacity_utilization": (
+            utilization_sum / utilization_length
+            if utilization_length > 1e-12
+            else 0.0
+        ),
+        "rho_range": max(rho_values) - min(rho_values),
+    }
+
+
 def _load_inputs() -> tuple[
     dict[str, Any],
     dict[str, Any],
@@ -320,6 +400,11 @@ def _render_debug_svg(
     backbone = [row["point"] for row in analysis["backbone"]["samples"]]
     support_guide = lane["guide_channel"]["guide_centerline"]
     wrap_guide = lane["flower_wrap_channel"]["guide_centerline"]
+    region_envelope = lane["flower_wrap_channel"]["region_envelope"]
+    region_polygon = (
+        list(region_envelope["outer_boundary"])
+        + list(reversed(region_envelope["inner_boundary"]))
+    )
     wrap_width = float(lane["flower_wrap_channel"]["width_profile"][0]["half_width"])
     support_start_width = float(lane["guide_channel"]["width_profile"][0]["half_width"])
     svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1188" viewBox="0 0 1000 1187.5">
@@ -327,7 +412,7 @@ def _render_debug_svg(
   <path d="{html.escape(_polyline_path(backbone, width, width))}" fill="none" stroke="#cbd2dc" stroke-width="18" stroke-linecap="round"/>
   <path d="{html.escape(_polyline_path(backbone, width, width))}" fill="none" stroke="#17264f" stroke-width="5" stroke-linecap="round"/>
   <ellipse cx="{center[0] * width:.3f}" cy="{center[1] * width:.3f}" rx="{float(flower['rx']) * width:.3f}" ry="{float(flower['ry']) * width:.3f}" fill="#fbe9ef" fill-opacity=".55" stroke="#db4779" stroke-width="4"/>
-  <ellipse cx="{center[0] * width:.3f}" cy="{center[1] * width:.3f}" rx="{float(flower['rx']) * width * 1.18:.3f}" ry="{float(flower['ry']) * width * 1.18:.3f}" fill="none" stroke="#e9a83d" stroke-width="2" stroke-dasharray="10 8"/>
+  <path d="{html.escape(_polyline_path(region_polygon + [region_polygon[0]], width, width))}" fill="#f3cc73" fill-opacity=".22" stroke="#d19016" stroke-width="3" stroke-dasharray="10 8"/>
   <path d="{html.escape(_polyline_path(support_guide, width, width))}" fill="none" stroke="#6ab6e8" stroke-width="{support_start_width * 2000:.3f}" stroke-opacity=".20"/>
   <path d="{html.escape(_polyline_path(support_guide, width, width))}" fill="none" stroke="#2f86c3" stroke-width="3" stroke-dasharray="9 7"/>
   <path d="{html.escape(_polyline_path(wrap_guide, width, width))}" fill="none" stroke="#e0ac39" stroke-width="{wrap_width * 2000:.3f}" stroke-opacity=".20"/>
@@ -416,6 +501,15 @@ def _render_focus_png(
         _point(point)
         for point in lane["flower_wrap_channel"]["guide_centerline"]
     ]
+    region_envelope = lane["flower_wrap_channel"]["region_envelope"]
+    region_inner = [
+        _point(point)
+        for point in region_envelope["inner_boundary"]
+    ]
+    region_outer = [
+        _point(point)
+        for point in region_envelope["outer_boundary"]
+    ]
     support_width = (
         float(lane["guide_channel"]["width_profile"][0]["half_width"])
         * 2.0
@@ -430,6 +524,12 @@ def _render_focus_png(
     )
     line(backbone, (202, 210, 221, 180), 15)
     line(backbone, "#17264f", 4)
+    draw.polygon(
+        [pixel(point) for point in region_outer + list(reversed(region_inner))],
+        fill=(243, 204, 115, 55),
+    )
+    line(region_outer, (209, 144, 22, 145), 2)
+    line(region_inner, (209, 144, 22, 110), 2)
     flower = analysis["flowers"][0]
     center = _point(flower["center"])
     center_pixel = pixel(center)
@@ -501,11 +601,15 @@ def _render_focus_png(
 
 
 def _render_contact_sheet(
-    before: Path,
+    before: Path | Image.Image,
     after: Path,
     output: Path,
 ) -> None:
-    before_image = Image.open(before).convert("RGB")
+    before_image = (
+        before.convert("RGB")
+        if isinstance(before, Image.Image)
+        else Image.open(before).convert("RGB")
+    )
     after_image = Image.open(after).convert("RGB")
     target_height = 780
     panels: list[Image.Image] = []
@@ -520,8 +624,8 @@ def _render_contact_sheet(
     canvas = Image.new("RGB", (1840, 900), "#f6f3ed")
     draw = ImageDraw.Draw(canvas)
     draw.text((30, 22), "R2 单一承花—包花 BranchUnit", fill="#17264f", font=_font(30, True))
-    draw.text((40, 70), "BEFORE · R1 仅有 L1 承花路径", fill="#52627a", font=_font(18, True))
-    draw.text((940, 70), "AFTER · L1 承花 + L2 外缘包花", fill="#14864a", font=_font(18, True))
+    draw.text((40, 70), "BEFORE · 被否决的等距贴边弧", fill="#9b4a38", font=_font(18, True))
+    draw.text((940, 70), "AFTER · 回环区域驱动的进入—外摆—回护", fill="#14864a", font=_font(18, True))
     for left, image in zip((30, 930), panels):
         top = 108
         canvas.paste(image, (left + (880 - image.width) // 2, top))
@@ -559,6 +663,11 @@ def _acceptance(
     support_channel = _channel_metrics(l1_points, lane["guide_channel"])
     wrap_channel = _channel_metrics(l2_points, lane["flower_wrap_channel"])
     wrap = ellipse_wrap_stats(l2_points, flower)
+    region_path = _region_path_metrics(
+        l2_points,
+        lane["flower_wrap_channel"],
+        flower,
+    )
     bounds = analysis["coordinate_system"]["canvas_bounds"]
     l1_oob, _ = out_of_bounds_stats(l1_points, float(bounds[1]), float(bounds[3]))
     l2_oob, _ = out_of_bounds_stats(l2_points, float(bounds[1]), float(bounds[3]))
@@ -666,7 +775,7 @@ def _acceptance(
         _check(
             "mean_rho",
             wrap["mean_rho"],
-            "[1.05, 1.45]",
+            "[1.25, 1.90]",
             acceptance["mean_rho_range"][0]
             <= wrap["mean_rho"]
             <= acceptance["mean_rho_range"][1],
@@ -676,9 +785,51 @@ def _acceptance(
         _check(
             "rho_cv",
             wrap["rho_cv"],
-            "<= 0.20",
-            wrap["rho_cv"] <= acceptance["rho_cv_max"],
+            "[0.08, 0.30]",
+            acceptance["rho_cv_min"]
+            <= wrap["rho_cv"]
+            <= acceptance["rho_cv_max"],
             "debug_overlay.svg",
+            wrap_scope,
+        ),
+        _check(
+            "rho_range",
+            region_path["rho_range"],
+            ">= 0.28",
+            region_path["rho_range"]
+            >= acceptance["rho_range_min"],
+            "debug_overlay.svg",
+            wrap_scope,
+        ),
+        _check(
+            "region_centerline_coverage",
+            region_path["region_centerline_coverage"],
+            ">= 0.85",
+            region_path["region_centerline_coverage"]
+            >= acceptance["region_centerline_coverage_min"],
+            "debug_overlay.svg",
+            wrap_scope,
+        ),
+        _check(
+            "region_capacity_utilization",
+            region_path["region_capacity_utilization"],
+            "[0.20, 0.85]",
+            acceptance["region_capacity_utilization_range"][0]
+            <= region_path["region_capacity_utilization"]
+            <= acceptance["region_capacity_utilization_range"][1],
+            "debug_overlay.svg",
+            wrap_scope,
+        ),
+        _check(
+            "fixed_radius_arc_used",
+            (
+                lane["flower_wrap_channel"]["path_construction"]
+                == "equidistant_flower_boundary_arc"
+            ),
+            "== false",
+            lane["flower_wrap_channel"]["path_construction"]
+            == "non_equidistant_region_centerline",
+            "isolated_plan.json",
             wrap_scope,
         ),
         _check(
@@ -744,7 +895,9 @@ def _acceptance(
     wrap_classified = (
         wrap["wrap_span_deg"] >= 90.0
         and wrap["minimum_rho"] >= 1.0
-        and wrap["rho_cv"] <= 0.20
+        and wrap["rho_cv"] >= acceptance["rho_cv_min"]
+        and region_path["region_centerline_coverage"]
+        >= acceptance["region_centerline_coverage_min"]
     )
     geometry_classifier_accuracy = (
         int(support_classified) + int(wrap_classified)
@@ -773,6 +926,7 @@ def _acceptance(
         "support_channel": support_channel,
         "wrap_channel": wrap_channel,
         "wrap_geometry": wrap,
+        "region_path": region_path,
         "support_contact_error": support_contact_error,
         "support_contact_normalized_dx": contact_dx,
         "support_contact_normalized_dy": contact_dy,
@@ -835,13 +989,21 @@ def run(output: Path) -> None:
         first_inventory["candidates"][0],
         output / "debug_overlay.svg",
     )
-    before = (
-        REPO_ROOT
-        / r2["inputs"]["r1_plan_root"]
-        / r2["scope"]["prototype_id"]
-        / f"seed_{r2['scope']['seed']}"
-        / "l1_flow_debug.png"
+    rejected_baseline = r2["rejected_visual_baseline"]
+    rejected_result = subprocess.run(
+        [
+            "git",
+            "show",
+            (
+                f"{rejected_baseline['commit']}:"
+                f"{rejected_baseline['artifact_path']}"
+            ),
+        ],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
     )
+    before = Image.open(io.BytesIO(rejected_result.stdout)).convert("RGB")
     _render_contact_sheet(
         before,
         after,
@@ -899,6 +1061,17 @@ def run(output: Path) -> None:
                         "clockwise wrap occupied the flower side already crossed by the backbone",
                     ],
                     "resolution": "use the remaining left outer sector and preserve the 120-degree wrap",
+                },
+                {
+                    "iteration": 4,
+                    "failed_metrics": [
+                        "visual_region_path_realization",
+                        "fixed_radius_arc_used",
+                    ],
+                    "root_causes": [
+                        "the region was serialized as metadata but the guide was still a constant-rho ellipse arc",
+                    ],
+                    "resolution": "derive radial capacity from the region and compile a non-equidistant enter-swing-guard centerline",
                 },
             ],
         },
@@ -974,10 +1147,35 @@ def run(output: Path) -> None:
                         "experiments/branch_unit/dynamic/R2_SUPPORT_WRAP_CONTRACT_V1.json",
                         "experiments/branch_unit/dynamic/run_R2_support_wrap.py",
                     ],
+                    "failed_metrics": [
+                        "visual_region_path_realization",
+                        "fixed_radius_arc_used",
+                    ],
+                    "root_causes": [
+                        "the numeric pass followed a fixed ellipse instead of using the planned growth region",
+                    ],
+                    "changes_made": [
+                        "recorded the numeric result for visual review",
+                    ],
+                    "result": "FAIL",
+                },
+                {
+                    "stage": "R2",
+                    "iteration": 5,
+                    "commit_before": commit_before,
+                    "files_changed": [
+                        "experiments/branch_unit/dynamic/prototype_analysis.py",
+                        "experiments/branch_unit/dynamic/global_l1_flow.py",
+                        "experiments/branch_unit/dynamic/R2_SUPPORT_WRAP_CONTRACT_V1.json",
+                        "experiments/branch_unit/dynamic/run_R2_support_wrap.py",
+                    ],
                     "failed_metrics": [],
                     "root_causes": [],
                     "changes_made": [
-                        "froze the legal support-wrap relation and automated acceptance",
+                        "measured radial capacity between the flower reserve and surrounding backbone",
+                        "selected the connected higher-capacity wrap sector",
+                        "generated a variable-radius enter-swing-guard guide through the region",
+                        "added region-use and non-constant-radius acceptance checks",
                     ],
                     "result": "PASS" if not failed_checks else "FAIL",
                 },
@@ -992,7 +1190,8 @@ def run(output: Path) -> None:
 - 固定对象：`proto_sw_3_1 / seed 4101 / support_1`
 - 几何组成：一根 L1 承花枝 + 一根 L2 包花枝；无其他 L1、L3 或末端内容。
 - 承花路径：复用 R1 远端挂接、花下 waypoint 与花位下侧接点。
-- 包花路径：从承花枝中后段接出，沿剩余外缘扇区形成连续回环。
+- 包花路径：从承花枝中后段接出，进入剩余回环区域，向区域外部摆出后再形成回护；不再拟合等距椭圆弧。
+- 区域作用：区域径向容量决定方向、中心线、宽度与退出方向，不再只是 JSON 元数据。
 - 角色判别：验收分类器只读取几何，不读取 role 或 semantic_role 标签。
 - 可复现：`{str(reproducibility_pass).lower()}`
 - 硬失败数：`{len(failed_checks)}`

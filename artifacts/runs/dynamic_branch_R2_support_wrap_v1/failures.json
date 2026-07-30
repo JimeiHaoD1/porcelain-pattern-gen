@@ -30,6 +30,17 @@
       "root_causes": [
         "clockwise wrap occupied the flower side already crossed by the backbone"
       ]
+    },
+    {
+      "failed_metrics": [
+        "visual_region_path_realization",
+        "fixed_radius_arc_used"
+      ],
+      "iteration": 4,
+      "resolution": "derive radial capacity from the region and compile a non-equidistant enter-swing-guard centerline",
+      "root_causes": [
+        "the region was serialized as metadata but the guide was still a constant-rho ellipse arc"
+      ]
     }
   ],
   "schema": "dynamic_branch_R2_failures_v1",

@@ -23,24 +23,55 @@
     "fixed_visual_prior": "artifacts/runs/dynamic_branch_stage3a_fixed_visual_prior_v1/fixed_visual_prior.json",
     "base_grammar_contract": "experiments/branch_unit/dynamic/STAGE4_UNIT_GRAMMAR_CONTRACT_V1.json"
   },
+  "rejected_visual_baseline": {
+    "commit": "e39869a",
+    "artifact_path": "artifacts/runs/dynamic_branch_R2_support_wrap_v1/support_wrap_atlas.png",
+    "rejection_reason": "constant-rho flower-boundary arc did not realize the planned loop-growth region"
+  },
   "guide": {
     "entry_distance_range": [
       0.3,
       0.48
     ],
     "analysis_boundary_sample_count": 48,
+    "radial_probe_step": 0.02,
+    "maximum_region_outer_rho": 3.0,
+    "minimum_region_backbone_clearance": 0.025,
+    "region_canvas_margin": 0.02,
     "support_half_width_start": 0.024,
     "support_half_width_end": 0.018,
     "wrap_mount_fraction": 0.72,
-    "wrap_outer_rho": 1.18,
-    "wrap_start_angle_deg": 110.0,
-    "wrap_span_deg": 120.0,
-    "wrap_direction": 1,
-    "approach_root_arm_fraction": 0.28,
-    "approach_join_arm_fraction": 0.3,
-    "approach_sample_count": 4,
-    "ellipse_sample_count": 8,
-    "wrap_half_width": 0.022
+    "wrap_span_deg": 100.0,
+    "region_guide_sample_count": 12,
+    "minimum_region_radial_depth": 0.22,
+    "minimum_guide_center_rho": 1.28,
+    "maximum_guide_center_rho": 1.9,
+    "maximum_region_envelope_rho": 2.25,
+    "region_depth_fraction_profile": [
+      {
+        "fraction": 0.0,
+        "region_depth_fraction": 0.12
+      },
+      {
+        "fraction": 0.25,
+        "region_depth_fraction": 0.38
+      },
+      {
+        "fraction": 0.55,
+        "region_depth_fraction": 0.68
+      },
+      {
+        "fraction": 0.8,
+        "region_depth_fraction": 0.78
+      },
+      {
+        "fraction": 1.0,
+        "region_depth_fraction": 0.7
+      }
+    ],
+    "wrap_half_width_min": 0.018,
+    "wrap_half_width_max": 0.035,
+    "region_channel_width_fraction": 0.14
   },
   "grammar_extension": {
     "grammar_id": "TerminalSupport-Wrap",
@@ -62,7 +93,7 @@
     ],
     "child_parent_length_ratio_range": [
       0.25,
-      1.5
+      2.0
     ]
   },
   "measurement": {
@@ -87,10 +118,17 @@
     ],
     "minimum_rho_min": 1.0,
     "mean_rho_range": [
-      1.05,
-      1.45
+      1.25,
+      1.9
     ],
-    "rho_cv_max": 0.2,
+    "rho_cv_min": 0.08,
+    "rho_cv_max": 0.3,
+    "rho_range_min": 0.28,
+    "region_centerline_coverage_min": 0.85,
+    "region_capacity_utilization_range": [
+      0.2,
+      0.85
+    ],
     "wrap_channel_coverage_min": 0.85,
     "wrap_mean_guide_alignment_min": 0.7,
     "unit_self_crossing_count_max": 0,

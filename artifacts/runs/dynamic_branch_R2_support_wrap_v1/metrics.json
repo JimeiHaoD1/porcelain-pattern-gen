@@ -9,8 +9,13 @@
       "wrap_classified": true
     },
     "l1_length": 0.5319888579144564,
-    "l2_length": 0.7844864764177206,
+    "l2_length": 0.8199138597652579,
     "out_of_bounds_length": 0.0,
+    "region_path": {
+      "region_capacity_utilization": 0.4095897918957456,
+      "region_centerline_coverage": 1.0,
+      "rho_range": 0.44358024057344747
+    },
     "support_channel": {
       "channel_coverage": 1.0,
       "mean_guide_alignment": 0.999681275698778,
@@ -21,14 +26,14 @@
     "support_contact_normalized_dy": 0.0,
     "wrap_channel": {
       "channel_coverage": 1.0,
-      "mean_guide_alignment": 0.9970633614623999,
-      "p10_guide_alignment": 0.9947398078957828
+      "mean_guide_alignment": 0.9899660509294003,
+      "p10_guide_alignment": 0.9960704403343621
     },
     "wrap_geometry": {
-      "mean_rho": 1.2006630080643175,
-      "minimum_rho": 1.1798038497480559,
-      "rho_cv": 0.0326167652473298,
-      "wrap_span_deg": 120.76416572746591
+      "mean_rho": 1.5530677096895589,
+      "minimum_rho": 1.2758344677380058,
+      "rho_cv": 0.09917806937678532,
+      "wrap_span_deg": 100.5341541191627
     }
   },
   "metrics": [
@@ -132,7 +137,7 @@
     },
     {
       "evidence_file": "debug_overlay.svg",
-      "measured_value": 120.76416572746591,
+      "measured_value": 100.5341541191627,
       "metric_name": "wrap_span_deg",
       "pass": true,
       "scope": {
@@ -146,7 +151,7 @@
     },
     {
       "evidence_file": "debug_overlay.svg",
-      "measured_value": 1.1798038497480559,
+      "measured_value": 1.2758344677380058,
       "metric_name": "minimum_rho",
       "pass": true,
       "scope": {
@@ -160,7 +165,7 @@
     },
     {
       "evidence_file": "debug_overlay.svg",
-      "measured_value": 1.2006630080643175,
+      "measured_value": 1.5530677096895589,
       "metric_name": "mean_rho",
       "pass": true,
       "scope": {
@@ -170,11 +175,11 @@
         "prototype_id": "proto_sw_3_1",
         "seed": 4101
       },
-      "threshold": "[1.05, 1.45]"
+      "threshold": "[1.25, 1.90]"
     },
     {
       "evidence_file": "debug_overlay.svg",
-      "measured_value": 0.0326167652473298,
+      "measured_value": 0.09917806937678532,
       "metric_name": "rho_cv",
       "pass": true,
       "scope": {
@@ -184,7 +189,63 @@
         "prototype_id": "proto_sw_3_1",
         "seed": 4101
       },
-      "threshold": "<= 0.20"
+      "threshold": "[0.08, 0.30]"
+    },
+    {
+      "evidence_file": "debug_overlay.svg",
+      "measured_value": 0.44358024057344747,
+      "metric_name": "rho_range",
+      "pass": true,
+      "scope": {
+        "branch_unit_id": "proto_sw_3_1__seed_4101__global_l1_flow_v1__R2_support_wrap__support_1",
+        "curve_id": "proto_sw_3_1__seed_4101__global_l1_flow_v1__R2_support_wrap__support_1.L2.1",
+        "lane_id": "support_1",
+        "prototype_id": "proto_sw_3_1",
+        "seed": 4101
+      },
+      "threshold": ">= 0.28"
+    },
+    {
+      "evidence_file": "debug_overlay.svg",
+      "measured_value": 1.0,
+      "metric_name": "region_centerline_coverage",
+      "pass": true,
+      "scope": {
+        "branch_unit_id": "proto_sw_3_1__seed_4101__global_l1_flow_v1__R2_support_wrap__support_1",
+        "curve_id": "proto_sw_3_1__seed_4101__global_l1_flow_v1__R2_support_wrap__support_1.L2.1",
+        "lane_id": "support_1",
+        "prototype_id": "proto_sw_3_1",
+        "seed": 4101
+      },
+      "threshold": ">= 0.85"
+    },
+    {
+      "evidence_file": "debug_overlay.svg",
+      "measured_value": 0.4095897918957456,
+      "metric_name": "region_capacity_utilization",
+      "pass": true,
+      "scope": {
+        "branch_unit_id": "proto_sw_3_1__seed_4101__global_l1_flow_v1__R2_support_wrap__support_1",
+        "curve_id": "proto_sw_3_1__seed_4101__global_l1_flow_v1__R2_support_wrap__support_1.L2.1",
+        "lane_id": "support_1",
+        "prototype_id": "proto_sw_3_1",
+        "seed": 4101
+      },
+      "threshold": "[0.20, 0.85]"
+    },
+    {
+      "evidence_file": "isolated_plan.json",
+      "measured_value": false,
+      "metric_name": "fixed_radius_arc_used",
+      "pass": true,
+      "scope": {
+        "branch_unit_id": "proto_sw_3_1__seed_4101__global_l1_flow_v1__R2_support_wrap__support_1",
+        "curve_id": "proto_sw_3_1__seed_4101__global_l1_flow_v1__R2_support_wrap__support_1.L2.1",
+        "lane_id": "support_1",
+        "prototype_id": "proto_sw_3_1",
+        "seed": 4101
+      },
+      "threshold": "== false"
     },
     {
       "evidence_file": "debug_overlay.svg",
@@ -202,7 +263,7 @@
     },
     {
       "evidence_file": "debug_overlay.svg",
-      "measured_value": 0.9970633614623999,
+      "measured_value": 0.9899660509294003,
       "metric_name": "wrap_mean_guide_alignment",
       "pass": true,
       "scope": {

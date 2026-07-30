@@ -1531,6 +1531,10 @@ def _build_candidate(
                 "target_relation": lane["target_relation"],
                 "support_channel_consumed": True,
                 "flower_wrap_channel_consumed": True,
+                "loop_growth_region_consumed": True,
+                "path_construction": guide_channel[
+                    "path_construction"
+                ],
             }
             if guide_channel is not None
             else None

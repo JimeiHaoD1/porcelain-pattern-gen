@@ -294,9 +294,23 @@
       },
       "flower_id": "flower_1",
       "flower_wrap_channel": {
+        "direction_candidates": [
+          {
+            "capacity_score": 0.9459891398166765,
+            "direction": -1.0,
+            "mean_depth": 0.9459891398166765,
+            "minimum_depth": 0.0
+          },
+          {
+            "capacity_score": 2.2981796179148883,
+            "direction": 1.0,
+            "mean_depth": 1.1731119475370704,
+            "minimum_depth": 0.7500451135852118
+          }
+        ],
         "exit_direction": [
-          0.650474227,
-          -0.759528328
+          0.455488022,
+          -0.890241912
         ],
         "guide_centerline": [
           [
@@ -304,139 +318,403 @@
             0.95268009
           ],
           [
-            0.653900837,
-            0.946856573
+            0.60826695,
+            0.91306663
           ],
           [
-            0.665949501,
-            0.937233796
+            0.562978678,
+            0.894650813
           ],
           [
-            0.673654143,
-            0.9272067
+            0.518634625,
+            0.864776433
           ],
           [
-            0.671617638,
-            0.920170226
+            0.476993111,
+            0.82328611
           ],
           [
-            0.608096573,
-            0.874155716
+            0.439049627,
+            0.771161727
           ],
           [
-            0.555298298,
-            0.806831308
+            0.406162381,
+            0.709075249
           ],
           [
-            0.516820929,
-            0.722785048
+            0.383211888,
+            0.637313341
           ],
           [
-            0.495286634,
-            0.62774455
+            0.373302746,
+            0.559392302
           ],
           [
-            0.492162941,
-            0.528186668
+            0.371680917,
+            0.479076809
           ],
           [
-            0.507662723,
-            0.430896105
+            0.383261594,
+            0.40004418
           ],
           [
-            0.540729697,
-            0.342503054
+            0.409576473,
+            0.328253669
           ],
           [
-            0.589110402,
-            0.269031355
+            0.442659602,
+            0.263593378
           ]
         ],
         "guide_tangents": [
           [
-            0.951853607,
-            -0.306552949
+            -0.65825216,
+            -0.752797512
           ],
           [
-            0.831806614,
-            -0.555065542
+            -0.809213363,
+            -0.587514879
           ],
           [
-            0.719862679,
-            -0.694116506
+            -0.880361865,
+            -0.474302632
           ],
           [
-            0.379664052,
-            -0.925124428
+            -0.769495817,
+            -0.638651852
           ],
           [
-            -0.892101274,
-            -0.451835497
+            -0.647707468,
+            -0.761889123
           ],
           [
-            -0.716223046,
-            -0.697871441
+            -0.527047146,
+            -0.849836046
           ],
           [
-            -0.516379926,
-            -0.856359605
+            -0.385012384,
+            -0.922911407
           ],
           [
-            -0.317733504,
-            -0.948180057
+            -0.214422248,
+            -0.976741061
           ],
           [
-            -0.12570704,
-            -0.992067407
+            -0.072679018,
+            -0.997355383
           ],
           [
-            0.062747263,
-            -0.998029449
+            0.06237573,
+            -0.998052738
           ],
           [
-            0.253044078,
-            -0.967454751
+            0.243683976,
+            -0.96985469
           ],
           [
-            0.449487203,
-            -0.893286771
+            0.399130546,
+            -0.916894109
           ],
           [
-            0.650474227,
-            -0.759528328
+            0.455488022,
+            -0.890241912
           ]
         ],
         "mount_fraction": 0.72,
+        "path_construction": "non_equidistant_region_centerline",
+        "region_capacity_trace": [
+          {
+            "angle_degrees": 113.550125464,
+            "fraction": 0.0,
+            "guide_center_rho": 1.319205738,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.79120134,
+            "region_depth_fraction": 0.12
+          },
+          {
+            "angle_degrees": 121.883458797,
+            "fraction": 0.083333333,
+            "guide_center_rho": 1.28,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.870045116,
+            "region_depth_fraction": 0.206666667
+          },
+          {
+            "angle_degrees": 130.216792131,
+            "fraction": 0.166666667,
+            "guide_center_rho": 1.348800001,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.921734339,
+            "region_depth_fraction": 0.293333333
+          },
+          {
+            "angle_degrees": 138.550125464,
+            "fraction": 0.25,
+            "guide_center_rho": 1.416400001,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.950533001,
+            "region_depth_fraction": 0.38
+          },
+          {
+            "angle_degrees": 146.883458797,
+            "fraction": 0.333333333,
+            "guide_center_rho": 1.481400001,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.928310779,
+            "region_depth_fraction": 0.463333333
+          },
+          {
+            "angle_degrees": 155.216792131,
+            "fraction": 0.416666667,
+            "guide_center_rho": 1.546400001,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.906088556,
+            "region_depth_fraction": 0.546666667
+          },
+          {
+            "angle_degrees": 163.550125464,
+            "fraction": 0.5,
+            "guide_center_rho": 1.611400001,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.91613367,
+            "region_depth_fraction": 0.63
+          },
+          {
+            "angle_degrees": 171.883458797,
+            "fraction": 0.583333333,
+            "guide_center_rho": 1.660800001,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.956711782,
+            "region_depth_fraction": 0.693333333
+          },
+          {
+            "angle_degrees": 180.216792131,
+            "fraction": 0.666666667,
+            "guide_center_rho": 1.686800001,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.261390159,
+            "region_depth_fraction": 0.726666667
+          },
+          {
+            "angle_degrees": 188.550125464,
+            "fraction": 0.75,
+            "guide_center_rho": 1.7128,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "region_depth_fraction": 0.76
+          },
+          {
+            "angle_degrees": 196.883458797,
+            "fraction": 0.833333333,
+            "guide_center_rho": 1.718,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "region_depth_fraction": 0.766666667
+          },
+          {
+            "angle_degrees": 205.216792131,
+            "fraction": 0.916666667,
+            "guide_center_rho": 1.692000001,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "region_depth_fraction": 0.733333333
+          },
+          {
+            "angle_degrees": 213.550125464,
+            "fraction": 1.0,
+            "guide_center_rho": 1.666000001,
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.866395987,
+            "region_depth_fraction": 0.7
+          }
+        ],
+        "region_envelope": {
+          "inner_boundary": [
+            [
+              0.661408759,
+              0.893603727
+            ],
+            [
+              0.627913757,
+              0.869115431
+            ],
+            [
+              0.597322889,
+              0.838130397
+            ],
+            [
+              0.570282133,
+              0.801302929
+            ],
+            [
+              0.547362501,
+              0.759410702
+            ],
+            [
+              0.529047981,
+              0.713338342
+            ],
+            [
+              0.515725315,
+              0.664058746
+            ],
+            [
+              0.507675835,
+              0.612612539
+            ],
+            [
+              0.505069519,
+              0.560086094
+            ],
+            [
+              0.507961404,
+              0.5075886
+            ],
+            [
+              0.516290423,
+              0.45622863
+            ],
+            [
+              0.529880694,
+              0.407090739
+            ],
+            [
+              0.548445235,
+              0.361212558
+            ]
+          ],
+          "outer_boundary": [
+            [
+              0.599063355,
+              1.092654893
+            ],
+            [
+              0.53581381,
+              1.075149072
+            ],
+            [
+              0.4769779,
+              1.036182663
+            ],
+            [
+              0.425562297,
+              0.979160012
+            ],
+            [
+              0.389973636,
+              0.902275064
+            ],
+            [
+              0.363131761,
+              0.819938485
+            ],
+            [
+              0.338218719,
+              0.736991496
+            ],
+            [
+              0.315108433,
+              0.650828981
+            ],
+            [
+              0.242372884,
+              0.558702917
+            ],
+            [
+              0.248182474,
+              0.4532392
+            ],
+            [
+              0.264914878,
+              0.35006069
+            ],
+            [
+              0.292216761,
+              0.251346177
+            ],
+            [
+              0.329511599,
+              0.159180189
+            ]
+          ]
+        },
         "schema": "dynamic_branch_role_guide_channel_v1",
+        "selected_region_capacity_score": 2.298179618,
         "semantic_role": "flower_wrap",
         "service_flower_id": "flower_1",
-        "target_relation": "outside_flower_boundary_arc",
+        "target_relation": "enter_wrap_region_then_swing_outward_and_return_guard",
         "width_profile": [
           {
             "fraction": 0.0,
-            "half_width": 0.022
+            "half_width": 0.021845401
+          },
+          {
+            "fraction": 0.083333333,
+            "half_width": 0.024411507
+          },
+          {
+            "fraction": 0.166666667,
+            "half_width": 0.026093822
           },
           {
             "fraction": 0.25,
-            "half_width": 0.022
+            "half_width": 0.027031124
+          },
+          {
+            "fraction": 0.333333333,
+            "half_width": 0.026307864
+          },
+          {
+            "fraction": 0.416666667,
+            "half_width": 0.025584603
           },
           {
             "fraction": 0.5,
-            "half_width": 0.022
+            "half_width": 0.025911539
+          },
+          {
+            "fraction": 0.583333333,
+            "half_width": 0.027232223
+          },
+          {
+            "fraction": 0.666666667,
+            "half_width": 0.035
           },
           {
             "fraction": 0.75,
-            "half_width": 0.022
+            "half_width": 0.035
+          },
+          {
+            "fraction": 0.833333333,
+            "half_width": 0.035
+          },
+          {
+            "fraction": 0.916666667,
+            "half_width": 0.035
           },
           {
             "fraction": 1.0,
-            "half_width": 0.022
+            "half_width": 0.035
           }
         ],
         "wrap_direction": 1,
-        "wrap_outer_rho": 1.18,
-        "wrap_span_deg": 120.0,
-        "wrap_start_angle_deg": 110.0
+        "wrap_rho_profile": [
+          1.319205738,
+          1.28,
+          1.348800001,
+          1.416400001,
+          1.481400001,
+          1.546400001,
+          1.611400001,
+          1.660800001,
+          1.686800001,
+          1.7128,
+          1.718,
+          1.692000001,
+          1.666000001
+        ],
+        "wrap_span_deg": 100.0,
+        "wrap_start_angle_deg": 113.550125464
       },
       "guide_centerline": [
         [
@@ -1135,7 +1413,7 @@
           }
         ]
       },
-      "guide_digest": "5967b4ff547bdf53f449b31a5b21a5a357d8dffb2ca833e9a3eec02d8526f463",
+      "guide_digest": "338291ecef01de52cd2055996676d66e8d643e0a4dbabbc849729834e8646fe8",
       "guide_tangents": [
         [
           0.310683063,
@@ -1363,195 +1641,915 @@
         "available_width_profile": [
           {
             "angle_degrees": 0.0,
-            "available_half_width": 0.009328066
+            "available_half_width": 0.0,
+            "available_radial_depth": 0.0,
+            "inner_point": [
+              1.025815157,
+              0.561457031
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.120000002,
+            "outer_point": [
+              1.025815157,
+              0.561457031
+            ],
+            "outward_unit": [
+              1.0,
+              0.0
+            ]
           },
           {
             "angle_degrees": 7.5,
-            "available_half_width": 0.000759819
+            "available_half_width": 0.0,
+            "available_radial_depth": 0.0,
+            "inner_point": [
+              1.023587623,
+              0.608749852
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.120000002,
+            "outer_point": [
+              1.023587623,
+              0.608749852
+            ],
+            "outward_unit": [
+              0.991444861,
+              0.130526192
+            ]
           },
           {
             "angle_degrees": 15.0,
-            "available_half_width": 0.00734432
+            "available_half_width": 0.139485938,
+            "available_radial_depth": 1.2,
+            "inner_point": [
+              1.016943137,
+              0.65523348
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.320000002,
+            "outer_point": [
+              1.286409276,
+              0.755708246
+            ],
+            "outward_unit": [
+              0.965925826,
+              0.258819045
+            ]
           },
           {
             "angle_degrees": 22.5,
-            "available_half_width": 0.014233435
+            "available_half_width": 0.174357422,
+            "available_radial_depth": 1.5,
+            "inner_point": [
+              1.005995385,
+              0.700112567
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.620000002,
+            "outer_point": [
+              1.328165893,
+              0.885811944
+            ],
+            "outward_unit": [
+              0.923879533,
+              0.382683432
+            ]
           },
           {
             "angle_degrees": 30.0,
-            "available_half_width": 0.019424641
+            "available_half_width": 0.216203204,
+            "available_radial_depth": 1.86,
+            "inner_point": [
+              0.990931689,
+              0.742619219
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "outer_point": [
+              1.365406622,
+              1.043477851
+            ],
+            "outward_unit": [
+              0.866025404,
+              0.5
+            ]
           },
           {
             "angle_degrees": 37.5,
-            "available_half_width": 0.022384971
+            "available_half_width": 0.216203204,
+            "available_radial_depth": 1.86,
+            "inner_point": [
+              0.972009791,
+              0.782026135
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "outer_point": [
+              1.315060859,
+              1.148328398
+            ],
+            "outward_unit": [
+              0.79335334,
+              0.608761429
+            ]
           },
           {
             "angle_degrees": 45.0,
-            "available_half_width": 0.02258769
+            "available_half_width": 0.176682188,
+            "available_radial_depth": 1.52,
+            "inner_point": [
+              0.949553451,
+              0.817659054
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.640000002,
+            "outer_point": [
+              1.199419797,
+              1.165361798
+            ],
+            "outward_unit": [
+              0.707106781,
+              0.707106781
+            ]
           },
           {
             "angle_degrees": 52.5,
-            "available_half_width": 0.019761575
+            "available_half_width": 0.144135469,
+            "available_radial_depth": 1.24,
+            "inner_point": [
+              0.923946903,
+              0.848908284
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.360000002,
+            "outer_point": [
+              1.099435131,
+              1.167157886
+            ],
+            "outward_unit": [
+              0.608761429,
+              0.79335334
+            ]
           },
           {
             "angle_degrees": 60.0,
-            "available_half_width": 0.014486048
+            "available_half_width": 0.120887813,
+            "available_radial_depth": 1.04,
+            "inner_point": [
+              0.895628282,
+              0.875239144
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.160000002,
+            "outer_point": [
+              1.016516094,
+              1.166608249
+            ],
+            "outward_unit": [
+              0.5,
+              0.866025404
+            ]
           },
           {
             "angle_degrees": 67.5,
-            "available_half_width": 0.00770556
+            "available_half_width": 0.104614453,
+            "available_radial_depth": 0.9,
+            "inner_point": [
+              0.865082127,
+              0.896201105
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.020000002,
+            "outer_point": [
+              0.945150563,
+              1.165191879
+            ],
+            "outward_unit": [
+              0.382683432,
+              0.923879533
+            ]
           },
           {
             "angle_degrees": 75.0,
-            "available_half_width": 0.0003366
+            "available_half_width": 0.0,
+            "available_radial_depth": 0.0,
+            "inner_point": [
+              0.832831092,
+              0.911435503
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.120000002,
+            "outer_point": [
+              0.832831092,
+              0.911435503
+            ],
+            "outward_unit": [
+              0.258819045,
+              0.965925826
+            ]
           },
           {
             "angle_degrees": 82.5,
-            "available_half_width": 0.007253241
+            "available_half_width": 0.0,
+            "available_radial_depth": 0.0,
+            "inner_point": [
+              0.799427,
+              0.920681671
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.120000002,
+            "outer_point": [
+              0.799427,
+              0.920681671
+            ],
+            "outward_unit": [
+              0.130526192,
+              0.991444861
+            ]
           },
           {
             "angle_degrees": 90.0,
-            "available_half_width": 0.01486982
+            "available_half_width": 0.034871484,
+            "available_radial_depth": 0.3,
+            "inner_point": [
+              0.765441406,
+              0.923781406
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.420000002,
+            "outer_point": [
+              0.765441406,
+              1.020832578
+            ],
+            "outward_unit": [
+              0.0,
+              1.0
+            ]
           },
           {
             "angle_degrees": 97.5,
-            "available_half_width": 0.022382816
+            "available_half_width": 0.053469609,
+            "available_radial_depth": 0.46,
+            "inner_point": [
+              0.731455812,
+              0.920681671
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.580000002,
+            "outer_point": [
+              0.717497443,
+              1.068220362
+            ],
+            "outward_unit": [
+              -0.130526192,
+              0.991444861
+            ]
           },
           {
             "angle_degrees": 105.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.067418203,
+            "available_radial_depth": 0.58,
+            "inner_point": [
+              0.69805172,
+              0.911435503
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.700000002,
+            "outer_point": [
+              0.66315349,
+              1.092674354
+            ],
+            "outward_unit": [
+              -0.258819045,
+              0.965925826
+            ]
           },
           {
             "angle_degrees": 112.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.076717266,
+            "available_radial_depth": 0.66,
+            "inner_point": [
+              0.665800685,
+              0.896201105
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.780000002,
+            "outer_point": [
+              0.607083832,
+              1.093461006
+            ],
+            "outward_unit": [
+              -0.382683432,
+              0.923879533
+            ]
           },
           {
             "angle_degrees": 120.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.086016328,
+            "available_radial_depth": 0.74,
+            "inner_point": [
+              0.635254531,
+              0.875239144
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.860000002,
+            "outer_point": [
+              0.549238202,
+              1.082559469
+            ],
+            "outward_unit": [
+              -0.5,
+              0.866025404
+            ]
           },
           {
             "angle_degrees": 127.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.09066586,
+            "available_radial_depth": 0.78,
+            "inner_point": [
+              0.606935909,
+              0.848908284
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.900000002,
+            "outer_point": [
+              0.496548153,
+              1.04909755
+            ],
+            "outward_unit": [
+              -0.608761429,
+              0.79335334
+            ]
           },
           {
             "angle_degrees": 135.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.097640156,
+            "available_radial_depth": 0.84,
+            "inner_point": [
+              0.581329361,
+              0.817659054
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.960000002,
+            "outer_point": [
+              0.443245328,
+              1.009810571
+            ],
+            "outward_unit": [
+              -0.707106781,
+              0.707106781
+            ]
           },
           {
             "angle_degrees": 142.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.095315391,
+            "available_radial_depth": 0.82,
+            "inner_point": [
+              0.558873021,
+              0.782026135
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.940000002,
+            "outer_point": [
+              0.407635454,
+              0.94351423
+            ],
+            "outward_unit": [
+              -0.79335334,
+              0.608761429
+            ]
           },
           {
             "angle_degrees": 150.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.092990625,
+            "available_radial_depth": 0.8,
+            "inner_point": [
+              0.539951123,
+              0.742619219
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.920000002,
+            "outer_point": [
+              0.378886636,
+              0.872020781
+            ],
+            "outward_unit": [
+              -0.866025404,
+              0.5
+            ]
           },
           {
             "angle_degrees": 157.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.09066586,
+            "available_radial_depth": 0.78,
+            "inner_point": [
+              0.524887427,
+              0.700112567
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.900000002,
+            "outer_point": [
+              0.357358763,
+              0.796676243
+            ],
+            "outward_unit": [
+              -0.923879533,
+              0.382683432
+            ]
           },
           {
             "angle_degrees": 165.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.092990625,
+            "available_radial_depth": 0.8,
+            "inner_point": [
+              0.513939675,
+              0.65523348
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.920000002,
+            "outer_point": [
+              0.334295582,
+              0.722216657
+            ],
+            "outward_unit": [
+              -0.965925826,
+              0.258819045
+            ]
           },
           {
             "angle_degrees": 172.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.097640156,
+            "available_radial_depth": 0.84,
+            "inner_point": [
+              0.507295189,
+              0.608749852
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.960000002,
+            "outer_point": [
+              0.313685526,
+              0.644219468
+            ],
+            "outward_unit": [
+              -0.991444861,
+              0.130526192
+            ]
           },
           {
             "angle_degrees": 180.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.130186875,
+            "available_radial_depth": 1.12,
+            "inner_point": [
+              0.505067655,
+              0.561457031
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.240000002,
+            "outer_point": [
+              0.244693904,
+              0.561457031
+            ],
+            "outward_unit": [
+              -1.0,
+              0.0
+            ]
           },
           {
             "angle_degrees": 187.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.216203204,
+            "available_radial_depth": 1.86,
+            "inner_point": [
+              0.507295189,
+              0.51416421
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "outer_point": [
+              0.078588078,
+              0.435624347
+            ],
+            "outward_unit": [
+              -0.991444861,
+              -0.130526192
+            ]
           },
           {
             "angle_degrees": 195.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.216203204,
+            "available_radial_depth": 1.86,
+            "inner_point": [
+              0.513939675,
+              0.467680582
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "outer_point": [
+              0.096267159,
+              0.311944694
+            ],
+            "outward_unit": [
+              -0.965925826,
+              -0.258819045
+            ]
           },
           {
             "angle_degrees": 202.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.216203204,
+            "available_radial_depth": 1.86,
+            "inner_point": [
+              0.524887427,
+              0.422801495
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "outer_point": [
+              0.125395997,
+              0.192534267
+            ],
+            "outward_unit": [
+              -0.923879533,
+              -0.382683432
+            ]
           },
           {
             "angle_degrees": 210.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.216203204,
+            "available_radial_depth": 1.86,
+            "inner_point": [
+              0.539951123,
+              0.380294843
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "outer_point": [
+              0.16547619,
+              0.079436211
+            ],
+            "outward_unit": [
+              -0.866025404,
+              -0.5
+            ]
           },
           {
             "angle_degrees": 217.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.188306016,
+            "available_radial_depth": 1.62,
+            "inner_point": [
+              0.558873021,
+              0.340887927
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.740000002,
+            "outer_point": [
+              0.260086607,
+              0.021850472
+            ],
+            "outward_unit": [
+              -0.79335334,
+              -0.608761429
+            ]
           },
           {
             "angle_degrees": 225.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.144135469,
+            "available_radial_depth": 1.24,
+            "inner_point": [
+              0.581329361,
+              0.305255008
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.360000002,
+            "outer_point": [
+              0.377491026,
+              0.021602769
+            ],
+            "outward_unit": [
+              -0.707106781,
+              -0.707106781
+            ]
           },
           {
             "angle_degrees": 232.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.113913516,
+            "available_radial_depth": 0.98,
+            "inner_point": [
+              0.606935909,
+              0.274005778
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.100000002,
+            "outer_point": [
+              0.4682436,
+              0.022485931
+            ],
+            "outward_unit": [
+              -0.608761429,
+              -0.79335334
+            ]
           },
           {
             "angle_degrees": 240.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.092990625,
+            "available_radial_depth": 0.8,
+            "inner_point": [
+              0.63525453,
+              0.247674918
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.920000002,
+            "outer_point": [
+              0.542263905,
+              0.023544837
+            ],
+            "outward_unit": [
+              -0.5,
+              -0.866025404
+            ]
           },
           {
             "angle_degrees": 247.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.079042031,
+            "available_radial_depth": 0.68,
+            "inner_point": [
+              0.665800685,
+              0.226712957
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.800000002,
+            "outer_point": [
+              0.605304533,
+              0.023475483
+            ],
+            "outward_unit": [
+              -0.382683432,
+              -0.923879533
+            ]
           },
           {
             "angle_degrees": 255.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.069742969,
+            "available_radial_depth": 0.6,
+            "inner_point": [
+              0.69805172,
+              0.211478559
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.720000002,
+            "outer_point": [
+              0.661950103,
+              0.023990093
+            ],
+            "outward_unit": [
+              -0.258819045,
+              -0.965925826
+            ]
           },
           {
             "angle_degrees": 262.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.065093438,
+            "available_radial_depth": 0.56,
+            "inner_point": [
+              0.731455812,
+              0.202232391
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.680000002,
+            "outer_point": [
+              0.714463015,
+              0.022620071
+            ],
+            "outward_unit": [
+              -0.130526192,
+              -0.991444861
+            ]
           },
           {
             "angle_degrees": 270.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.062768672,
+            "available_radial_depth": 0.54,
+            "inner_point": [
+              0.765441406,
+              0.199132656
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.660000002,
+            "outer_point": [
+              0.765441406,
+              0.024440546
+            ],
+            "outward_unit": [
+              0.0,
+              -1.0
+            ]
           },
           {
             "angle_degrees": 277.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.065093438,
+            "available_radial_depth": 0.56,
+            "inner_point": [
+              0.799427,
+              0.202232391
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.680000002,
+            "outer_point": [
+              0.816419797,
+              0.022620071
+            ],
+            "outward_unit": [
+              0.130526192,
+              -0.991444861
+            ]
           },
           {
             "angle_degrees": 285.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.069742969,
+            "available_radial_depth": 0.6,
+            "inner_point": [
+              0.832831092,
+              0.211478559
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.720000002,
+            "outer_point": [
+              0.868932709,
+              0.023990093
+            ],
+            "outward_unit": [
+              0.258819045,
+              -0.965925826
+            ]
           },
           {
             "angle_degrees": 292.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.079042031,
+            "available_radial_depth": 0.68,
+            "inner_point": [
+              0.865082127,
+              0.226712957
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.800000002,
+            "outer_point": [
+              0.925578279,
+              0.023475483
+            ],
+            "outward_unit": [
+              0.382683432,
+              -0.923879533
+            ]
           },
           {
             "angle_degrees": 300.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.092990625,
+            "available_radial_depth": 0.8,
+            "inner_point": [
+              0.895628282,
+              0.247674918
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 1.920000002,
+            "outer_point": [
+              0.988618907,
+              0.023544837
+            ],
+            "outward_unit": [
+              0.5,
+              -0.866025404
+            ]
           },
           {
             "angle_degrees": 307.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.113913516,
+            "available_radial_depth": 0.98,
+            "inner_point": [
+              0.923946903,
+              0.274005778
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.100000002,
+            "outer_point": [
+              1.062639212,
+              0.022485931
+            ],
+            "outward_unit": [
+              0.608761429,
+              -0.79335334
+            ]
           },
           {
             "angle_degrees": 315.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.144135469,
+            "available_radial_depth": 1.24,
+            "inner_point": [
+              0.949553451,
+              0.305255008
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.360000002,
+            "outer_point": [
+              1.153391786,
+              0.021602769
+            ],
+            "outward_unit": [
+              0.707106781,
+              -0.707106781
+            ]
           },
           {
             "angle_degrees": 322.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.188306016,
+            "available_radial_depth": 1.62,
+            "inner_point": [
+              0.972009791,
+              0.340887927
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.740000002,
+            "outer_point": [
+              1.270796205,
+              0.021850472
+            ],
+            "outward_unit": [
+              0.79335334,
+              -0.608761429
+            ]
           },
           {
             "angle_degrees": 330.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.216203204,
+            "available_radial_depth": 1.86,
+            "inner_point": [
+              0.990931689,
+              0.380294843
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "outer_point": [
+              1.365406622,
+              0.079436211
+            ],
+            "outward_unit": [
+              0.866025404,
+              -0.5
+            ]
           },
           {
             "angle_degrees": 337.5,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.216203204,
+            "available_radial_depth": 1.86,
+            "inner_point": [
+              1.005995385,
+              0.422801495
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "outer_point": [
+              1.405486815,
+              0.192534267
+            ],
+            "outward_unit": [
+              0.923879533,
+              -0.382683432
+            ]
           },
           {
             "angle_degrees": 345.0,
-            "available_half_width": 0.027897188
+            "available_half_width": 0.216203204,
+            "available_radial_depth": 1.86,
+            "inner_point": [
+              1.016943137,
+              0.467680582
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "outer_point": [
+              1.434615653,
+              0.311944694
+            ],
+            "outward_unit": [
+              0.965925826,
+              -0.258819045
+            ]
           },
           {
             "angle_degrees": 352.5,
-            "available_half_width": 0.018780221
+            "available_half_width": 0.216203204,
+            "available_radial_depth": 1.86,
+            "inner_point": [
+              1.023587623,
+              0.51416421
+            ],
+            "inner_rho": 1.120000002,
+            "maximum_outer_rho": 2.980000002,
+            "outer_point": [
+              1.452294734,
+              0.435624347
+            ],
+            "outward_unit": [
+              0.991444861,
+              -0.130526192
+            ]
           }
         ],
         "clearance_samples": [
@@ -2102,7 +3100,14 @@
         "flower_id": "flower_1",
         "planner_decisions_present": false,
         "prototype_id": "proto_sw_3_1",
-        "region_digest": "d7e6f57fcb5daedf9d0dceece43fb6fababe5e4fb5b72d730ad48f70db058cc9",
+        "radial_probe_policy": {
+          "canvas_margin": 0.02,
+          "horizontal_repeat_boundary_is_not_a_wall": true,
+          "maximum_outer_rho": 3.0,
+          "minimum_backbone_clearance": 0.025,
+          "radial_probe_step": 0.02
+        },
+        "region_digest": "61f5a4513a40b3b336658fb374ff1e5ce57261b478780058f35a1d9b7031fbbe",
         "role_neutral": true,
         "schema": "dynamic_branch_loop_growth_region_v1"
       },
@@ -2204,7 +3209,7 @@
     }
   ],
   "motion_policy": "tangent_led_v1",
-  "plan_digest": "d518373549ffb6a42f45355db6b641fa40ad0addb784b6f33ef05f8bd70575f1",
+  "plan_digest": "2d119fc41538788dae278c5cd054119351b078fe62bb6fdc583866eab21841a4",
   "plan_id": "proto_sw_3_1__seed_4101__global_l1_flow_v1__R2_support_wrap",
   "prototype_id": "proto_sw_3_1",
   "review": {

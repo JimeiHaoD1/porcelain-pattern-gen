@@ -130,25 +130,6 @@ def _cubic_point(segment: Mapping[str, Sequence[float]], t: float) -> Point:
     )
 
 
-def _cubic_derivative(
-    segment: Mapping[str, Sequence[float]],
-    t: float,
-) -> Point:
-    p0 = _point(segment["p0"], "segment.p0")
-    p1 = _point(segment["p1"], "segment.p1")
-    p2 = _point(segment["p2"], "segment.p2")
-    p3 = _point(segment["p3"], "segment.p3")
-    u = 1.0 - t
-    return (
-        3.0 * u * u * (p1[0] - p0[0])
-        + 6.0 * u * t * (p2[0] - p1[0])
-        + 3.0 * t * t * (p3[0] - p2[0]),
-        3.0 * u * u * (p1[1] - p0[1])
-        + 6.0 * u * t * (p2[1] - p1[1])
-        + 3.0 * t * t * (p3[1] - p2[1]),
-    )
-
-
 def _sample_segments(
     segments: Sequence[Mapping[str, Sequence[float]]],
     samples_per_segment: int = 18,
@@ -2449,6 +2430,14 @@ def attach_loop_growth_guide(
         boundary_sample_count=int(
             guide_contract["analysis_boundary_sample_count"]
         ),
+        radial_probe_step=float(guide_contract["radial_probe_step"]),
+        maximum_outer_rho=float(
+            guide_contract["maximum_region_outer_rho"]
+        ),
+        minimum_backbone_clearance=float(
+            guide_contract["minimum_region_backbone_clearance"]
+        ),
+        canvas_margin=float(guide_contract["region_canvas_margin"]),
     )
     support_points = [
         _point(point, "lane.centerline")
@@ -2476,87 +2465,205 @@ def attach_loop_growth_guide(
     ]
 
     mount_fraction = float(guide_contract["wrap_mount_fraction"])
-    mount_root, mount_tangent = _point_and_tangent_at_arc_fraction(
+    mount_root, _ = _point_and_tangent_at_arc_fraction(
         support_points,
         mount_fraction,
     )
     center = _flower_center_near(flower, mount_root[0])
     rx = float(flower["rx"])
     ry = float(flower["ry"])
-    outer_rho = float(guide_contract["wrap_outer_rho"])
-    start_angle = math.radians(
-        float(guide_contract["wrap_start_angle_deg"])
-    )
-    signed_span = (
-        float(guide_contract["wrap_span_deg"])
-        * float(guide_contract["wrap_direction"])
-    )
-    join = (
-        center[0] + outer_rho * rx * math.cos(start_angle),
-        center[1] + outer_rho * ry * math.sin(start_angle),
-    )
-    progress_sign = 1.0 if signed_span >= 0.0 else -1.0
-    ellipse_start_tangent = _unit(
+    region_profile = list(region["available_width_profile"])
+    region_count = len(region_profile)
+
+    def region_row(angle_degrees: float) -> dict[str, float]:
+        wrapped = angle_degrees % 360.0
+        scaled = wrapped * region_count / 360.0
+        left_index = int(math.floor(scaled)) % region_count
+        right_index = (left_index + 1) % region_count
+        local = scaled - math.floor(scaled)
+        left = region_profile[left_index]
+        right = region_profile[right_index]
+        return {
+            key: float(left[key])
+            + (float(right[key]) - float(left[key])) * local
+            for key in ("inner_rho", "maximum_outer_rho")
+        }
+
+    depth_profile = [
         (
-            -progress_sign * rx * math.sin(start_angle),
-            progress_sign * ry * math.cos(start_angle),
-        ),
-        "wrap ellipse start tangent",
-    )
-    approach_chord = _distance(mount_root, join)
-    approach = _hermite_segment(
-        mount_root,
-        join,
-        mount_tangent,
-        ellipse_start_tangent,
-        approach_chord
-        * float(guide_contract["approach_root_arm_fraction"]),
-        approach_chord
-        * float(guide_contract["approach_join_arm_fraction"]),
-    )
-    approach_sample_count = int(
-        guide_contract["approach_sample_count"]
-    )
-    wrap_points = [
-        _cubic_point(approach, index / approach_sample_count)
-        for index in range(approach_sample_count + 1)
-    ]
-    wrap_tangents = [
-        _unit(
-            _cubic_derivative(approach, index / approach_sample_count),
-            "wrap approach tangent",
+            float(row["fraction"]),
+            float(row["region_depth_fraction"]),
         )
-        for index in range(approach_sample_count + 1)
+        for row in guide_contract["region_depth_fraction_profile"]
     ]
-    ellipse_sample_count = int(
-        guide_contract["ellipse_sample_count"]
+
+    def depth_fraction(fraction: float) -> float:
+        if fraction <= depth_profile[0][0]:
+            return depth_profile[0][1]
+        for (left_f, left_v), (right_f, right_v) in zip(
+            depth_profile,
+            depth_profile[1:],
+        ):
+            if left_f <= fraction <= right_f:
+                local = (fraction - left_f) / (right_f - left_f)
+                return left_v + (right_v - left_v) * local
+        return depth_profile[-1][1]
+
+    normalized_mount = (
+        (mount_root[0] - center[0]) / rx,
+        (mount_root[1] - center[1]) / ry,
     )
-    for index in range(1, ellipse_sample_count + 1):
-        fraction = index / ellipse_sample_count
-        angle = start_angle + math.radians(signed_span) * fraction
-        wrap_points.append(
+    start_angle_degrees = math.degrees(
+        math.atan2(normalized_mount[1], normalized_mount[0])
+    ) % 360.0
+    wrap_span_degrees = float(guide_contract["wrap_span_deg"])
+    guide_sample_count = int(guide_contract["region_guide_sample_count"])
+    minimum_region_depth = float(
+        guide_contract["minimum_region_radial_depth"]
+    )
+    direction_rows: list[dict[str, float]] = []
+    for direction in (-1, 1):
+        depths: list[float] = []
+        for index in range(1, guide_sample_count + 1):
+            fraction = index / guide_sample_count
+            row = region_row(
+                start_angle_degrees
+                + direction * wrap_span_degrees * fraction
+            )
+            depths.append(
+                row["maximum_outer_rho"] - row["inner_rho"]
+            )
+        direction_rows.append(
+            {
+                "direction": float(direction),
+                "minimum_depth": min(depths),
+                "mean_depth": sum(depths) / len(depths),
+                "capacity_score": (
+                    min(depths) * 1.5
+                    + sum(depths) / len(depths)
+                ),
+            }
+        )
+    feasible_directions = [
+        row
+        for row in direction_rows
+        if row["minimum_depth"] >= minimum_region_depth
+    ]
+    if not feasible_directions:
+        raise GlobalL1FlowError(
+            "flower wrap has no connected growth-region direction"
+        )
+    selected_direction = max(
+        feasible_directions,
+        key=lambda row: (
+            row["capacity_score"],
+            row["mean_depth"],
+            row["direction"],
+        ),
+    )
+    progress_sign = int(selected_direction["direction"])
+    maximum_center_rho = float(
+        guide_contract["maximum_guide_center_rho"]
+    )
+    minimum_center_rho = float(
+        guide_contract["minimum_guide_center_rho"]
+    )
+    envelope_outer_rho = float(
+        guide_contract["maximum_region_envelope_rho"]
+    )
+    wrap_points: list[Point] = [mount_root]
+    wrap_rhos: list[float] = [
+        math.hypot(normalized_mount[0], normalized_mount[1])
+    ]
+    region_inner_points: list[Point] = []
+    region_outer_points: list[Point] = []
+    region_capacity_trace: list[dict[str, float]] = []
+    for index in range(guide_sample_count + 1):
+        fraction = index / guide_sample_count
+        angle_degrees = (
+            start_angle_degrees
+            + progress_sign * wrap_span_degrees * fraction
+        )
+        angle = math.radians(angle_degrees)
+        row = region_row(angle_degrees)
+        inner_rho = row["inner_rho"]
+        outer_rho = min(
+            row["maximum_outer_rho"],
+            envelope_outer_rho,
+        )
+        region_inner_points.append(
+            (
+                center[0] + inner_rho * rx * math.cos(angle),
+                center[1] + inner_rho * ry * math.sin(angle),
+            )
+        )
+        region_outer_points.append(
             (
                 center[0] + outer_rho * rx * math.cos(angle),
                 center[1] + outer_rho * ry * math.sin(angle),
             )
         )
-        wrap_tangents.append(
-            _unit(
-                (
-                    -progress_sign * rx * math.sin(angle),
-                    progress_sign * ry * math.cos(angle),
-                ),
-                "wrap ellipse tangent",
+        if index == 0:
+            center_rho = wrap_rhos[0]
+        else:
+            center_rho = inner_rho + depth_fraction(fraction) * max(
+                0.0,
+                min(row["maximum_outer_rho"], maximum_center_rho)
+                - inner_rho,
             )
+            center_rho = max(
+                minimum_center_rho,
+                min(center_rho, row["maximum_outer_rho"]),
+            )
+            wrap_points.append(
+                (
+                    center[0] + center_rho * rx * math.cos(angle),
+                    center[1] + center_rho * ry * math.sin(angle),
+                )
+            )
+            wrap_rhos.append(center_rho)
+        region_capacity_trace.append(
+            {
+                "fraction": round(fraction, 9),
+                "angle_degrees": round(angle_degrees, 9),
+                "inner_rho": round(inner_rho, 9),
+                "maximum_outer_rho": round(
+                    row["maximum_outer_rho"],
+                    9,
+                ),
+                "guide_center_rho": round(center_rho, 9),
+                "region_depth_fraction": round(
+                    depth_fraction(fraction),
+                    9,
+                ),
+            }
         )
-    wrap_half_width = float(guide_contract["wrap_half_width"])
-    wrap_width_profile = [
-        {
-            "fraction": round(index / 4.0, 9),
-            "half_width": round(wrap_half_width, 9),
-        }
-        for index in range(5)
-    ]
+    wrap_tangents = _polyline_tangents(wrap_points)
+    wrap_width_min = float(guide_contract["wrap_half_width_min"])
+    wrap_width_max = float(guide_contract["wrap_half_width_max"])
+    region_width_fraction = float(
+        guide_contract["region_channel_width_fraction"]
+    )
+    wrap_width_profile = []
+    for index, trace in enumerate(region_capacity_trace):
+        radial_depth = (
+            trace["maximum_outer_rho"] - trace["inner_rho"]
+        ) * min(rx, ry)
+        wrap_width_profile.append(
+            {
+                "fraction": round(index / guide_sample_count, 9),
+                "half_width": round(
+                    max(
+                        wrap_width_min,
+                        min(
+                            wrap_width_max,
+                            radial_depth * region_width_fraction,
+                        ),
+                    ),
+                    9,
+                ),
+            }
+        )
     guided = dict(lane)
     guided.update(
         {
@@ -2592,7 +2699,9 @@ def attach_loop_growth_guide(
                 "schema": "dynamic_branch_role_guide_channel_v1",
                 "semantic_role": "flower_wrap",
                 "service_flower_id": flower_id,
-                "target_relation": "outside_flower_boundary_arc",
+                "target_relation": (
+                    "enter_wrap_region_then_swing_outward_and_return_guard"
+                ),
                 "mount_fraction": round(mount_fraction, 9),
                 "guide_centerline": [
                     _round_point(point) for point in wrap_points
@@ -2603,13 +2712,34 @@ def attach_loop_growth_guide(
                 ],
                 "width_profile": wrap_width_profile,
                 "exit_direction": _round_point(wrap_tangents[-1]),
-                "wrap_outer_rho": round(outer_rho, 9),
                 "wrap_start_angle_deg": round(
-                    math.degrees(start_angle),
+                    start_angle_degrees,
                     9,
                 ),
-                "wrap_span_deg": round(abs(signed_span), 9),
+                "wrap_span_deg": round(wrap_span_degrees, 9),
                 "wrap_direction": int(progress_sign),
+                "wrap_rho_profile": [
+                    round(value, 9) for value in wrap_rhos
+                ],
+                "region_envelope": {
+                    "inner_boundary": [
+                        _round_point(point)
+                        for point in region_inner_points
+                    ],
+                    "outer_boundary": [
+                        _round_point(point)
+                        for point in region_outer_points
+                    ],
+                },
+                "region_capacity_trace": region_capacity_trace,
+                "direction_candidates": direction_rows,
+                "selected_region_capacity_score": round(
+                    selected_direction["capacity_score"],
+                    9,
+                ),
+                "path_construction": (
+                    "non_equidistant_region_centerline"
+                ),
             },
             "loop_growth_region": region,
         }

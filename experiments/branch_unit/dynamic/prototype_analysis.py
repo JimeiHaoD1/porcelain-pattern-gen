@@ -848,6 +848,10 @@ def derive_loop_growth_region(
     *,
     entry_distance_range: Sequence[float],
     boundary_sample_count: int,
+    radial_probe_step: float,
+    maximum_outer_rho: float,
+    minimum_backbone_clearance: float,
+    canvas_margin: float,
 ) -> dict[str, object]:
     """Derive role-neutral flower-edge space for an existing analysis."""
 
@@ -862,6 +866,14 @@ def derive_loop_growth_region(
         raise ValueError("entry_distance_range must be increasing")
     if boundary_sample_count < 12:
         raise ValueError("boundary_sample_count must be at least 12")
+    if radial_probe_step <= 0.0:
+        raise ValueError("radial_probe_step must be positive")
+    if maximum_outer_rho <= 1.0:
+        raise ValueError("maximum_outer_rho must exceed one")
+    if minimum_backbone_clearance <= 0.0:
+        raise ValueError("minimum_backbone_clearance must be positive")
+    if canvas_margin < 0.0:
+        raise ValueError("canvas_margin must be non-negative")
     flower = next(
         (
             row
@@ -880,6 +892,7 @@ def derive_loop_growth_region(
     ry = float(flower["ry"])
     protection_rx = float(flower["protection_rx"])
     protection_ry = float(flower["protection_ry"])
+    protection_rho = max(protection_rx / rx, protection_ry / ry)
     nearest_s = float(flower["nearest_backbone_s"])
     minimum_entry = float(entry_distance_range[0])
     maximum_entry = float(entry_distance_range[1])
@@ -905,14 +918,12 @@ def derive_loop_growth_region(
     boundary_samples: list[dict[str, object]] = []
     clearance_samples: list[dict[str, object]] = []
     width_samples: list[dict[str, object]] = []
-    protection_gap = min(protection_rx - rx, protection_ry - ry)
-    for index in range(boundary_sample_count):
-        angle = 2.0 * math.pi * index / boundary_sample_count
-        point = (
-            center[0] + rx * math.cos(angle),
-            center[1] + ry * math.sin(angle),
-        )
-        clearance = min(
+    canvas_bounds = analysis["coordinate_system"]["canvas_bounds"]
+    y_min = float(canvas_bounds[1]) + canvas_margin
+    y_max = float(canvas_bounds[3]) - canvas_margin
+
+    def backbone_clearance(point: Point) -> float:
+        return min(
             _point_segment_distance(
                 point,
                 (start[0] + offset, start[1]),
@@ -920,6 +931,41 @@ def derive_loop_growth_region(
             )
             for offset in (-1.0, 0.0, 1.0)
             for start, end in zip(backbone, backbone[1:])
+        )
+
+    for index in range(boundary_sample_count):
+        angle = 2.0 * math.pi * index / boundary_sample_count
+        point = (
+            center[0] + rx * math.cos(angle),
+            center[1] + ry * math.sin(angle),
+        )
+        clearance = backbone_clearance(point)
+        inner_point = (
+            center[0] + protection_rho * rx * math.cos(angle),
+            center[1] + protection_rho * ry * math.sin(angle),
+        )
+        maximum_rho = protection_rho
+        probe_rho = protection_rho
+        while probe_rho + radial_probe_step <= maximum_outer_rho + 1e-12:
+            candidate_rho = min(
+                maximum_outer_rho,
+                probe_rho + radial_probe_step,
+            )
+            candidate = (
+                center[0] + candidate_rho * rx * math.cos(angle),
+                center[1] + candidate_rho * ry * math.sin(angle),
+            )
+            if not y_min <= candidate[1] <= y_max:
+                break
+            if backbone_clearance(candidate) < minimum_backbone_clearance:
+                break
+            maximum_rho = candidate_rho
+            probe_rho = candidate_rho
+            if maximum_rho >= maximum_outer_rho - 1e-12:
+                break
+        outer_point = (
+            center[0] + maximum_rho * rx * math.cos(angle),
+            center[1] + maximum_rho * ry * math.sin(angle),
         )
         angle_degrees = _round(math.degrees(angle))
         boundary_samples.append(
@@ -937,14 +983,20 @@ def derive_loop_growth_region(
         width_samples.append(
             {
                 "angle_degrees": angle_degrees,
+                "inner_rho": _round(protection_rho),
+                "maximum_outer_rho": _round(maximum_rho),
+                "available_radial_depth": _round(
+                    maximum_rho - protection_rho
+                ),
+                "inner_point": _round_point(inner_point),
+                "outer_point": _round_point(outer_point),
+                "outward_unit": _round_point(
+                    (math.cos(angle), math.sin(angle))
+                ),
                 "available_half_width": _round(
-                    max(
-                        0.0,
-                        min(
-                            protection_gap,
-                            clearance * 0.25,
-                        ),
-                    )
+                    max(0.0, maximum_rho - protection_rho)
+                    * min(rx, ry)
+                    * 0.5
                 ),
             }
         )
@@ -956,6 +1008,15 @@ def derive_loop_growth_region(
         "clearance_samples": clearance_samples,
         "flower_boundary_samples": boundary_samples,
         "available_width_profile": width_samples,
+        "radial_probe_policy": {
+            "radial_probe_step": _round(radial_probe_step),
+            "maximum_outer_rho": _round(maximum_outer_rho),
+            "minimum_backbone_clearance": _round(
+                minimum_backbone_clearance
+            ),
+            "canvas_margin": _round(canvas_margin),
+            "horizontal_repeat_boundary_is_not_a_wall": True,
+        },
         "role_neutral": True,
         "planner_decisions_present": False,
         "curve_geometry_present": False,

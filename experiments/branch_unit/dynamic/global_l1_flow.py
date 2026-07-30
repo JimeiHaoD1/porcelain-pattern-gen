@@ -20,8 +20,10 @@ from fixed_visual_prior import canonical_digest, validate_fixed_visual_prior
 from prototype_analysis import derive_loop_growth_region
 from role_region_plan import (
     build_sw1_role_region_plan,
+    build_sw3_group_region_plan,
     build_sw3_remote_support_region_plan,
     validate_role_region_plan,
+    validate_sw3_group_region_plan,
     validate_sw3_remote_support_region_plan,
 )
 from topology_contract_loader import materialize_prototype_topology
@@ -2398,7 +2400,7 @@ def _region_l1_candidate(
     offset_fraction: float,
     candidate_index: int,
 ) -> dict[str, Any]:
-    if role not in {"flower_support", "flower_wrap"}:
+    if role not in {"flower_support", "flower_wrap", "balance"}:
         raise GlobalL1FlowError(f"unsupported R2C role: {role}")
     if role == "flower_support":
         center = _point(flower["center"], "R2C support flower center")
@@ -2412,7 +2414,7 @@ def _region_l1_candidate(
             terminal_point=terminal,
         )
         knot_indices = None
-    else:
+    elif role == "flower_wrap":
         full_guide = [
             _point(value, "R2C wrap region guide")
             for value in region["guide_centerline"]
@@ -2449,6 +2451,12 @@ def _region_l1_candidate(
         ]
         if knot_indices[-1] != len(path) - 1:
             knot_indices.append(len(path) - 1)
+    else:
+        path = _offset_region_guide(
+            region,
+            offset_fraction,
+        )
+        knot_indices = None
     segments = _region_path_segments(path, knot_indices=knot_indices)
     centerline = _sample_segments(segments, samples_per_segment=18)
     flower_service_start_index: int | None = None
@@ -2970,6 +2978,211 @@ def generate_sw3_remote_support_l1(
                 ],
                 "selected_geometry_digest": selected[
                     "geometry_digest"
+                ],
+            }
+        ),
+    }
+
+
+def _generate_region_balance_l1(
+    *,
+    analysis: Mapping[str, Any],
+    region_plan: Mapping[str, Any],
+    core_curves: Sequence[Mapping[str, Any]],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Generate a light L1 counterweight after core curves occupy the group."""
+
+    flower_id = str(region_plan["service_flower_id"])
+    flower = next(
+        row
+        for row in analysis["flowers"]
+        if row["flower_id"] == flower_id
+    )
+    region = next(
+        row
+        for row in region_plan["regions"]
+        if row["role"] == "balance_region"
+    )
+    candidates = [
+        _region_l1_candidate(
+            prototype_id=str(analysis["prototype_id"]),
+            role="balance",
+            region=region,
+            flower=flower,
+            offset_fraction=offset,
+            candidate_index=index,
+        )
+        for index, offset in enumerate((-0.52, 0.0, 0.52), start=1)
+    ]
+    backbone = [
+        row["point"] for row in analysis["backbone"]["samples"]
+    ]
+    for candidate in candidates:
+        candidate["flower_id"] = None
+        candidate["slot_id"] = f"balance__{flower_id}"
+        candidate["curve_id"] = (
+            f"{analysis['prototype_id']}__{flower_id}__balance"
+            f"__candidate_{candidate['candidate_id'].rsplit('_', 1)[-1]}"
+        )
+        rejections: list[str] = []
+        if _polyline_crossing_count(
+            candidate["centerline"],
+            candidate["centerline"],
+        ):
+            rejections.append("self_intersection")
+        if _polyline_crossing_count(
+            candidate["centerline"][1:],
+            backbone,
+        ):
+            rejections.append("backbone_intersection")
+        if any(
+            _polyline_crossing_count(
+                candidate["centerline"],
+                core["centerline"],
+            )
+            for core in core_curves
+        ):
+            rejections.append("core_branch_intersection")
+        candidate["hard_rejections"] = rejections
+        candidate["generation_policy"].update(
+            {
+                "core_region_occupancy_consumed_first": True,
+                "largest_remaining_sector_consumed": True,
+                "independent_role_random_generation_used": False,
+            }
+        )
+    legal = [
+        candidate
+        for candidate in candidates
+        if not candidate["hard_rejections"]
+    ]
+    if not legal:
+        raise GlobalL1FlowError(
+            f"{analysis['prototype_id']} R3 balance region has no "
+            "non-intersecting candidate"
+        )
+    selected = min(
+        legal,
+        key=lambda row: (
+            abs(float(row["offset_fraction"])),
+            str(row["candidate_id"]),
+        ),
+    )
+    selected["curve_id"] = "balance_1"
+    selected["selected"] = True
+    return selected, candidates
+
+
+def generate_sw1_region_l1_group(
+    analysis: Mapping[str, Any],
+    region_plan: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Generate the SW1 support, wrap, then residual-sector balance group."""
+
+    validate_role_region_plan(region_plan)
+    pair = generate_sw1_region_l1_pair(analysis, region_plan)
+    core_curves = list(pair["selected_curves"])
+    balance, balance_candidates = _generate_region_balance_l1(
+        analysis=analysis,
+        region_plan=region_plan,
+        core_curves=core_curves,
+    )
+    selected = [*core_curves, balance]
+    return {
+        "schema": "dynamic_branch_R3_sw1_flower_group_v2",
+        "prototype_id": str(analysis["prototype_id"]),
+        "family_id": "SW1",
+        "service_flower_id": str(region_plan["service_flower_id"]),
+        "source_region_plan_digest": str(
+            region_plan["region_plan_digest"]
+        ),
+        "generation_order": [
+            "flower_support",
+            "flower_wrap",
+            "compute_core_region_occupancy",
+            "compute_largest_remaining_sector",
+            "balance",
+        ],
+        "selected_curves": selected,
+        "candidate_inventory": [
+            *pair["candidate_inventory"],
+            *balance_candidates,
+        ],
+        "stage_scope": {
+            "selected_L1_count": 3,
+            "support_L1_count": 1,
+            "wrap_L1_count": 1,
+            "balance_L1_count": 1,
+            "ordinary_L1_count": 0,
+            "L2_count": 0,
+            "L3_count": 0,
+        },
+        "selection_digest": canonical_digest(
+            {
+                "source_region_plan_digest": region_plan[
+                    "region_plan_digest"
+                ],
+                "selected_geometry_digests": [
+                    row["geometry_digest"] for row in selected
+                ],
+            }
+        ),
+    }
+
+
+def generate_sw3_region_l1_group(
+    analysis: Mapping[str, Any],
+    region_plan: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Generate the SW3 remote support, then residual-sector balance group."""
+
+    validate_sw3_group_region_plan(region_plan)
+    remote_result = generate_sw3_remote_support_l1(
+        analysis,
+        region_plan,
+    )
+    remote = remote_result["selected_remote_support"]
+    balance, balance_candidates = _generate_region_balance_l1(
+        analysis=analysis,
+        region_plan=region_plan,
+        core_curves=[remote],
+    )
+    selected = [remote, balance]
+    return {
+        "schema": "dynamic_branch_R3_sw3_flower_group_v2",
+        "prototype_id": str(analysis["prototype_id"]),
+        "family_id": "SW3",
+        "service_flower_id": str(region_plan["service_flower_id"]),
+        "source_region_plan_digest": str(
+            region_plan["region_plan_digest"]
+        ),
+        "generation_order": [
+            "remote_flower_support",
+            "compute_core_region_occupancy",
+            "compute_largest_remaining_sector",
+            "balance",
+        ],
+        "selected_curves": [remote, balance],
+        "candidate_inventory": [
+            *remote_result["candidate_inventory"],
+            *balance_candidates,
+        ],
+        "stage_scope": {
+            "selected_L1_count": 2,
+            "remote_support_L1_count": 1,
+            "balance_L1_count": 1,
+            "forced_wrap_count": 0,
+            "L2_count": 0,
+            "L3_count": 0,
+        },
+        "selection_digest": canonical_digest(
+            {
+                "source_region_plan_digest": region_plan[
+                    "region_plan_digest"
+                ],
+                "selected_geometry_digests": [
+                    remote["geometry_digest"],
+                    balance["geometry_digest"],
                 ],
             }
         ),

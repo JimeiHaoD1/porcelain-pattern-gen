@@ -1163,6 +1163,178 @@ def validate_sw3_remote_support_region_plan(
         raise RoleRegionPlanError("R2D role region plan digest mismatch")
 
 
+def build_sw3_group_region_plan(
+    analysis: Mapping[str, Any],
+    topology: Mapping[str, Any],
+    service_flower_id: str,
+) -> dict[str, Any]:
+    """Plan the R3 SW3 balance channel after the remote-support channel."""
+
+    plan = build_sw3_remote_support_region_plan(
+        analysis,
+        topology,
+        service_flower_id,
+    )
+    flower = next(
+        row
+        for row in analysis["flowers"]
+        if row["flower_id"] == service_flower_id
+    )
+    remote = next(
+        row
+        for row in plan["regions"]
+        if row["role"] == "remote_support_region"
+    )
+    center = _point(flower["center"], "R3 SW3 flower center")
+    protection_rx = float(flower["protection_rx"])
+    protection_ry = float(flower["protection_ry"])
+    minor_radius = min(float(flower["rx"]), float(flower["ry"]))
+    backbone = analysis["backbone"]["samples"]
+    nearest_s = float(flower["nearest_backbone_s"])
+
+    # The remote support occupies the lower flower-side sector.  The balance
+    # root and target are derived from the opposite residual sector, not from
+    # a seed-specific point or a pre-existing branch.
+    balance_s = (nearest_s + 0.175) % 1.0
+    balance_root, balance_tangent = _backbone_at_s(backbone, balance_s)
+    bounds = [
+        float(value)
+        for value in analysis["coordinate_system"]["canvas_bounds"]
+    ]
+    balance_target = (
+        min(
+            bounds[2] - 0.08,
+            max(bounds[0] + 0.08, center[0] - 1.50 * protection_rx),
+        ),
+        min(
+            bounds[3] - 0.08,
+            max(bounds[1] + 0.08, center[1] - 0.64 * protection_ry),
+        ),
+    )
+    balance_tangent = _oriented_tangent(
+        balance_tangent,
+        _sub(balance_target, balance_root),
+    )
+    balance_chord = _distance(balance_root, balance_target)
+    normal_options = [
+        (-balance_tangent[1], balance_tangent[0]),
+        (balance_tangent[1], -balance_tangent[0]),
+    ]
+    balance_normal = max(
+        normal_options,
+        key=lambda normal: _distance(
+            _add(
+                _lerp(balance_root, balance_target, 0.52),
+                _mul(normal, 0.14 * balance_chord),
+            ),
+            center,
+        ),
+    )
+    balance_anchors = [
+        balance_root,
+        _add(
+            _add(
+                balance_root,
+                _mul(balance_tangent, 0.20 * balance_chord),
+            ),
+            _mul(balance_normal, 0.05 * balance_chord),
+        ),
+        _add(
+            _lerp(balance_root, balance_target, 0.54),
+            _mul(balance_normal, 0.14 * balance_chord),
+        ),
+        balance_target,
+    ]
+    balance_half_width = minor_radius * 0.13
+    balance = _role_region(
+        prototype_id=str(analysis["prototype_id"]),
+        family_id="SW3",
+        role="balance_region",
+        region_id=(
+            f"{analysis['prototype_id']}__{service_flower_id}__balance"
+        ),
+        service_flower_id=service_flower_id,
+        entry_s_range=_entry_range(balance_s, 0.022),
+        anchors=balance_anchors,
+        width_profile=[
+            (0.0, balance_half_width * 0.54),
+            (0.25, balance_half_width * 0.88),
+            (0.50, balance_half_width * 1.00),
+            (0.75, balance_half_width * 0.78),
+            (1.0, balance_half_width * 0.46),
+        ],
+        target_relation="counterweight_without_flower_connection",
+        target_sector="largest_residual_opposite_sector",
+        capacity={"maximum_l1_count": 1, "maximum_l2_count": 0},
+        priority=30,
+        overlap_roles=[],
+        forbidden_ids=[
+            f"{analysis['prototype_id']}__{service_flower_id}"
+            "__flower_forbidden",
+            f"{analysis['prototype_id']}__backbone_protection_1",
+        ],
+        analysis=analysis,
+        source_region_ids=[str(remote["region_id"])],
+        protection_flower=flower,
+    )
+    balance["source_geometry"].update(
+        {
+            "core_region_occupancy_computed_first": True,
+            "largest_remaining_sector": "upper_opposite_to_remote_support",
+            "balance_root_s": _round(balance_s),
+            "balance_target_policy": (
+                "flower_frame_opposite_sector_after_remote_occupancy"
+            ),
+            "topology_contract_digest": str(
+                topology["topology_contract_digest"]
+            ),
+        }
+    )
+    plan["plan_id"] = (
+        f"{analysis['prototype_id']}__{service_flower_id}"
+        "__family_group_regions_v2"
+    )
+    plan["generation_order"] = [
+        "local_coordinate_frame",
+        "hard_constraint_regions",
+        "remote_support_region",
+        "compute_core_region_occupancy",
+        "compute_largest_remaining_sector",
+        "balance_region",
+        "freeze_before_branch_geometry",
+    ]
+    plan["stage_scope"] = {
+        "new_branch_curve_count": 0,
+        "role_region_count": 2,
+        "hard_constraint_region_count": 2,
+        "region_plan_created_before_branch_geometry": True,
+    }
+    plan["regions"].append(balance)
+    plan["region_plan_digest"] = None
+    digest_source = json.loads(json.dumps(plan))
+    for region in digest_source["regions"]:
+        region["region_plan_digest"] = None
+    region_plan_digest = canonical_digest(digest_source)
+    plan["region_plan_digest"] = region_plan_digest
+    for region in plan["regions"]:
+        region["region_plan_digest"] = region_plan_digest
+    return plan
+
+
+def validate_sw3_group_region_plan(plan: Mapping[str, Any]) -> None:
+    validate_sw3_remote_support_region_plan(plan)
+    roles = [str(row.get("role")) for row in plan["regions"]]
+    if roles.count("balance_region") != 1:
+        raise RoleRegionPlanError("R3 SW3 requires exactly one balance region")
+    if plan.get("stage_scope", {}).get("role_region_count") != 2:
+        raise RoleRegionPlanError("R3 SW3 region count mismatch")
+    order = list(plan.get("generation_order", []))
+    if order.index("remote_support_region") > order.index("balance_region"):
+        raise RoleRegionPlanError(
+            "R3 SW3 balance must be planned after remote support"
+        )
+
+
 def validate_role_region_plan(plan: Mapping[str, Any]) -> None:
     if plan.get("schema") != SCHEMA:
         raise RoleRegionPlanError("role region plan schema mismatch")

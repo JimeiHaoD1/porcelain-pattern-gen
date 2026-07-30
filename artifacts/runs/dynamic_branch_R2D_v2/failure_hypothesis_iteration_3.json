@@ -1,0 +1,19 @@
+{
+  "stage": "R2D",
+  "iteration": 3,
+  "failure_codes": [
+    "terminal_contact_has_connector_kink"
+  ],
+  "root_cause_layer": "curve_compilation",
+  "root_cause": "The region guide stops before the flower and the compiler appends the exact underside contact as a separate terminal segment, creating a visible corner.",
+  "proposed_change": "Make the underside contact the last region anchor and compile the offset guide all the way to that anchor, preserving a single smooth terminal approach.",
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/role_region_plan.py",
+    "experiments/branch_unit/dynamic/global_l1_flow.py"
+  ],
+  "forbidden_shortcuts": [
+    "move_the_flower",
+    "hide_the_corner_with_stroke_width",
+    "skip_visual_review"
+  ]
+}

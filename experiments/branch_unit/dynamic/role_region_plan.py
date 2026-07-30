@@ -865,6 +865,304 @@ def build_sw1_role_region_plan(
     return plan
 
 
+def build_sw3_remote_support_region_plan(
+    analysis: Mapping[str, Any],
+    topology: Mapping[str, Any],
+    service_flower_id: str,
+) -> dict[str, Any]:
+    """Create the curve-free R2D remote-support channel before candidates."""
+
+    if analysis.get("schema") != "dynamic_branch_prototype_analysis_v1":
+        raise RoleRegionPlanError("R2D requires approved Stage-2 analysis")
+    if analysis.get("prototype_id") != "proto_sw_3_1":
+        raise RoleRegionPlanError("R2D frozen instance is proto_sw_3_1")
+    contract = analysis.get("analysis_contract", {})
+    boundary = analysis.get("stage_boundary", {})
+    if any(
+        (
+            bool(contract.get("curve_geometry_present")),
+            bool(contract.get("old_branches_consumed")),
+            bool(contract.get("old_growth_regions_consumed")),
+            bool(contract.get("old_region_graph_consumed")),
+            bool(contract.get("planner_decisions_present")),
+            bool(boundary.get("curve_compilation_present")),
+            bool(boundary.get("dynamic_branch_plan_present")),
+            bool(boundary.get("stage_3_candidate_slots_started")),
+        )
+    ):
+        raise RoleRegionPlanError(
+            "R2D input contains forbidden post-region state"
+        )
+    if topology.get("schema") != "dynamic_branch_R_prototype_topology_v2":
+        raise RoleRegionPlanError("R2D requires verified R2A topology")
+    if topology.get("family") != "SW3":
+        raise RoleRegionPlanError("R2D frozen instance requires SW3 topology")
+    matching_slots = [
+        row
+        for row in topology.get("slots", [])
+        if row.get("role") == "remote_flower_support"
+        and row.get("service_flower_id") == service_flower_id
+        and row.get("level") == "L1"
+        and row.get("parent") == "backbone"
+        and row.get("parent_curve_id") is None
+    ]
+    if len(matching_slots) != 1:
+        raise RoleRegionPlanError(
+            "R2D target flower lacks one frozen remote-support L1 slot"
+        )
+    flower = next(
+        (
+            row
+            for row in analysis.get("flowers", [])
+            if row.get("flower_id") == service_flower_id
+        ),
+        None,
+    )
+    if flower is None:
+        raise RoleRegionPlanError(
+            f"unknown R2D service flower: {service_flower_id}"
+        )
+
+    prototype_id = str(analysis["prototype_id"])
+    family_id = "SW3"
+    backbone = analysis["backbone"]["samples"]
+    center = _point(flower["center"], "R2D flower center")
+    rx = float(flower["rx"])
+    ry = float(flower["ry"])
+    protection_rx = float(flower["protection_rx"])
+    protection_ry = float(flower["protection_ry"])
+    nearest_s = float(flower["nearest_backbone_s"])
+    remote_distance = 0.5 * (0.30 + 0.48)
+    root_options: list[tuple[float, float, Point, Point]] = []
+    for direction in (-1.0, 1.0):
+        root_s = (nearest_s + direction * remote_distance) % 1.0
+        root, tangent = _backbone_at_s(backbone, root_s)
+        root_options.append(
+            (
+                abs(root[0] - center[0]),
+                direction,
+                root,
+                tangent,
+            )
+        )
+    _, root_direction, root, tangent = max(
+        root_options,
+        key=lambda row: (row[0], row[1]),
+    )
+    root_s = (nearest_s + root_direction * remote_distance) % 1.0
+    entry = _entry_range(root_s, 0.024)
+    half_width = min(rx, ry) * 0.12
+    contact = (center[0], center[1] + ry)
+    lower_margin = max(0.045, 0.18 * min(rx, ry))
+    lower_left = (
+        center[0] - 0.72 * protection_rx,
+        contact[1] + 0.95 * lower_margin,
+    )
+    lower_mid = (
+        center[0] - 0.34 * protection_rx,
+        contact[1] + 0.72 * lower_margin,
+    )
+    guide_target = (
+        center[0] - 0.12 * protection_rx,
+        contact[1] + 0.32 * lower_margin,
+    )
+    tangent = _oriented_tangent(tangent, _sub(lower_left, root))
+    flower_side_normal = (tangent[1], -tangent[0])
+    departure_angle = math.radians(38.0)
+    departure_direction = _unit(
+        _add(
+            _mul(tangent, math.cos(departure_angle)),
+            _mul(flower_side_normal, math.sin(departure_angle)),
+        ),
+        "R2D remote-support departure direction",
+    )
+    first_chord = _distance(root, lower_left)
+    anchors = [
+        root,
+        _add(
+            root,
+            _mul(
+                departure_direction,
+                0.22 * first_chord,
+            ),
+        ),
+        _add(
+            _add(
+                root,
+                _mul(
+                    departure_direction,
+                    0.42 * first_chord,
+                ),
+            ),
+            _mul(flower_side_normal, 0.18 * first_chord),
+        ),
+        lower_left,
+        lower_mid,
+        guide_target,
+        contact,
+    ]
+    widths = [
+        (0.0, half_width * 0.52),
+        (0.25, half_width * 0.86),
+        (0.50, half_width * 1.08),
+        (0.75, half_width * 0.88),
+        (1.0, half_width * 0.50),
+    ]
+    forbidden_id = (
+        f"{prototype_id}__{service_flower_id}__flower_forbidden"
+    )
+    backbone_id = f"{prototype_id}__backbone_protection_1"
+    remote = _role_region(
+        prototype_id=prototype_id,
+        family_id=family_id,
+        role="remote_support_region",
+        region_id=(
+            f"{prototype_id}__{service_flower_id}__remote_support"
+        ),
+        service_flower_id=service_flower_id,
+        entry_s_range=entry,
+        anchors=anchors,
+        width_profile=widths,
+        target_relation="remote_mount_below_flower_to_underside",
+        target_sector="flower_lower_remote_approach",
+        capacity={"maximum_l1_count": 1, "maximum_l2_count": 0},
+        priority=20,
+        overlap_roles=[],
+        forbidden_ids=[forbidden_id, backbone_id],
+        analysis=analysis,
+        source_region_ids=[],
+        protection_flower=flower,
+    )
+    remote["source_geometry"].update(
+        {
+            "nearest_backbone_s": _round(nearest_s),
+            "remote_root_s": _round(root_s),
+            "remote_mount_arc_distance": _round(remote_distance),
+            "remote_direction": _round(root_direction),
+            "root_selection_policy": (
+                "maximum_horizontal_separation_at_frozen_remote_band_midpoint"
+            ),
+            "below_flower_waypoint": _round_point(lower_left),
+            "below_flower_waypoint_margin": _round(
+                lower_left[1] - contact[1]
+            ),
+            "topology_contract_digest": str(
+                topology["topology_contract_digest"]
+            ),
+        }
+    )
+    regions = [
+        _flower_forbidden_region(
+            prototype_id=prototype_id,
+            family_id=family_id,
+            flower=flower,
+        ),
+        _backbone_protection_region(
+            prototype_id=prototype_id,
+            family_id=family_id,
+            analysis=analysis,
+            reference_flower=flower,
+        ),
+        remote,
+    ]
+    plan: dict[str, Any] = {
+        "schema": SCHEMA,
+        "plan_id": (
+            f"{prototype_id}__{service_flower_id}"
+            "__remote_support_regions_v2"
+        ),
+        "prototype_id": prototype_id,
+        "family_id": family_id,
+        "service_flower_id": service_flower_id,
+        "topology_contract_digest": str(
+            topology["topology_contract_digest"]
+        ),
+        "source_analysis_digest": str(analysis["analysis_digest"]),
+        "unit_bounds": [
+            _round(float(value))
+            for value in analysis["coordinate_system"]["canvas_bounds"]
+        ],
+        "periodic_seam": {
+            "axis": "x",
+            "repeat_x_range": [
+                _round(float(value))
+                for value in analysis["coordinate_system"][
+                    "repeat_x_range"
+                ]
+            ],
+            "left_guard_visible": True,
+            "right_guard_visible": True,
+        },
+        "generation_order": [
+            "local_coordinate_frame",
+            "hard_constraint_regions",
+            "remote_entry_interval",
+            "remote_support_guide_centerline",
+            "variable_width_soft_channel",
+            "freeze_before_branch_geometry",
+        ],
+        "input_provenance": {
+            "stage2_analysis_only": True,
+            "R2A_topology_only": True,
+            "branch_geometry_used_as_input": False,
+            "selected_candidate_used_as_input": False,
+            "stage5_selection_used_as_input": False,
+            "seed_used_as_geometry_input": False,
+        },
+        "stage_scope": {
+            "new_branch_curve_count": 0,
+            "role_region_count": 1,
+            "hard_constraint_region_count": 2,
+            "region_plan_created_before_branch_geometry": True,
+        },
+        "regions": regions,
+        "region_plan_digest": None,
+    }
+    digest_source = json.loads(json.dumps(plan))
+    for region in digest_source["regions"]:
+        region["region_plan_digest"] = None
+    region_plan_digest = canonical_digest(digest_source)
+    plan["region_plan_digest"] = region_plan_digest
+    for region in plan["regions"]:
+        region["region_plan_digest"] = region_plan_digest
+    return plan
+
+
+def validate_sw3_remote_support_region_plan(
+    plan: Mapping[str, Any],
+) -> None:
+    if plan.get("schema") != SCHEMA:
+        raise RoleRegionPlanError("R2D role region plan schema mismatch")
+    if plan.get("prototype_id") != "proto_sw_3_1":
+        raise RoleRegionPlanError("R2D role region prototype mismatch")
+    if plan.get("family_id") != "SW3":
+        raise RoleRegionPlanError("R2D role region family mismatch")
+    if plan.get("stage_scope", {}).get("new_branch_curve_count") != 0:
+        raise RoleRegionPlanError("R2D region plan must be curve-free")
+    regions = plan.get("regions")
+    if not isinstance(regions, list):
+        raise RoleRegionPlanError("R2D role regions are missing")
+    roles = [str(row.get("role")) for row in regions]
+    for role in (
+        "remote_support_region",
+        "flower_forbidden_region",
+        "backbone_protection_region",
+    ):
+        if roles.count(role) != 1:
+            raise RoleRegionPlanError(f"R2D requires exactly one {role}")
+    digest_source = json.loads(json.dumps(plan))
+    stored_digest = digest_source["region_plan_digest"]
+    digest_source["region_plan_digest"] = None
+    for region in digest_source["regions"]:
+        if region.get("region_plan_digest") != stored_digest:
+            raise RoleRegionPlanError(
+                "R2D region/plan digest reference mismatch"
+            )
+        region["region_plan_digest"] = None
+    if canonical_digest(digest_source) != stored_digest:
+        raise RoleRegionPlanError("R2D role region plan digest mismatch")
+
+
 def validate_role_region_plan(plan: Mapping[str, Any]) -> None:
     if plan.get("schema") != SCHEMA:
         raise RoleRegionPlanError("role region plan schema mismatch")

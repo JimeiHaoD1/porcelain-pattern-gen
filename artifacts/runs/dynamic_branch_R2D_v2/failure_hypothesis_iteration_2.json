@@ -1,0 +1,20 @@
+{
+  "stage": "R2D",
+  "iteration": 2,
+  "failure_codes": [
+    "remote_support_hugs_backbone_after_root",
+    "terminal_contact_turn_is_nearly_vertical"
+  ],
+  "root_cause_layer": "generated_geometry",
+  "root_cause": "The legal center candidate follows the descending backbone too long, then overshoots below the flower and returns through an almost vertical terminal segment. It reads as a routed connector instead of a growing support branch.",
+  "proposed_change": "Preserve the derived remote root and underside target, rotate the departure farther toward the open flower-side corridor, flatten the lower sweep, and place the last guide anchor left and slightly below the flower contact so the terminal approach rises diagonally into the underside.",
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/role_region_plan.py"
+  ],
+  "forbidden_shortcuts": [
+    "change_remote_root_band",
+    "move_root_to_seed_specific_coordinate",
+    "delete_failed_candidates",
+    "accept_zero_intersections_as_visual_success"
+  ]
+}

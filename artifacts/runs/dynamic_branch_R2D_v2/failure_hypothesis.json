@@ -1,0 +1,19 @@
+{
+  "stage": "R2D",
+  "iteration": 1,
+  "failure_codes": [
+    "all_remote_support_candidates_cross_backbone_after_root"
+  ],
+  "root_cause_layer": "generated_geometry",
+  "root_cause": "The first remote-support channel leaves the remote root toward the flower but its lower sweep returns through the descending backbone before reaching the flower underside.",
+  "proposed_change": "Keep the same remote root band and flower contact, but route the guide through the open lower-left corridor before turning horizontally under the flower. Validate only self, branch/backbone, and branch/branch intersections, then inspect the rendered curve visually.",
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/role_region_plan.py"
+  ],
+  "forbidden_shortcuts": [
+    "delete_failed_candidates_after_selection",
+    "ignore_backbone_crossing",
+    "change_frozen_contract_thresholds",
+    "seed_specific_control_points"
+  ]
+}

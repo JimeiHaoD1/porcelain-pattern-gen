@@ -1,0 +1,51 @@
+{
+  "stage": "R2D",
+  "stage_start_commit": "21366b88a2ee32febb7c4ada42db8f9fc53d0371",
+  "fixed_instance": {
+    "prototype_id": "proto_sw_3_1",
+    "seed": 4101,
+    "curve_id": "support_1",
+    "service_flower_id": "flower_1"
+  },
+  "files_to_modify": [
+    "experiments/branch_unit/dynamic/global_l1_flow.py",
+    "experiments/branch_unit/dynamic/role_region_plan.py",
+    "experiments/branch_unit/dynamic/diagnostics/region_*",
+    "tests/branch_unit_R/test_R2D_*",
+    "artifacts/runs/dynamic_branch_R2D_*"
+  ],
+  "reason_by_file": {
+    "experiments/branch_unit/dynamic/role_region_plan.py": "Build a curve-free SW3 remote-support soft channel from Stage-2 analysis plus the frozen R2A topology before branch geometry.",
+    "experiments/branch_unit/dynamic/global_l1_flow.py": "Generate deterministic L1 candidates from the remote-support channel and select exactly one support_1 without wrap, L2, or L3.",
+    "experiments/branch_unit/dynamic/diagnostics/region_*": "Independently recompute every frozen R2D metric and render region-to-curve evidence.",
+    "tests/branch_unit_R/test_R2D_*": "Verify topology, remoteness, tangent, contact, channel, legality, and anti-shortcut constraints independently.",
+    "artifacts/runs/dynamic_branch_R2D_*": "Store the frozen region, candidates, selected support, replay, metrics, visual evidence, and audits."
+  },
+  "expected_metrics_to_improve": [
+    "remote_mount_arc_distance",
+    "below_flower_waypoint_margin",
+    "support_contact_error",
+    "support_channel_coverage",
+    "mean_guide_alignment",
+    "root_tangent_error_deg",
+    "horizontal_progress_ratio"
+  ],
+  "protected_metrics": [
+    "wrap_curve_count == 0",
+    "L2_count == 0",
+    "L3_count == 0",
+    "unit_self_crossing_count == 0",
+    "flower_core_intrusion_count == 0",
+    "backbone_crossing_count == 0",
+    "out_of_bounds_length == 0",
+    "frozen_contract_unchanged == true",
+    "seed_specific_patch_detected == false",
+    "region_plan_created_before_branch_geometry == true"
+  ],
+  "frozen_hashes": {
+    "goal_sha256": "071547dc89259b17e285b14c5c06b5ca9ec73b2fb82ffd79904cff4932d8421e",
+    "acceptance_contract_sha256": "b815fccf1e47ae8cb7575498a0b89fb311e99d573d0dbb280ba62a4735d2e77a",
+    "role_spec_sha256": "70c4fb6e5c12e34424a3f477d5d5a3a23f0583617743f961ba370f99a8a85872",
+    "topology_contract_digest": "195e214afd784983e4d4b236795b22b0058ca2c8fd16121c8c78effc89003a36"
+  }
+}

@@ -18,7 +18,12 @@ from typing import Any, Iterable, Mapping, Sequence
 
 from fixed_visual_prior import canonical_digest, validate_fixed_visual_prior
 from prototype_analysis import derive_loop_growth_region
-from role_region_plan import build_sw1_role_region_plan, validate_role_region_plan
+from role_region_plan import (
+    build_sw1_role_region_plan,
+    build_sw3_remote_support_region_plan,
+    validate_role_region_plan,
+    validate_sw3_remote_support_region_plan,
+)
 from topology_contract_loader import materialize_prototype_topology
 
 
@@ -2767,6 +2772,210 @@ def generate_sw1_region_l1_pair(
     }
 
 
+def _offset_remote_support_guide(
+    region: Mapping[str, Any],
+    offset_fraction: float,
+    terminal_point: Point,
+) -> list[Point]:
+    guide = [
+        _point(value, "R2D remote-support guide")
+        for value in region["guide_centerline"]
+    ]
+    if len(guide) < 12:
+        raise GlobalL1FlowError("R2D remote-support guide is too short")
+    result: list[Point] = []
+    for index, point in enumerate(guide):
+        before = guide[max(0, index - 1)]
+        after = guide[min(len(guide) - 1, index + 1)]
+        tangent = _unit(
+            _sub(after, before),
+            f"R2D remote-support guide tangent {index}",
+        )
+        normal = (-tangent[1], tangent[0])
+        entry_fade = max(0.0, min(1.0, (index - 3) / 4.0))
+        exit_fade = max(
+            0.0,
+            min(1.0, (len(guide) - 1 - index) / 4.0),
+        )
+        offset = (
+            offset_fraction
+            * _role_region_width(
+                region,
+                index / max(1, len(guide) - 1),
+            )
+            * min(entry_fade, exit_fade)
+        )
+        result.append(_add(point, _mul(normal, offset)))
+    result[-1] = terminal_point
+    return result
+
+
+def _remote_support_candidate(
+    *,
+    analysis: Mapping[str, Any],
+    region: Mapping[str, Any],
+    flower: Mapping[str, Any],
+    offset_fraction: float,
+    candidate_index: int,
+) -> dict[str, Any]:
+    center = _point(flower["center"], "R2D flower center")
+    contact = (center[0], center[1] + float(flower["ry"]))
+    path = _offset_remote_support_guide(
+        region,
+        offset_fraction,
+        contact,
+    )
+    segments = _region_path_segments(path, maximum_knot_gap=4)
+    centerline = _sample_segments(segments, samples_per_segment=18)
+    entry = [float(value) for value in region["entry_s_range"]]
+    root_s = 0.5 * (entry[0] + entry[1])
+    candidate_id = (
+        "proto_sw_3_1__flower_1__remote_support"
+        f"__region_candidate_{candidate_index}"
+    )
+    return {
+        "candidate_id": candidate_id,
+        "curve_id": (
+            "support_1"
+            if candidate_index == 2
+            else f"support_1_candidate_{candidate_index}"
+        ),
+        "slot_id": "remote_flower_support__flower_1",
+        "role": "remote_flower_support",
+        "semantic_role": "remote_flower_support",
+        "level": "L1",
+        "parent": "backbone",
+        "parent_curve_id": None,
+        "service_flower_id": "flower_1",
+        "flower_id": "flower_1",
+        "region_id": str(region["region_id"]),
+        "source_region_plan_digest": str(region["region_plan_digest"]),
+        "region_plan_regenerated_after_curve_generation": False,
+        "root_s": round(root_s, 9),
+        "root": _round_point(centerline[0]),
+        "target": _round_point(centerline[-1]),
+        "segments": segments,
+        "centerline": [_round_point(point) for point in centerline],
+        "planning_length": round(_polyline_length(centerline), 9),
+        "offset_fraction": round(offset_fraction, 9),
+        "geometry_digest": canonical_digest(segments),
+        "remote_mount_arc_distance": float(
+            region["source_geometry"]["remote_mount_arc_distance"]
+        ),
+        "below_flower_waypoint_margin": float(
+            region["source_geometry"]["below_flower_waypoint_margin"]
+        ),
+        "selected": False,
+        "generation_policy": {
+            "region_guide_consumed": True,
+            "variable_width_consumed": True,
+            "region_created_before_curve": True,
+            "posthoc_region_fit_used": False,
+            "validation_guided_retry_used": False,
+            "seed_specific_control_points_used": False,
+            "fixed_two_segment_template_used": False,
+        },
+    }
+
+
+def generate_sw3_remote_support_l1(
+    analysis: Mapping[str, Any],
+    region_plan: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Generate one R2D remote-support L1 from its frozen soft channel."""
+
+    validate_sw3_remote_support_region_plan(region_plan)
+    if analysis.get("prototype_id") != "proto_sw_3_1":
+        raise GlobalL1FlowError("R2D frozen instance is proto_sw_3_1")
+    if region_plan.get("source_analysis_digest") != analysis.get(
+        "analysis_digest"
+    ):
+        raise GlobalL1FlowError("R2D analysis/region plan digest mismatch")
+    flower = next(
+        row
+        for row in analysis["flowers"]
+        if row["flower_id"] == "flower_1"
+    )
+    region = next(
+        row
+        for row in region_plan["regions"]
+        if row["role"] == "remote_support_region"
+    )
+    candidates = [
+        _remote_support_candidate(
+            analysis=analysis,
+            region=region,
+            flower=flower,
+            offset_fraction=offset,
+            candidate_index=index,
+        )
+        for index, offset in enumerate((-0.65, 0.0, 0.65), start=1)
+    ]
+    for candidate in candidates:
+        candidate["hard_rejections"] = _R2C_candidate_hard_rejections(
+            candidate,
+            analysis,
+            flower,
+        )
+    legal = [
+        candidate
+        for candidate in candidates
+        if not candidate["hard_rejections"]
+    ]
+    if not legal:
+        raise GlobalL1FlowError(
+            "R2D remote-support region has no legal L1 candidate"
+        )
+    selected = min(
+        legal,
+        key=lambda row: (
+            abs(float(row["offset_fraction"])),
+            str(row["candidate_id"]),
+        ),
+    )
+    selected["curve_id"] = "support_1"
+    selected["selected"] = True
+    return {
+        "schema": "dynamic_branch_R2D_remote_support_l1_v2",
+        "prototype_id": "proto_sw_3_1",
+        "seed": 4101,
+        "service_flower_id": "flower_1",
+        "source_region_plan_digest": str(
+            region_plan["region_plan_digest"]
+        ),
+        "region_plan_regenerated_after_curve_generation": False,
+        "stage_scope": {
+            "selected_L1_count": 1,
+            "remote_support_L1_count": 1,
+            "wrap_curve_count": 0,
+            "L2_count": 0,
+            "L3_count": 0,
+        },
+        "candidate_inventory": candidates,
+        "selected_remote_support": selected,
+        "solver": {
+            "mode": "single_forward_remote_region_selection",
+            "candidate_count": len(candidates),
+            "legal_candidate_count": len(legal),
+            "validation_guided_retry_used": False,
+            "best_of_n_render_selection_used": False,
+        },
+        "selection_digest": canonical_digest(
+            {
+                "source_region_plan_digest": region_plan[
+                    "region_plan_digest"
+                ],
+                "candidate_geometry_digests": [
+                    row["geometry_digest"] for row in candidates
+                ],
+                "selected_geometry_digest": selected[
+                    "geometry_digest"
+                ],
+            }
+        ),
+    }
+
+
 def generate_global_l1_flow_plan(
     strict_p0: Mapping[str, Any],
     analysis: Mapping[str, Any],
@@ -2794,6 +3003,8 @@ def generate_global_l1_flow_plan(
     )
     role_region_plan = None
     region_driven_sw1_pair = None
+    remote_support_region_plan = None
+    region_driven_sw3_support = None
     if prototype_id == "proto_sw_1_1":
         role_region_plan = build_sw1_role_region_plan(
             analysis,
@@ -2804,6 +3015,21 @@ def generate_global_l1_flow_plan(
         region_driven_sw1_pair = generate_sw1_region_l1_pair(
             analysis,
             role_region_plan,
+        )
+    elif prototype_id == "proto_sw_3_1":
+        remote_support_region_plan = (
+            build_sw3_remote_support_region_plan(
+                analysis,
+                prototype_topology,
+                str(analysis["flowers"][0]["flower_id"]),
+            )
+        )
+        validate_sw3_remote_support_region_plan(
+            remote_support_region_plan
+        )
+        region_driven_sw3_support = generate_sw3_remote_support_l1(
+            analysis,
+            remote_support_region_plan,
         )
     slots = _make_slots(analysis, morphology, count_derivation, latents, seed)
     pools: dict[str, list[dict[str, Any]]] = {}
@@ -2915,6 +3141,8 @@ def generate_global_l1_flow_plan(
         "prototype_topology": prototype_topology,
         "role_region_plan": role_region_plan,
         "region_driven_sw1_pair": region_driven_sw1_pair,
+        "remote_support_region_plan": remote_support_region_plan,
+        "region_driven_sw3_support": region_driven_sw3_support,
         "count_derivation": count_derivation,
         "slots": [
             {

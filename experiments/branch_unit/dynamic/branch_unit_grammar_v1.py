@@ -17,13 +17,36 @@ from typing import Any, Mapping, Sequence
 
 
 SCHEMA = "dynamic_branch_stage4_unit_candidate_inventory_v1"
+SCHEMA_V2 = "dynamic_branch_stage4_unit_candidate_inventory_v2"
 CANDIDATE_SCHEMA = "dynamic_branch_unit_candidate_v1"
+CANDIDATE_SCHEMA_V2 = "dynamic_branch_unit_candidate_v2"
 CONTRACT_SCHEMA = "dynamic_branch_stage4_unit_grammar_contract_v1"
+CONTRACT_SCHEMA_V2 = "dynamic_branch_stage4_unit_grammar_contract_v2"
+EDITOR_L2_PRIOR_SCHEMA = "dynamic_branch_editor_l2_placement_prior_v1"
 Point = tuple[float, float]
 
 
 class UnitGrammarError(RuntimeError):
     """The stage-4 grammar input or complete candidate pool is invalid."""
+
+
+def _editor_l2_profile(
+    editor_l2_prior: Mapping[str, Any],
+    prototype_id: str,
+) -> Mapping[str, Any]:
+    if editor_l2_prior.get("schema") != EDITOR_L2_PRIOR_SCHEMA:
+        raise UnitGrammarError("editor L2 placement prior schema mismatch")
+    profiles = editor_l2_prior.get("profiles")
+    if not isinstance(profiles, Mapping):
+        raise UnitGrammarError("editor L2 placement prior has no profiles")
+    profile = profiles.get(prototype_id) or profiles.get("global")
+    if not isinstance(profile, Mapping):
+        raise UnitGrammarError(
+            f"editor L2 placement prior has no profile for {prototype_id}"
+        )
+    if int(profile.get("active_l2_count", 0)) < 5:
+        raise UnitGrammarError("editor L2 placement profile is too small")
+    return profile
 
 
 def canonical_digest(value: object) -> str:
@@ -296,6 +319,13 @@ def _candidate_strata(
     lane: Mapping[str, Any],
     contract: Mapping[str, Any],
 ) -> list[tuple[str, str, bool]]:
+    if contract.get("schema") == CONTRACT_SCHEMA_V2:
+        coverage = contract["candidate_coverage"]["weak_role_grammar_strata"]
+        return [
+            (grammar_id, str(stratum), False)
+            for grammar_id in ("L1-Only", "Y-C", "Y-2C")
+            for stratum in coverage[grammar_id]
+        ]
     role = str(lane["role"])
     coverage = contract["candidate_coverage"]
     if role in {"primary_sweep", "balance"}:
@@ -434,10 +464,34 @@ def _mounts(
     count: int,
     quantiles: Sequence[float],
     contract: Mapping[str, Any],
+    editor_l2_profile: Mapping[str, Any] | None = None,
 ) -> list[float]:
+    if count == 0:
+        return []
     low, high = [
         float(value) for value in contract["geometry"]["mount_fraction_range"]
     ]
+    if editor_l2_profile is not None:
+        if count == 1:
+            mount = _quantile(
+                editor_l2_profile["single_child_mount_fraction"],
+                quantiles[0],
+            )
+            return [max(low, min(high, mount))]
+        center = _quantile(
+            editor_l2_profile["paired_child_mount_center"],
+            quantiles[0],
+        )
+        separation = _quantile(
+            editor_l2_profile["paired_child_mount_separation"],
+            quantiles[1],
+        )
+        minimum_gap = float(
+            contract["geometry"]["minimum_sibling_mount_separation"]
+        )
+        separation = max(minimum_gap, min(high - low, separation))
+        lower = max(low, min(high - separation, center - separation * 0.5))
+        return [lower, lower + separation]
     statistic = _stat(prior, role_condition, "mount_fraction")
     if count == 1:
         return [max(low, min(high, _quantile(statistic, quantiles[0])))]
@@ -927,6 +981,7 @@ def _diagnose_candidate(
     candidate: Mapping[str, Any],
     analysis: Mapping[str, Any],
     contract: Mapping[str, Any],
+    editor_l2_profile: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     issues: list[dict[str, Any]] = []
     curves = candidate["curves"]
@@ -1061,6 +1116,34 @@ def _diagnose_candidate(
             }
         )
 
+    l2_curves = [curve for curve in curves if curve["level"] == "L2"]
+    sibling_curve_clearance = min(
+        (
+            _polyline_distance(
+                [_point(value) for value in first["centerline"]],
+                [_point(value) for value in second["centerline"]],
+            )
+            for index, first in enumerate(l2_curves)
+            for second in l2_curves[index + 1 :]
+        ),
+        default=1.0,
+    )
+    required_sibling_clearance = 0.0
+    if editor_l2_profile is not None and len(l2_curves) > 1:
+        required_sibling_clearance = float(
+            editor_l2_profile[
+                "paired_child_curve_clearance_unit_ratio"
+            ]["q10"]
+        )
+        if sibling_curve_clearance < required_sibling_clearance:
+            issues.append(
+                {
+                    "code": "sibling_curves_below_editor_clearance",
+                    "value": _round(sibling_curve_clearance),
+                    "required": _round(required_sibling_clearance),
+                }
+            )
+
     crossing_count = 0
     for index, curve in enumerate(curves):
         points = [_point(value) for value in curve["centerline"]]
@@ -1185,23 +1268,35 @@ def _diagnose_candidate(
             }
         )
 
+    metrics = {
+        "maximum_attachment_error": _round(max(root_errors, default=0.0)),
+        "minimum_entry_opening_degrees": _round(min(openings, default=0.0)),
+        "minimum_immediate_departure": _round(
+            min(departure_distances, default=0.0)
+        ),
+        "minimum_sibling_mount_separation": _round(minimum_mount_gap),
+        "unit_self_crossing_count": crossing_count,
+        "backbone_crossing_count": backbone_crossing_count,
+        "flower_reserve_entry_count": reserve_entry_count,
+        "support_contact_error": _round(support_contact_error),
+        "periodic_self_crossing_count": periodic_crossing_count,
+    }
+    if editor_l2_profile is not None:
+        metrics.update(
+            {
+                "minimum_sibling_curve_clearance": _round(
+                    sibling_curve_clearance
+                ),
+                "required_sibling_curve_clearance": _round(
+                    required_sibling_clearance
+                ),
+            }
+        )
     return {
         "valid": not issues,
         "issue_count": len(issues),
         "issues": issues,
-        "metrics": {
-            "maximum_attachment_error": _round(max(root_errors, default=0.0)),
-            "minimum_entry_opening_degrees": _round(min(openings, default=0.0)),
-            "minimum_immediate_departure": _round(
-                min(departure_distances, default=0.0)
-            ),
-            "minimum_sibling_mount_separation": _round(minimum_mount_gap),
-            "unit_self_crossing_count": crossing_count,
-            "backbone_crossing_count": backbone_crossing_count,
-            "flower_reserve_entry_count": reserve_entry_count,
-            "support_contact_error": _round(support_contact_error),
-            "periodic_self_crossing_count": periodic_crossing_count,
-        },
+        "metrics": metrics,
     }
 
 
@@ -1216,6 +1311,7 @@ def _build_candidate(
     stratum: str,
     include_l3: bool,
     candidate_index: int,
+    editor_l2_profile: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
     seed = int(plan["seed"])
     lane_id = str(lane["slot_id"])
@@ -1227,22 +1323,29 @@ def _build_candidate(
     grammar = contract["grammar"][grammar_id]
     l2_count = int(grammar["l2_count"])
     role = str(lane["role"])
-    role_condition = _role_condition(role, 2)
+    weak_roles = contract.get("schema") == CONTRACT_SCHEMA_V2
+    generation_role = "primary_sweep" if weak_roles else role
+    role_condition = _role_condition(generation_role, 2)
     preferred_mounts = _mounts(
         prior,
         role_condition,
         l2_count,
         quantiles,
         contract,
+        editor_l2_profile,
     )
     l1_points = [_point(value) for value in l1["centerline"]]
-    mounts = _contextual_mounts(
-        l1_points,
-        preferred_mounts,
-        lane,
-        analysis,
-        contract,
-        quantiles[7],
+    mounts = (
+        list(preferred_mounts)
+        if editor_l2_profile is not None
+        else _contextual_mounts(
+            l1_points,
+            preferred_mounts,
+            lane,
+            analysis,
+            contract,
+            quantiles[7],
+        )
     )
     signs = _child_signs(
         l1_points,
@@ -1276,9 +1379,11 @@ def _build_candidate(
             parent_curve=l1,
             mount_fraction=mount,
             sign=sign,
-            role=role,
+            role=generation_role,
             semantic_role=(
-                "flower_wrap"
+                "lateral_subordinate"
+                if weak_roles
+                else "flower_wrap"
                 if role == "flower_support"
                 else "terminal_subordinate"
                 if role == "terminal_flower_support"
@@ -1307,6 +1412,7 @@ def _build_candidate(
             1,
             tertiary_quantiles,
             contract,
+            None,
         )[0]
         tertiary = _compile_child_curve(
             curve_id=f"{branch_unit_id}.L3.1",
@@ -1329,7 +1435,9 @@ def _build_candidate(
     flower_relation = {
         "flower_id": lane["flower_id"],
         "policy": (
-            "sw1_trough_support_with_single_wrap"
+            "soft_spatial_anchor_without_mandatory_service"
+            if weak_roles
+            else "sw1_trough_support_with_single_wrap"
             if role == "flower_support"
             else "sw3_remote_below_flower_underside_support"
             if role == "terminal_flower_support"
@@ -1338,7 +1446,7 @@ def _build_candidate(
         "l1_contact_point": lane["target"] if lane["flower_id"] else None,
     }
     candidate: dict[str, Any] = {
-        "schema": CANDIDATE_SCHEMA,
+        "schema": CANDIDATE_SCHEMA_V2 if weak_roles else CANDIDATE_SCHEMA,
         "candidate_id": candidate_id,
         "branch_unit_id": branch_unit_id,
         "source_plan_id": plan["plan_id"],
@@ -1354,7 +1462,7 @@ def _build_candidate(
             "l1_count": 1,
             "l2_count": l2_count,
             "l3_count": 1 if include_l3 else 0,
-            "maximum_level": 3 if include_l3 else 2,
+            "maximum_level": 3 if include_l3 else 2 if l2_count else 1,
         },
         "curves": curves,
         "parent_graph": [
@@ -1388,6 +1496,13 @@ def _build_candidate(
             "length_sequence": [
                 curve["actual_length"] for curve in curves
             ],
+            "hierarchy_density_class": (
+                "l1_only"
+                if l2_count == 0
+                else "single_child"
+                if l2_count == 1
+                else "paired_child"
+            ),
         },
         "random_provenance": {
             "method": contract["sampling"]["method"],
@@ -1405,6 +1520,7 @@ def _build_candidate(
         candidate,
         analysis,
         contract,
+        editor_l2_profile,
     )
     digest_source = dict(candidate)
     candidate["candidate_digest"] = canonical_digest(digest_source)
@@ -1416,19 +1532,36 @@ def generate_unit_candidate_inventory(
     analysis: Mapping[str, Any],
     prior: Mapping[str, Any],
     contract: Mapping[str, Any],
+    editor_l2_prior: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    if plan.get("schema") != "dynamic_branch_global_l1_flow_plan_v1":
+    contract_schema = contract.get("schema")
+    expected_plan_schema = (
+        "dynamic_branch_global_l1_flow_plan_v2"
+        if contract_schema == CONTRACT_SCHEMA_V2
+        else "dynamic_branch_global_l1_flow_plan_v1"
+    )
+    if plan.get("schema") != expected_plan_schema:
         raise UnitGrammarError("stage-3B plan schema mismatch")
     if analysis.get("schema") != "dynamic_branch_prototype_analysis_v1":
         raise UnitGrammarError("stage-2 analysis schema mismatch")
     if prior.get("schema") != "dynamic_branch_fixed_visual_prior_v1":
         raise UnitGrammarError("stage-3A prior schema mismatch")
-    if contract.get("schema") != CONTRACT_SCHEMA:
+    if contract_schema not in {CONTRACT_SCHEMA, CONTRACT_SCHEMA_V2}:
         raise UnitGrammarError("stage-4 contract schema mismatch")
     if analysis.get("prototype_id") != plan.get("prototype_id"):
         raise UnitGrammarError("analysis/plan prototype mismatch")
     if plan.get("review", {}).get("status") != "l1_flow_pending_visual_review":
         raise UnitGrammarError("approved source plan content was unexpectedly mutated")
+    editor_l2_profile: Mapping[str, Any] | None = None
+    if contract_schema == CONTRACT_SCHEMA_V2:
+        if editor_l2_prior is None:
+            raise UnitGrammarError(
+                "stage-4 V2 requires the editor L2 placement prior"
+            )
+        editor_l2_profile = _editor_l2_profile(
+            editor_l2_prior,
+            str(plan["prototype_id"]),
+        )
 
     candidates: list[dict[str, Any]] = []
     lane_rows: list[dict[str, Any]] = []
@@ -1446,6 +1579,7 @@ def generate_unit_candidate_inventory(
                 stratum=stratum,
                 include_l3=include_l3,
                 candidate_index=candidate_index,
+                editor_l2_profile=editor_l2_profile,
             )
             candidate_index += 1
             candidates.append(candidate)
@@ -1476,16 +1610,26 @@ def generate_unit_candidate_inventory(
         for row in lane_rows
         if row["feasible_candidate_count"] == 0
     ]
+    weak_roles = contract_schema == CONTRACT_SCHEMA_V2
     inventory: dict[str, Any] = {
-        "schema": SCHEMA,
+        "schema": SCHEMA_V2 if weak_roles else SCHEMA,
         "contract_id": contract["contract_id"],
-        "inventory_id": f"{plan['plan_id']}__unit_candidates_v1",
+        "inventory_id": (
+            f"{plan['plan_id']}__unit_candidates_v2"
+            if weak_roles
+            else f"{plan['plan_id']}__unit_candidates_v1"
+        ),
         "prototype_id": plan["prototype_id"],
         "family_id": plan["family_id"],
         "seed": plan["seed"],
         "source_plan_id": plan["plan_id"],
         "source_plan_digest": plan["plan_digest"],
         "source_l1_geometry_policy": "approved_stage3b_l1_is_immutable",
+        "role_policy": (
+            "weak_compatibility_metadata_only"
+            if weak_roles
+            else "role_conditioned_v1"
+        ),
         "global_latents": plan["global_latents"],
         "lane_count": len(plan["lanes"]),
         "candidate_count": len(candidates),
@@ -1518,17 +1662,23 @@ def generate_unit_candidate_inventory(
             "status": contract["output"]["review_state"],
             "numeric_checks_cannot_auto_approve_visual_gate": True,
             "criteria": [
-                "no_straight_radial_chicken_claw",
+                "visible_l1_curvature",
                 "visible_c_and_s_flow",
-                "l1_l2_l3_hierarchy",
+                "sparse_l1_only_single_and_paired_hierarchy",
                 "coordinated_sibling_rhythm",
+                "editor_demonstrated_l2_mount_spacing",
                 "immediate_child_departure",
-                "sw1_flower_support_wrap_relation",
-                "sw3_terminal_support_dominance",
-                "fixed_visual_capability_not_degraded",
+                "flower_relation_is_soft_not_mandatory",
             ],
         },
     }
+    if weak_roles and editor_l2_prior is not None:
+        inventory["editor_l2_placement_prior"] = {
+            "consumed": True,
+            "prior_id": str(editor_l2_prior["prior_id"]),
+            "profile_id": str(plan["prototype_id"]),
+            "mount_source": "saved_editor_active_l2_parent_grouping",
+        }
     digest_source = dict(inventory)
     inventory["inventory_digest"] = canonical_digest(digest_source)
     validate_unit_candidate_inventory(inventory, contract)
@@ -1544,7 +1694,12 @@ def validate_unit_candidate_inventory(
     inventory: Mapping[str, Any],
     contract: Mapping[str, Any],
 ) -> None:
-    if inventory.get("schema") != SCHEMA:
+    weak_roles = contract.get("schema") == CONTRACT_SCHEMA_V2
+    expected_schema = SCHEMA_V2 if weak_roles else SCHEMA
+    expected_candidate_schema = (
+        CANDIDATE_SCHEMA_V2 if weak_roles else CANDIDATE_SCHEMA
+    )
+    if inventory.get("schema") != expected_schema:
         raise UnitGrammarError("candidate inventory schema mismatch")
     if inventory.get("contract_id") != contract.get("contract_id"):
         raise UnitGrammarError("candidate inventory contract mismatch")
@@ -1554,7 +1709,10 @@ def validate_unit_candidate_inventory(
         raise UnitGrammarError("candidate inventory arrays are missing")
     if inventory.get("candidate_count") != len(candidates):
         raise UnitGrammarError("candidate inventory count mismatch")
-    if any(candidate.get("schema") != CANDIDATE_SCHEMA for candidate in candidates):
+    if any(
+        candidate.get("schema") != expected_candidate_schema
+        for candidate in candidates
+    ):
         raise UnitGrammarError("candidate schema mismatch")
     if any(
         candidate.get("source_plan_digest") != inventory.get("source_plan_digest")
@@ -1576,6 +1734,16 @@ def validate_unit_candidate_inventory(
         raise UnitGrammarError("candidate review state mismatch")
     if inventory.get("coverage", {}).get("global_selection_performed") is not False:
         raise UnitGrammarError("stage-5 global selection leaked into stage 4")
+    if weak_roles:
+        l2_policy = inventory.get("editor_l2_placement_prior", {})
+        if l2_policy.get("consumed") is not True:
+            raise UnitGrammarError(
+                "stage-4 V2 did not consume editor L2 placement evidence"
+            )
+        if l2_policy.get("mount_source") != (
+            "saved_editor_active_l2_parent_grouping"
+        ):
+            raise UnitGrammarError("stage-4 V2 L2 mount source mismatch")
     role_counts = Counter(candidate["role"] for candidate in candidates)
     if not role_counts:
         raise UnitGrammarError("candidate inventory is empty")

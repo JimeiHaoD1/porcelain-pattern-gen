@@ -1,0 +1,76 @@
+{
+  "schema": "dynamic_branch_stage5_global_selection_contract_v2",
+  "contract_id": "edit_feedback_sparse_hierarchy_selection_v2",
+  "stage": "5",
+  "scope": {
+    "old_mainline_only": true,
+    "branch_skeleton_only": true,
+    "new_curve_generation_present": false,
+    "curve_mutation_present": false,
+    "role_labels_are_weak_metadata": true,
+    "role_specific_hierarchy_is_required": false
+  },
+  "required_inputs": {
+    "inventory_schema": "dynamic_branch_stage4_unit_candidate_inventory_v2",
+    "approved_stage4_candidate_pool_is_immutable": true,
+    "intrinsically_invalid_candidates_are_preserved_but_not_selectable": true,
+    "editor_l2_placement_prior_consumed": true
+  },
+  "selection": {
+    "candidate_count_per_lane": 1,
+    "eligible_candidate_rule": "intrinsic_diagnostics.valid == true",
+    "solver": "deterministic_constraint_backtracking_with_exact_hierarchy_mix",
+    "stop_rule": "first_complete_legal_assignment_matching_the_edit_feedback_hierarchy_mix",
+    "best_of_n_visual_ranking_used": false,
+    "composite_visual_score_used": false,
+    "validation_guided_retry_used": false,
+    "validation_guided_resample_used": false,
+    "automatic_repair_used": false,
+    "automatic_deletion_used": false,
+    "silent_fallback_used": false
+  },
+  "hierarchy_mix": {
+    "source": "edited_svg_batch_125_structural_counts",
+    "class_fraction_targets": {
+      "l1_only": 0.276,
+      "single_child": 0.398,
+      "paired_child": 0.326
+    },
+    "count_derivation": "largest_remainder_per_composition",
+    "exact_derived_counts_required": true,
+    "target_mean_l2_per_l1": 1.0,
+    "candidate_class_field": "visual_features.hierarchy_density_class"
+  },
+  "hard_constraints": {
+    "one_complete_unit_per_approved_lane": true,
+    "selected_candidate_must_be_intrinsically_valid": true,
+    "cross_unit_curve_crossing_allowed": false,
+    "periodic_repeat_crossing_allowed": false,
+    "repeat_shifts_checked": [-1.0, 0.0, 1.0],
+    "descendant_against_other_unit_l1_checked": true,
+    "descendant_against_other_unit_descendant_checked": true,
+    "minimum_descendant_clearance_from_editor_profile_q10": true
+  },
+  "deterministic_order": {
+    "lane_order": "fewest_eligible_candidates_then_source_lane_id",
+    "candidate_order": [
+      "hierarchy_class_cycle_by_lane",
+      "within_class_stratum_priority",
+      "cross_unit_conflict_degree",
+      "candidate_id"
+    ],
+    "class_cycle": ["single_child", "l1_only", "paired_child"],
+    "within_class_stratum_priority": {
+      "l1_only": ["independent_l1"],
+      "single_child": ["balanced_s", "open_c", "compact_c"],
+      "paired_child": ["open_asymmetric", "staggered_c", "nested_s"]
+    }
+  },
+  "output": {
+    "conflict_graph_saved": true,
+    "selected_complete_composition_saved_when_feasible": true,
+    "hierarchy_mix_trace_saved": true,
+    "review_state": "global_unit_selection_pending_visual_review",
+    "numeric_checks_cannot_auto_approve_visual_gate": true
+  }
+}

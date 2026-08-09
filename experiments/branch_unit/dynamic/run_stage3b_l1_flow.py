@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import tempfile
 from pathlib import Path
 from typing import Any, Mapping
@@ -21,18 +22,38 @@ from render_global_l1_flow import render_contact_sheet, render_png, render_svg
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DYNAMIC_DIR = Path(__file__).resolve().parent
-STAGE1_ROOT = REPO_ROOT / "artifacts" / "runs" / "dynamic_branch_stage1_inputs_v1"
-STAGE2_ROOT = REPO_ROOT / "artifacts" / "runs" / "dynamic_branch_stage2_analysis_v1"
+INPUT_REPO_ROOT = Path(
+    os.environ.get("CHANZHI_FROZEN_INPUT_ROOT", str(REPO_ROOT))
+).resolve()
+STAGE1_ROOT = (
+    INPUT_REPO_ROOT / "artifacts" / "runs" / "dynamic_branch_stage1_inputs_v1"
+)
+STAGE2_ROOT = (
+    INPUT_REPO_ROOT / "artifacts" / "runs" / "dynamic_branch_stage2_analysis_v1"
+)
 STAGE25_ROOT = (
-    REPO_ROOT / "artifacts" / "runs" / "dynamic_branch_stage25_morphology_v1"
+    INPUT_REPO_ROOT
+    / "artifacts"
+    / "runs"
+    / "dynamic_branch_stage25_morphology_v1"
 )
 STAGE3A_ROOT = (
-    REPO_ROOT / "artifacts" / "runs" / "dynamic_branch_stage3a_fixed_visual_prior_v1"
+    INPUT_REPO_ROOT
+    / "artifacts"
+    / "runs"
+    / "dynamic_branch_stage3a_fixed_visual_prior_v1"
 )
 DEFAULT_OUTPUT = (
-    REPO_ROOT / "artifacts" / "runs" / "dynamic_branch_stage3b_global_l1_flow_v1"
+    REPO_ROOT
+    / "artifacts"
+    / "runs"
+    / "dynamic_branch_stage3b_edit_feedback_l1_flow_v2"
 )
-CONTRACT_PATH = DYNAMIC_DIR / "STAGE3B_L1_FLOW_CONTRACT_V1.json"
+CONTRACT_PATH = DYNAMIC_DIR / "STAGE3B_L1_FLOW_CONTRACT_V2.json"
+FEEDBACK_PRIOR_PATH = DYNAMIC_DIR / "EDIT_FEEDBACK_PRIOR_V1.json"
+CURVE_GEOMETRY_PRIOR_PATH = (
+    DYNAMIC_DIR / "EDITOR_CURVE_GEOMETRY_PRIOR_V2.json"
+)
 
 
 class Stage3BRunError(RuntimeError):
@@ -76,6 +97,8 @@ def _load_inputs() -> tuple[
     dict[str, dict[str, Any]],
     dict[str, Any],
     dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
     dict[str, str],
 ]:
     stage1_manifest_path = STAGE1_ROOT / "manifest.json"
@@ -88,6 +111,8 @@ def _load_inputs() -> tuple[
         stage25_manifest_path,
         stage3a_manifest_path,
         CONTRACT_PATH,
+        FEEDBACK_PRIOR_PATH,
+        CURVE_GEOMETRY_PRIOR_PATH,
     ):
         if not path.is_file():
             raise Stage3BRunError(f"required stage-3B input is missing: {path}")
@@ -97,6 +122,8 @@ def _load_inputs() -> tuple[
     stage25 = _read_json(stage25_manifest_path)
     stage3a = _read_json(stage3a_manifest_path)
     contract = _read_json(CONTRACT_PATH)
+    feedback_prior = _read_json(FEEDBACK_PRIOR_PATH)
+    curve_geometry_prior = _read_json(CURVE_GEOMETRY_PRIOR_PATH)
     if stage1.get("schema") != "dynamic_branch_stage1_input_manifest_v1":
         raise Stage3BRunError("stage-1 manifest schema mismatch")
     if stage2.get("schema") != "dynamic_branch_stage2_analysis_manifest_v1":
@@ -111,6 +138,12 @@ def _load_inputs() -> tuple[
         raise Stage3BRunError("stage-2.5 morphology gate is not approved")
     if stage3a.get("status") != "fixed_visual_prior_complete":
         raise Stage3BRunError("stage-3A visual prior is incomplete")
+    if feedback_prior.get("schema") != "dynamic_branch_edit_feedback_prior_v1":
+        raise Stage3BRunError("edit feedback prior schema mismatch")
+    if curve_geometry_prior.get("schema") != (
+        "dynamic_branch_editor_curve_geometry_prior_v2"
+    ):
+        raise Stage3BRunError("editor curve geometry prior schema mismatch")
 
     stage1_rows = _profile_rows(stage1, "stage-1")
     stage2_rows = _profile_rows(stage2, "stage-2")
@@ -167,14 +200,26 @@ def _load_inputs() -> tuple[
         }
 
     provenance = {
+        "frozen_input_root": str(INPUT_REPO_ROOT),
         "stage1_manifest_sha256": file_sha256(stage1_manifest_path),
         "stage2_manifest_sha256": file_sha256(stage2_manifest_path),
         "stage25_manifest_sha256": file_sha256(stage25_manifest_path),
         "stage3a_manifest_sha256": file_sha256(stage3a_manifest_path),
         "stage3b_contract_sha256": file_sha256(CONTRACT_PATH),
+        "edit_feedback_prior_sha256": file_sha256(FEEDBACK_PRIOR_PATH),
+        "editor_curve_geometry_prior_sha256": file_sha256(
+            CURVE_GEOMETRY_PRIOR_PATH
+        ),
         "fixed_visual_prior_sha256": file_sha256(prior_path),
     }
-    return inputs, prior, contract, provenance
+    return (
+        inputs,
+        prior,
+        feedback_prior,
+        curve_geometry_prior,
+        contract,
+        provenance,
+    )
 
 
 def _write_readme(output: Path) -> None:
@@ -190,10 +235,21 @@ def _write_readme(output: Path) -> None:
     output.write_text(text, encoding="utf-8", newline="\n")
 
 
-def run(output: Path) -> None:
+def run(
+    output: Path,
+    prototype_ids: tuple[str, ...] = PROTOTYPE_IDS,
+    seeds: tuple[int, ...] = SEEDS,
+) -> None:
     if output.exists():
         raise Stage3BRunError(f"formal stage-3B output already exists: {output}")
-    inputs, prior, contract, provenance = _load_inputs()
+    (
+        inputs,
+        prior,
+        feedback_prior,
+        curve_geometry_prior,
+        contract,
+        provenance,
+    ) = _load_inputs()
     output.parent.mkdir(parents=True, exist_ok=True)
 
     with tempfile.TemporaryDirectory(prefix="stage3b_", dir=str(output.parent)) as directory:
@@ -202,11 +258,11 @@ def run(output: Path) -> None:
         clean_paths: list[Path] = []
         debug_paths: list[Path] = []
         triple_paths: list[Path] = []
-        for prototype_id in PROTOTYPE_IDS:
+        for prototype_id in prototype_ids:
             prototype_clean: list[Path] = []
             prototype_triple: list[Path] = []
             payload = inputs[prototype_id]
-            for seed in SEEDS:
+            for seed in seeds:
                 case = temporary / prototype_id / f"seed_{seed}"
                 case.mkdir(parents=True)
                 plan, inventory = generate_global_l1_flow_plan(
@@ -216,6 +272,8 @@ def run(output: Path) -> None:
                     prior,
                     contract,
                     seed,
+                    feedback_prior,
+                    curve_geometry_prior,
                 )
                 validate_global_l1_flow_plan(plan)
                 plan_path = case / "global_l1_flow_plan.json"
@@ -249,7 +307,7 @@ def run(output: Path) -> None:
                 prototype_triple.append(triple_path)
                 task_rows.append(
                     {
-                        "task_id": f"{prototype_id}__seed_{seed}__global_l1_flow_v1",
+                        "task_id": f"{prototype_id}__seed_{seed}__global_l1_flow_v2",
                         "prototype_id": prototype_id,
                         "family_id": plan["family_id"],
                         "seed": seed,
@@ -299,11 +357,11 @@ def run(output: Path) -> None:
         _write_readme(temporary / "README.md")
 
         manifest = {
-            "schema": "dynamic_branch_stage3b_l1_flow_manifest_v1",
+            "schema": "dynamic_branch_stage3b_l1_flow_manifest_v2",
             "stage": "3B",
             "contract_id": contract["contract_id"],
-            "prototype_ids": list(PROTOTYPE_IDS),
-            "seeds": list(SEEDS),
+            "prototype_ids": list(prototype_ids),
+            "seeds": list(seeds),
             "task_count": len(task_rows),
             "success_count": len(task_rows),
             "failure_count": 0,
@@ -321,6 +379,8 @@ def run(output: Path) -> None:
                 "validation_guided_retry_used": False,
                 "validation_guided_resample_used": False,
                 "silent_fallback_used": False,
+                "edit_feedback_prior_consumed": True,
+                "edited_svg_templates_consumed": False,
             },
             "review_gate": {
                 "status": "l1_flow_pending_visual_review",
@@ -342,8 +402,27 @@ def run(output: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--prototype",
+        choices=PROTOTYPE_IDS,
+        action="append",
+        dest="prototypes",
+        help="Run only the selected prototype; may be repeated.",
+    )
+    parser.add_argument(
+        "--seed",
+        choices=SEEDS,
+        action="append",
+        type=int,
+        dest="seeds",
+        help="Run only the selected seed; may be repeated.",
+    )
     args = parser.parse_args()
-    run(args.output.resolve())
+    run(
+        args.output.resolve(),
+        tuple(args.prototypes or PROTOTYPE_IDS),
+        tuple(args.seeds or SEEDS),
+    )
     print(args.output.resolve())
     return 0
 

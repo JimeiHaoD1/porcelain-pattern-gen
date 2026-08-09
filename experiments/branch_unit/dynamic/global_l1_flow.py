@@ -12,6 +12,7 @@ import hashlib
 import json
 import math
 import random
+from bisect import bisect_right
 from collections import Counter
 from dataclasses import dataclass
 from typing import Any, Iterable, Mapping, Sequence
@@ -20,7 +21,11 @@ from fixed_visual_prior import canonical_digest, validate_fixed_visual_prior
 
 
 SCHEMA = "dynamic_branch_global_l1_flow_plan_v1"
+SCHEMA_V2 = "dynamic_branch_global_l1_flow_plan_v2"
 CONTRACT_SCHEMA = "dynamic_branch_stage3b_l1_flow_contract_v1"
+CONTRACT_SCHEMA_V2 = "dynamic_branch_stage3b_l1_flow_contract_v2"
+FEEDBACK_SCHEMA = "dynamic_branch_edit_feedback_prior_v1"
+CURVE_GEOMETRY_PRIOR_SCHEMA = "dynamic_branch_editor_curve_geometry_prior_v2"
 PROTOTYPE_IDS = (
     "proto_sw_1_1",
     "proto_sw_1_3",
@@ -52,6 +57,57 @@ class BeamState:
     score: float
 
 
+def _feedback_mode(contract: Mapping[str, Any]) -> bool:
+    return contract.get("schema") == CONTRACT_SCHEMA_V2
+
+
+def _feedback_profile(
+    feedback_prior: Mapping[str, Any],
+    prototype_id: str,
+) -> dict[str, Any]:
+    if feedback_prior.get("schema") != FEEDBACK_SCHEMA:
+        raise GlobalL1FlowError("edit feedback prior schema mismatch")
+    policy = feedback_prior.get("stage3b_policy")
+    profiles = feedback_prior.get("prototype_profiles")
+    if not isinstance(policy, Mapping) or not isinstance(profiles, Mapping):
+        raise GlobalL1FlowError("edit feedback prior is incomplete")
+    prototype = profiles.get(prototype_id)
+    if not isinstance(prototype, Mapping):
+        raise GlobalL1FlowError(
+            f"edit feedback prior has no profile for {prototype_id}"
+        )
+    return {**dict(policy), **dict(prototype)}
+
+
+def _curve_geometry_profile(
+    curve_geometry_prior: Mapping[str, Any],
+    prototype_id: str,
+) -> Mapping[str, Any]:
+    if curve_geometry_prior.get("schema") != CURVE_GEOMETRY_PRIOR_SCHEMA:
+        raise GlobalL1FlowError("editor curve geometry prior schema mismatch")
+    profiles = curve_geometry_prior.get("profiles")
+    if not isinstance(profiles, Mapping):
+        raise GlobalL1FlowError("editor curve geometry prior has no profiles")
+    profile = profiles.get(prototype_id) or profiles.get("global")
+    if not isinstance(profile, Mapping):
+        raise GlobalL1FlowError(
+            f"editor curve geometry prior has no profile for {prototype_id}"
+        )
+    if int(profile.get("single_cubic_l1_count", 0)) < 5:
+        raise GlobalL1FlowError("editor curve geometry profile is too small")
+    if int(profile.get("paired_original_edited_cubic_count", 0)) < 5:
+        raise GlobalL1FlowError(
+            "editor curve geometry profile lacks paired corrections"
+        )
+    if int(profile.get("paired_edited_descriptor_unique_count", 0)) != int(
+        profile["paired_original_edited_cubic_count"]
+    ):
+        raise GlobalL1FlowError(
+            "editor profile does not support non-repeating corrections"
+        )
+    return profile
+
+
 def _finite(value: object, path: str) -> float:
     number = float(value)
     if not math.isfinite(number):
@@ -75,6 +131,15 @@ def _sub(a: Point, b: Point) -> Point:
 
 def _mul(a: Point, scalar: float) -> Point:
     return a[0] * scalar, a[1] * scalar
+
+
+def _rotate(vector: Point, radians: float) -> Point:
+    cosine = math.cos(radians)
+    sine = math.sin(radians)
+    return (
+        vector[0] * cosine - vector[1] * sine,
+        vector[0] * sine + vector[1] * cosine,
+    )
 
 
 def _dot(a: Point, b: Point) -> float:
@@ -362,8 +427,35 @@ def _derive_lane_count(
     analysis: Mapping[str, Any],
     morphology: Mapping[str, Any],
     prior: Mapping[str, Any],
+    feedback_profile: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     family_id = morphology["classification"]["flower_branch_relation"]["family_id"]
+    if feedback_profile is not None:
+        selected = int(feedback_profile["preferred_l1_count"])
+        if selected < 2:
+            raise GlobalL1FlowError(
+                f"{prototype_id} edit feedback requests fewer than two L1 lanes"
+            )
+        return {
+            "selected_l1_count": selected,
+            "required_support_count": 0,
+            "ordinary_lane_count": selected,
+            "primary_branch_evidence": int(
+                morphology["instance_priors"]["source_observation_counts"][
+                    "primary_branch_count"
+                ]
+            ),
+            "branch_guide_equivalent_l1": None,
+            "blank_region_plus_support_evidence": len(
+                analysis["space_analysis"]["continuous_blank_regions"]
+            ),
+            "fixed_visual_capacity": int(
+                prior["paired_baseline_scope"]["topology"]["L1"]
+            ),
+            "governing_evidence": "completed_editor_batch_l1_hierarchy",
+            "fixed_count_copied": False,
+            "mandatory_flower_service_count": 0,
+        }
     support_count = _required_support_count(family_id, len(analysis["flowers"]))
     evidence = morphology["instance_priors"]["source_observation_counts"]
     primary_evidence = int(evidence["primary_branch_count"])
@@ -432,8 +524,39 @@ def _make_slots(
     count_derivation: Mapping[str, Any],
     latents: Mapping[str, float],
     seed: int,
+    feedback_profile: Mapping[str, Any] | None = None,
 ) -> list[Slot]:
     family_id = morphology["classification"]["flower_branch_relation"]["family_id"]
+    if feedback_profile is not None:
+        ordinary_count = int(count_derivation["ordinary_lane_count"])
+        vertical = _vertical_preferences(morphology, ordinary_count, seed)
+        roles = _slot_roles(family_id, ordinary_count)
+        root_rhythm = feedback_profile.get("root_rhythm_quantiles")
+        if isinstance(root_rhythm, Sequence) and len(root_rhythm) == ordinary_count:
+            preferred_values = [
+                (float(value) + 0.55 * float(latents["flow_phase"])) % 1.0
+                for value in root_rhythm
+            ]
+        else:
+            preferred_values = [
+                (
+                    (index + 0.5) / ordinary_count
+                    + float(latents["flow_phase"])
+                )
+                % 1.0
+                for index in range(ordinary_count)
+            ]
+        return [
+            Slot(
+                slot_id=f"ordinary_{index + 1}",
+                role=roles[index],
+                index=index,
+                flower_id=None,
+                preferred_s=preferred_values[index],
+                preferred_vertical_side=vertical[index],
+            )
+            for index in range(ordinary_count)
+        ]
     support_role = (
         "flower_support"
         if family_id == "SW-1_valley_filling"
@@ -508,12 +631,513 @@ def _candidate_base(
     }
 
 
+def _bow_ratio(points: Sequence[Point]) -> float:
+    if len(points) < 3:
+        return 0.0
+    start = points[0]
+    end = points[-1]
+    chord = _distance(start, end)
+    actual = _polyline_length(points)
+    if chord <= 1e-9 or actual <= 1e-9:
+        return 0.0
+    maximum = max(
+        abs(_cross(_sub(end, start), _sub(point, start))) / chord
+        for point in points[1:-1]
+    )
+    return maximum / actual
+
+
+def _direction_turn_degrees(first: Point, second: Point) -> float:
+    first_unit = _unit(first, "first_direction")
+    second_unit = _unit(second, "second_direction")
+    cosine = max(-1.0, min(1.0, _dot(first_unit, second_unit)))
+    return math.degrees(math.acos(cosine))
+
+
+def _polyline_inflection_count(points: Sequence[Point]) -> int:
+    signs: list[int] = []
+    for index in range(1, len(points) - 1):
+        incoming = _sub(points[index], points[index - 1])
+        outgoing = _sub(points[index + 1], points[index])
+        turn = _cross(incoming, outgoing)
+        if abs(turn) <= 1e-8:
+            continue
+        sign = 1 if turn > 0.0 else -1
+        if not signs or signs[-1] != sign:
+            signs.append(sign)
+    return max(0, len(signs) - 1)
+
+
+def _empirical_cdf(
+    distribution: Mapping[str, Any],
+    value: float,
+) -> float:
+    samples = [float(sample) for sample in distribution["samples"]]
+    if not samples:
+        raise GlobalL1FlowError("editor geometry distribution is empty")
+    return bisect_right(samples, float(value)) / len(samples)
+
+
+def _single_cubic_descriptors(
+    segment: Mapping[str, Any],
+) -> tuple[dict[str, float], float]:
+    p0 = _point(segment["p0"], "descriptor.p0")
+    p1 = _point(segment["p1"], "descriptor.p1")
+    p2 = _point(segment["p2"], "descriptor.p2")
+    p3 = _point(segment["p3"], "descriptor.p3")
+    chord = _sub(p3, p0)
+    chord_length = _length(chord)
+    if chord_length <= 1e-9:
+        raise GlobalL1FlowError("cannot describe a degenerate cubic")
+    chord_direction = _mul(chord, 1.0 / chord_length)
+    normal = (-chord_direction[1], chord_direction[0])
+    start_handle = _sub(p1, p0)
+    end_handle = _sub(p3, p2)
+    start_angle = math.degrees(
+        math.atan2(
+            _dot(start_handle, normal),
+            _dot(start_handle, chord_direction),
+        )
+    )
+    end_angle = math.degrees(
+        math.atan2(
+            _dot(end_handle, normal),
+            _dot(end_handle, chord_direction),
+        )
+    )
+    orientation_sign = 1.0 if start_angle >= 0.0 else -1.0
+    return (
+        {
+            "start_handle_chord_ratio": _length(start_handle) / chord_length,
+            "end_handle_chord_ratio": _length(end_handle) / chord_length,
+            "start_angle_abs_deg": abs(start_angle),
+            "end_angle_normalized_deg": end_angle * orientation_sign,
+        },
+        orientation_sign,
+    )
+
+
+def _demonstration_corrected_descriptors(
+    profile: Mapping[str, Any],
+    original_descriptors: Mapping[str, float],
+    variant_index: int,
+) -> tuple[dict[str, float], dict[str, float], dict[str, float], int, float]:
+    """Apply an actual editor original-to-edited correction in descriptor space."""
+
+    names = (
+        "start_handle_chord_ratio",
+        "end_handle_chord_ratio",
+        "start_angle_abs_deg",
+        "end_angle_normalized_deg",
+    )
+    correction_rows = profile.get("paired_corrections")
+    source_distributions = profile.get("original_descriptor_distributions")
+    edited_distributions = profile.get("descriptor_distributions")
+    if not isinstance(correction_rows, Sequence) or not correction_rows:
+        raise GlobalL1FlowError("editor paired corrections are empty")
+    if not isinstance(source_distributions, Mapping) or not isinstance(
+        edited_distributions, Mapping
+    ):
+        raise GlobalL1FlowError("editor correction distributions are missing")
+
+    def row_distance(row: Mapping[str, Any]) -> float:
+        original = row["original_descriptors"]
+        total = 0.0
+        for name in names:
+            distribution = source_distributions[name]
+            scale = max(
+                float(distribution["q90"]) - float(distribution["q10"]),
+                1e-6,
+            )
+            total += (
+                (float(original_descriptors[name]) - float(original[name]))
+                / scale
+            ) ** 2
+        return math.sqrt(total / len(names))
+
+    ranked = sorted(
+        enumerate(correction_rows),
+        key=lambda item: (row_distance(item[1]), item[0]),
+    )
+    demonstration_rank = int(variant_index) % min(8, len(ranked))
+    row_index, row = ranked[demonstration_rank]
+    distance = row_distance(row)
+    delta = {name: float(row["edit_delta"][name]) for name in names}
+    descriptors: dict[str, float] = {}
+    quantiles: dict[str, float] = {}
+    for name in names:
+        distribution = edited_distributions[name]
+        corrected = float(original_descriptors[name]) + delta[name]
+        corrected = max(
+            float(distribution["min"]),
+            min(float(distribution["max"]), corrected),
+        )
+        descriptors[name] = corrected
+        quantiles[name] = _empirical_cdf(distribution, corrected)
+    return descriptors, quantiles, delta, int(row_index), distance
+
+
+def _maximum_backbone_excursion(
+    points: Sequence[Point],
+    backbone: Sequence[Point],
+) -> float:
+    maximum = 0.0
+    for point in points:
+        nearest = float("inf")
+        for offset in (-1.0, 0.0, 1.0):
+            for index in range(1, len(backbone)):
+                first = (backbone[index - 1][0] + offset, backbone[index - 1][1])
+                second = (backbone[index][0] + offset, backbone[index][1])
+                nearest = min(nearest, _point_segment_distance(point, first, second))
+        maximum = max(maximum, nearest)
+    return maximum
+
+
+def _nearest_flower_gap(
+    points: Sequence[Point],
+    analysis: Mapping[str, Any],
+) -> float:
+    if not analysis["flowers"]:
+        return 1.0
+    minimum = float("inf")
+    for flower in analysis["flowers"]:
+        rx = float(flower["protection_rx"])
+        ry = float(flower["protection_ry"])
+        for point in points:
+            center = _flower_center_near(flower, point[0])
+            normalized = math.sqrt(max(0.0, _ellipse_value(point, center, rx, ry)))
+            minimum = min(minimum, max(0.0, normalized - 1.0))
+    return minimum
+
+
+def _feedback_ordinary_candidates(
+    slot: Slot,
+    analysis: Mapping[str, Any],
+    prior: Mapping[str, Any],
+    latents: Mapping[str, float],
+    feedback_profile: Mapping[str, Any],
+    curve_geometry_profile: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """Correct old-mainline L1 geometry with paired editor demonstrations."""
+
+    base_length = float(
+        prior["statistics"]["primary_geometry"]["chord_length_repeat"]["median"]
+    )
+    length_strata = tuple(float(value) for value in feedback_profile["length_strata"])
+    length_multiplier = float(feedback_profile["length_multiplier"])
+    root_gap_median = float(
+        prior["statistics"]["primary_root_rhythm"]["consecutive_mount_gap"]["median"]
+    )
+    canvas_height = float(analysis["coordinate_system"]["canvas_bounds"][3])
+    backbone = _backbone_points(analysis)
+    candidates: list[dict[str, Any]] = []
+    candidate_index = 0
+    phase = float(latents["flow_phase"]) * (1.0 if slot.index % 2 == 0 else -1.0)
+    bow_distribution = curve_geometry_profile["observed_geometry"]["bow_ratio"]
+    bow_lower = float(bow_distribution["q10"])
+    bow_upper = float(bow_distribution["q90"])
+
+    for region in _candidate_regions(analysis):
+        side_id = str(region["side_id"])
+        for root_s in _region_s_values(region, phase):
+            root, tangent = _sample_at_s(analysis, root_s)
+            outward = _normal(tangent, side_id)
+            for along_sign in (-1.0, 1.0):
+                along = _mul(tangent, along_sign)
+                for stratum_index, length_scale in enumerate(length_strata):
+                    for descriptor_variant in range(16):
+                        candidate_index += 1
+                        planned = (
+                            base_length
+                            * length_scale
+                            * length_multiplier
+                            * (0.94 + 0.06 * float(latents["openness"]))
+                        )
+                        longitudinal = planned * (
+                            0.72 + 0.10 * stratum_index
+                        )
+                        outward_reach = planned * (
+                            0.56 + 0.035 * stratum_index
+                        )
+                        target = _add(
+                            root,
+                            _add(
+                                _mul(along, longitudinal),
+                                _mul(outward, outward_reach),
+                            ),
+                        )
+                        chord = _sub(target, root)
+                        chord_length = _length(chord)
+                        chord_direction = _unit(
+                            chord,
+                            "feedback_editor_correction_chord",
+                        )
+                        original_start_direction = _unit(
+                            _add(
+                                _mul(outward, 0.91),
+                                _mul(tangent, 0.18 * along_sign),
+                            ),
+                            "feedback_original_start_direction",
+                        )
+                        original_terminal_direction = _unit(
+                            _add(
+                                _mul(tangent, 0.78 * along_sign),
+                                _mul(outward, 0.34),
+                            ),
+                            "feedback_original_terminal_direction",
+                        )
+                        original_variant = descriptor_variant % 2
+                        if original_variant == 1:
+                            original_terminal_direction = _unit(
+                                _add(
+                                    _mul(original_terminal_direction, 0.72),
+                                    _mul(outward, -0.46),
+                                ),
+                                "feedback_original_reverse_terminal",
+                            )
+                        original_start_arm = chord_length * (
+                            0.28 + 0.05 * float(latents["curl_energy"])
+                        )
+                        original_end_arm = chord_length * (
+                            0.34 + 0.06 * float(latents["curl_energy"])
+                        )
+                        original_segment = _segment(
+                            root,
+                            _add(
+                                root,
+                                _mul(
+                                    original_start_direction,
+                                    original_start_arm,
+                                ),
+                            ),
+                            _sub(
+                                target,
+                                _mul(
+                                    original_terminal_direction,
+                                    original_end_arm,
+                                ),
+                            ),
+                            target,
+                        )
+                        original_descriptors, orientation_sign = (
+                            _single_cubic_descriptors(original_segment)
+                        )
+                        (
+                            descriptors,
+                            descriptor_quantiles,
+                            editor_delta,
+                            demonstration_row_index,
+                            demonstration_distance,
+                        ) = _demonstration_corrected_descriptors(
+                            curve_geometry_profile,
+                            original_descriptors,
+                            descriptor_variant // 2,
+                        )
+                        start_direction = _unit(
+                            _rotate(
+                                chord_direction,
+                                math.radians(
+                                    orientation_sign
+                                    * float(descriptors["start_angle_abs_deg"])
+                                ),
+                            ),
+                            "feedback_editor_corrected_start",
+                        )
+                        terminal_direction = _unit(
+                            _rotate(
+                                chord_direction,
+                                math.radians(
+                                    orientation_sign
+                                    * float(
+                                        descriptors[
+                                            "end_angle_normalized_deg"
+                                        ]
+                                    )
+                                ),
+                            ),
+                            "feedback_editor_corrected_terminal",
+                        )
+                        start_arm = chord_length * float(
+                            descriptors["start_handle_chord_ratio"]
+                        )
+                        end_arm = chord_length * float(
+                            descriptors["end_handle_chord_ratio"]
+                        )
+                        segments = [
+                            _segment(
+                                root,
+                                _add(root, _mul(start_direction, start_arm)),
+                                _sub(target, _mul(terminal_direction, end_arm)),
+                                target,
+                            )
+                        ]
+                        points = _sample_segments(segments)
+                        if any(
+                            point[1] < 0.025 or point[1] > canvas_height - 0.025
+                            for point in points
+                        ):
+                            continue
+                        if any(point[0] < -0.30 or point[0] > 1.30 for point in points):
+                            continue
+                        actual_length = _polyline_length(points)
+                        bow_ratio = _bow_ratio(points)
+                        bow_empirical_quantile = _empirical_cdf(
+                            bow_distribution,
+                            bow_ratio,
+                        )
+                        terminal_turn_degrees = _direction_turn_degrees(
+                            start_direction,
+                            terminal_direction,
+                        )
+                        inflection_count = _polyline_inflection_count(points)
+                        vertical_span = max(point[1] for point in points) - min(
+                            point[1] for point in points
+                        )
+                        excursion = _maximum_backbone_excursion(points, backbone)
+                        flower_gap = _nearest_flower_gap(points, analysis)
+                        root_preference = 1.0 - min(
+                            1.0,
+                            _periodic_delta(root_s, slot.preferred_s)
+                            / max(root_gap_median * 2.2, 0.18),
+                        )
+                        vertical_side = "upper" if target[1] < root[1] else "lower"
+                        vertical_match = (
+                            1.0 if vertical_side == slot.preferred_vertical_side else 0.0
+                        )
+                        if bow_lower <= bow_ratio <= bow_upper:
+                            bow_score = 1.0
+                        else:
+                            bow_score = 1.0 - min(
+                                1.0,
+                                min(
+                                    abs(bow_ratio - bow_lower),
+                                    abs(bow_ratio - bow_upper),
+                                )
+                                / max(bow_upper - bow_lower, 0.03),
+                            )
+                        compact_score = 1.0 - min(
+                            1.0,
+                            abs(actual_length - planned) / max(planned * 0.45, 1e-9),
+                        )
+                        individual_score = (
+                            2.6 * root_preference
+                            + 0.45 * vertical_match
+                            + 0.75 * min(1.0, float(region["mean_clearance"]) / 0.30)
+                            + 1.25 * abs(_dot(start_direction, tangent))
+                            + 1.35 * bow_score
+                            + 1.10 * compact_score
+                            + (1.0 if stratum_index == 1 else 0.45 if stratum_index == 2 else 0.0)
+                            - 0.35
+                            * max(
+                                0.0,
+                                vertical_span
+                                / float(feedback_profile["maximum_vertical_span"])
+                                - 0.78,
+                            )
+                        )
+                        candidates.append(
+                            _candidate_base(
+                                candidate_id=(
+                                    f"{slot.slot_id}_feedback_{candidate_index:04d}"
+                                ),
+                                slot=slot,
+                                source_channel=(
+                                    "editor_original_to_edited_correction"
+                                ),
+                                side_id=side_id,
+                                root_s=root_s,
+                                root=root,
+                                target=target,
+                                segments=segments,
+                                flower_id=None,
+                                curvature_signature=(
+                                    "editor_corrected_reverse_end"
+                                    if float(
+                                        descriptors["end_angle_normalized_deg"]
+                                    )
+                                    < 0.0
+                                    else "editor_corrected_same_side_end"
+                                ),
+                                features={
+                                    "root_preference": root_preference,
+                                    "vertical_match": vertical_match,
+                                    "initial_tangent_alignment": abs(
+                                        _dot(start_direction, tangent)
+                                    ),
+                                    "initial_outward_alignment": _dot(
+                                        start_direction, outward
+                                    ),
+                                    "bow_ratio": bow_ratio,
+                                    "bow_empirical_quantile": (
+                                        bow_empirical_quantile
+                                    ),
+                                    "vertical_span": vertical_span,
+                                    "maximum_backbone_excursion": excursion,
+                                    "nearest_flower_gap": flower_gap,
+                                    "length_stratum": float(stratum_index),
+                                    "descriptor_variant_index": float(
+                                        descriptor_variant
+                                    ),
+                                    "original_curve_variant": float(
+                                        original_variant
+                                    ),
+                                    "editor_demonstration_row_index": float(
+                                        demonstration_row_index
+                                    ),
+                                    "editor_demonstration_distance": (
+                                        demonstration_distance
+                                    ),
+                                    "descriptor_mean_quantile": sum(
+                                        descriptor_quantiles.values()
+                                    )
+                                    / len(descriptor_quantiles),
+                                    **{
+                                        f"editor_{name}": value
+                                        for name, value in descriptors.items()
+                                    },
+                                    **{
+                                        f"original_{name}": value
+                                        for name, value in original_descriptors.items()
+                                    },
+                                    **{
+                                        f"editor_delta_{name}": value
+                                        for name, value in editor_delta.items()
+                                    },
+                                    **{
+                                        f"editor_{name}_quantile": value
+                                        for name, value in descriptor_quantiles.items()
+                                    },
+                                    "terminal_turn_degrees": terminal_turn_degrees,
+                                    "inflection_count": float(inflection_count),
+                                    "planned_chord": _distance(root, target),
+                                },
+                                individual_score=individual_score,
+                            )
+                        )
+    return candidates
+
+
 def _ordinary_candidates(
     slot: Slot,
     analysis: Mapping[str, Any],
     prior: Mapping[str, Any],
     latents: Mapping[str, float],
+    feedback_profile: Mapping[str, Any] | None = None,
+    curve_geometry_profile: Mapping[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
+    if feedback_profile is not None:
+        if curve_geometry_profile is None:
+            raise GlobalL1FlowError(
+                "editor-demonstrated curve geometry profile is required"
+            )
+        return _feedback_ordinary_candidates(
+            slot,
+            analysis,
+            prior,
+            latents,
+            feedback_profile,
+            curve_geometry_profile,
+        )
     primary_stats = prior["statistics"]["primary_geometry"]["chord_length_repeat"]
     if slot.role == "frontier":
         base_length = float(primary_stats["q75"])
@@ -904,6 +1528,7 @@ def _candidate_rejections(
     analysis: Mapping[str, Any],
     family_id: str,
     prior: Mapping[str, Any],
+    feedback_profile: Mapping[str, Any] | None = None,
 ) -> list[str]:
     reasons: list[str] = []
     centerline = [_point(point, "candidate.centerline") for point in candidate["centerline"]]
@@ -912,8 +1537,20 @@ def _candidate_rejections(
     _, tangent = _sample_at_s(analysis, float(candidate["root_s"]))
     outward = _normal(tangent, str(candidate["side_id"]))
     initial = _unit(_sub(centerline[1], centerline[0]), "candidate.initial")
-    if _dot(initial, outward) < 0.72:
-        reasons.append("ordinary_or_support_initial_departure_not_outward")
+    if feedback_profile is None:
+        if _dot(initial, outward) < 0.72:
+            reasons.append("ordinary_or_support_initial_departure_not_outward")
+    else:
+        tangent_alignment = abs(_dot(initial, tangent))
+        outward_alignment = _dot(initial, outward)
+        if tangent_alignment < float(
+            feedback_profile["minimum_initial_tangent_alignment"]
+        ):
+            reasons.append("feedback_lane_does_not_start_tangentially")
+        if outward_alignment < float(
+            feedback_profile["minimum_initial_outward_alignment"]
+        ):
+            reasons.append("feedback_lane_initially_turns_inward")
 
     canvas_height = float(analysis["coordinate_system"]["canvas_bounds"][3])
     if not (0.0 <= target[1] <= canvas_height):
@@ -944,11 +1581,19 @@ def _candidate_rejections(
     if self_clearance < 0.032:
         reasons.append("periodic_self_conflict")
 
-    if family_id == "SW-1_valley_filling" and role == "flower_support":
+    if (
+        feedback_profile is None
+        and family_id == "SW-1_valley_filling"
+        and role == "flower_support"
+    ):
         trough_distance = float(candidate["features"].get("trough_arc_distance", 1.0))
         if trough_distance > 0.14:
             reasons.append("sw1_support_not_from_trough_flank")
-    if family_id == "SW-3_tangent_terminal" and role == "terminal_flower_support":
+    if (
+        feedback_profile is None
+        and family_id == "SW-3_tangent_terminal"
+        and role == "terminal_flower_support"
+    ):
         remote = float(candidate["features"].get("remote_mount_arc_distance", -1.0))
         if not 0.30 <= remote <= 0.48:
             reasons.append("sw3_support_mount_not_remote")
@@ -1001,7 +1646,11 @@ def _pair_metrics(
     }
 
 
-def _global_score(lanes: Sequence[Mapping[str, Any]]) -> tuple[float, dict[str, float]]:
+def _global_score(
+    lanes: Sequence[Mapping[str, Any]],
+    feedback_profile: Mapping[str, Any] | None = None,
+    curve_geometry_profile: Mapping[str, Any] | None = None,
+) -> tuple[float, dict[str, float]]:
     roots = sorted(float(lane["root_s"]) for lane in lanes)
     root_gaps = [
         roots[index] - roots[index - 1]
@@ -1025,6 +1674,181 @@ def _global_score(lanes: Sequence[Mapping[str, Any]]) -> tuple[float, dict[str, 
     length_rhythm = min(1.0, math.sqrt(length_variance) / max(length_mean * 0.32, 1e-9))
     source_channels = Counter(str(lane["source_channel"]) for lane in lanes)
     fixed_prior_presence = 1.0 if source_channels["fixed_warp_visual_prior"] else 0.0
+    if feedback_profile is not None:
+        if curve_geometry_profile is None:
+            raise GlobalL1FlowError(
+                "global feedback scoring lacks editor curve geometry"
+            )
+        bow_distribution = curve_geometry_profile["observed_geometry"][
+            "bow_ratio"
+        ]
+        bow_lower = float(bow_distribution["q10"])
+        bow_upper = float(bow_distribution["q90"])
+        bow_scores = [
+            (
+                1.0
+                if bow_lower <= float(lane["features"]["bow_ratio"]) <= bow_upper
+                else 1.0
+                - min(
+                    1.0,
+                    min(
+                        abs(float(lane["features"]["bow_ratio"]) - bow_lower),
+                        abs(float(lane["features"]["bow_ratio"]) - bow_upper),
+                    )
+                    / max(bow_upper - bow_lower, 0.03),
+                )
+            )
+            for lane in lanes
+        ]
+        tangent_alignment = sum(
+            float(lane["features"]["initial_tangent_alignment"])
+            for lane in lanes
+        ) / len(lanes)
+        root_rhythm_fidelity = sum(
+            float(lane["features"]["root_preference"]) for lane in lanes
+        ) / len(lanes)
+        vertical_compactness = 1.0 - min(
+            1.0,
+            sum(float(lane["features"]["vertical_span"]) for lane in lanes)
+            / len(lanes)
+            / float(feedback_profile["maximum_vertical_span"]),
+        )
+        excursion_compactness = 1.0 - min(
+            1.0,
+            sum(
+                float(lane["features"]["maximum_backbone_excursion"])
+                for lane in lanes
+            )
+            / len(lanes)
+            / float(feedback_profile["maximum_backbone_excursion"]),
+        )
+        length_strata_coverage = len(
+            {
+                int(round(float(lane["features"]["length_stratum"])))
+                for lane in lanes
+            }
+        ) / 3.0
+        target_fractions = [
+            float(value)
+            for value in feedback_profile["length_stratum_target_fractions"]
+        ]
+        actual_fractions = [
+            sum(
+                int(round(float(lane["features"]["length_stratum"]))) == index
+                for lane in lanes
+            )
+            / len(lanes)
+            for index in range(3)
+        ]
+        length_strata_mix = 1.0 - 0.5 * sum(
+            abs(actual - target)
+            for actual, target in zip(actual_fractions, target_fractions)
+        )
+        motion_signature_coverage = min(
+            1.0,
+            len({str(lane["curvature_signature"]) for lane in lanes}) / 2.0,
+        )
+        demonstration_correction_coverage = len(
+            {
+                int(lane["features"]["editor_demonstration_row_index"])
+                for lane in lanes
+            }
+        ) / len(lanes)
+        uniform_targets = [
+            (index + 0.5) / len(lanes) for index in range(len(lanes))
+        ]
+
+        def distribution_match(feature_name: str) -> float:
+            observed = sorted(
+                float(lane["features"][feature_name]) for lane in lanes
+            )
+            return max(
+                0.0,
+                1.0
+                - 2.0
+                * sum(
+                    abs(value - target)
+                    for value, target in zip(observed, uniform_targets)
+                )
+                / len(observed),
+            )
+
+        control_descriptor_distribution_match = sum(
+            distribution_match(feature_name)
+            for feature_name in (
+                "editor_start_handle_chord_ratio_quantile",
+                "editor_end_handle_chord_ratio_quantile",
+                "editor_start_angle_abs_deg_quantile",
+                "editor_end_angle_normalized_deg_quantile",
+            )
+        ) / 4.0
+        bow_distribution_match = distribution_match(
+            "bow_empirical_quantile"
+        )
+        bow_mean = sum(
+            float(lane["features"]["bow_ratio"]) for lane in lanes
+        ) / len(lanes)
+        bow_spread = min(
+            1.0,
+            math.sqrt(
+                sum(
+                    (float(lane["features"]["bow_ratio"]) - bow_mean) ** 2
+                    for lane in lanes
+                )
+                / len(lanes)
+            )
+            / max(
+                float(bow_distribution["q75"])
+                - float(bow_distribution["q25"]),
+                0.03,
+            ),
+        )
+        flower_proximity = sum(
+            1.0 / (1.0 + 2.0 * float(lane["features"]["nearest_flower_gap"]))
+            for lane in lanes
+        ) / len(lanes)
+        bow_fidelity = sum(bow_scores) / len(bow_scores)
+        score = (
+            2.5 * root_coverage
+            + 2.0 * root_rhythm_fidelity
+            + 1.2 * target_coverage
+            + 1.0 * length_rhythm
+            + 0.7 * length_strata_coverage
+            + 1.8 * length_strata_mix
+            + 1.5 * bow_fidelity
+            + 0.7 * bow_spread
+            + 0.8 * motion_signature_coverage
+            + 2.5 * demonstration_correction_coverage
+            + 1.4 * control_descriptor_distribution_match
+            + 2.4 * bow_distribution_match
+            + 1.4 * tangent_alignment
+            + 1.15 * vertical_compactness
+            + 1.15 * excursion_compactness
+            + 0.45 * flower_proximity
+        )
+        return score, {
+            "root_coverage": root_coverage,
+            "root_rhythm_fidelity": root_rhythm_fidelity,
+            "target_zone_coverage": target_coverage,
+            "length_rhythm": length_rhythm,
+            "length_strata_coverage": length_strata_coverage,
+            "length_strata_mix": length_strata_mix,
+            "bow_fidelity": bow_fidelity,
+            "bow_spread": bow_spread,
+            "motion_signature_coverage": motion_signature_coverage,
+            "demonstration_correction_coverage": (
+                demonstration_correction_coverage
+            ),
+            "control_descriptor_distribution_match": (
+                control_descriptor_distribution_match
+            ),
+            "bow_distribution_match": bow_distribution_match,
+            "initial_tangent_alignment": tangent_alignment,
+            "vertical_compactness": vertical_compactness,
+            "backbone_excursion_compactness": excursion_compactness,
+            "soft_flower_proximity": flower_proximity,
+            "fixed_prior_channel_present": 0.0,
+        }
     score = (
         4.0 * root_coverage
         + 3.0 * target_coverage
@@ -1045,6 +1869,8 @@ def _solve(
     slots: Sequence[Slot],
     candidate_pools: Mapping[str, Sequence[Mapping[str, Any]]],
     prior: Mapping[str, Any],
+    feedback_profile: Mapping[str, Any] | None = None,
+    curve_geometry_profile: Mapping[str, Any] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     root_stats = prior["statistics"]["primary_root_rhythm"]["consecutive_mount_gap"]
     root_spacing = max(0.05, float(root_stats["min"]) * 0.78)
@@ -1055,10 +1881,32 @@ def _solve(
     pair_cache: dict[tuple[str, str], tuple[bool, float, dict[str, float]]] = {}
 
     for slot in slots:
-        pool = sorted(
+        ranked_pool = sorted(
             candidate_pools[slot.slot_id],
             key=lambda row: (-float(row["individual_score"]), str(row["candidate_id"])),
-        )[:expansion_cap]
+        )
+        if feedback_profile is not None:
+            by_demonstration: dict[int, list[Mapping[str, Any]]] = {}
+            for candidate in ranked_pool:
+                row_index = int(
+                    candidate["features"]["editor_demonstration_row_index"]
+                )
+                by_demonstration.setdefault(row_index, []).append(candidate)
+            pool = []
+            round_index = 0
+            while len(pool) < expansion_cap:
+                added = False
+                for rows in by_demonstration.values():
+                    if round_index < len(rows):
+                        pool.append(rows[round_index])
+                        added = True
+                        if len(pool) >= expansion_cap:
+                            break
+                if not added:
+                    break
+                round_index += 1
+        else:
+            pool = ranked_pool[:expansion_cap]
         if not pool:
             raise GlobalL1FlowError(f"slot {slot.slot_id} has no feasible candidates")
         expanded: list[BeamState] = []
@@ -1066,6 +1914,27 @@ def _solve(
             for candidate in pool:
                 pair_score = 0.0
                 compatible = True
+                if feedback_profile is not None:
+                    demonstration_row = int(
+                        candidate["features"][
+                            "editor_demonstration_row_index"
+                        ]
+                    )
+                    reuse_count = sum(
+                        int(
+                            existing["features"][
+                                "editor_demonstration_row_index"
+                            ]
+                        )
+                        == demonstration_row
+                        for existing in state.lanes
+                    )
+                    if reuse_count >= int(
+                        feedback_profile[
+                            "maximum_demonstration_correction_reuse_per_unit"
+                        ]
+                    ):
+                        continue
                 for existing in state.lanes:
                     key = tuple(sorted((str(candidate["candidate_id"]), str(existing["candidate_id"]))))
                     if key not in pair_cache:
@@ -1103,7 +1972,11 @@ def _solve(
 
     ranked: list[tuple[float, BeamState, dict[str, float]]] = []
     for state in states:
-        global_value, global_features = _global_score(state.lanes)
+        global_value, global_features = _global_score(
+            state.lanes,
+            feedback_profile,
+            curve_geometry_profile,
+        )
         ranked.append((state.score + global_value, state, global_features))
     ranked.sort(
         key=lambda row: (
@@ -1141,6 +2014,15 @@ def _solve(
         "selected_total_score": round(total_score, 9),
         "global_features": {key: round(value, 9) for key, value in global_features.items()},
         "selected_pair_metrics": pair_rows,
+        "maximum_demonstration_correction_reuse_per_unit": (
+            int(
+                feedback_profile[
+                    "maximum_demonstration_correction_reuse_per_unit"
+                ]
+            )
+            if feedback_profile is not None
+            else None
+        ),
     }
 
 
@@ -1152,7 +2034,7 @@ def _validate_inputs(
     contract: Mapping[str, Any],
     seed: int,
 ) -> tuple[str, str]:
-    if contract.get("schema") != CONTRACT_SCHEMA:
+    if contract.get("schema") not in {CONTRACT_SCHEMA, CONTRACT_SCHEMA_V2}:
         raise GlobalL1FlowError("stage-3B contract schema mismatch")
     if seed not in SEEDS:
         raise GlobalL1FlowError(f"seed is outside the formal launch matrix: {seed}")
@@ -1183,6 +2065,8 @@ def generate_global_l1_flow_plan(
     prior: Mapping[str, Any],
     contract: Mapping[str, Any],
     seed: int,
+    feedback_prior: Mapping[str, Any] | None = None,
+    curve_geometry_prior: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Generate one formal L1-only layout and its complete candidate inventory."""
 
@@ -1194,26 +2078,69 @@ def generate_global_l1_flow_plan(
         contract,
         seed,
     )
+    feedback_profile: Mapping[str, Any] | None = None
+    curve_geometry_profile: Mapping[str, Any] | None = None
+    if _feedback_mode(contract):
+        if feedback_prior is None or curve_geometry_prior is None:
+            raise GlobalL1FlowError(
+                "stage-3B v2 requires both completed editor priors"
+            )
+        feedback_profile = _feedback_profile(feedback_prior, prototype_id)
+        curve_geometry_profile = _curve_geometry_profile(
+            curve_geometry_prior,
+            prototype_id,
+        )
     latents = _global_latents(prototype_id, seed)
-    count_derivation = _derive_lane_count(prototype_id, analysis, morphology, prior)
-    slots = _make_slots(analysis, morphology, count_derivation, latents, seed)
+    count_derivation = _derive_lane_count(
+        prototype_id,
+        analysis,
+        morphology,
+        prior,
+        feedback_profile,
+    )
+    slots = _make_slots(
+        analysis,
+        morphology,
+        count_derivation,
+        latents,
+        seed,
+        feedback_profile,
+    )
     pools: dict[str, list[dict[str, Any]]] = {}
     inventory_rows: list[dict[str, Any]] = []
     rejection_counts: Counter[str] = Counter()
 
     for slot in slots:
         candidates: list[dict[str, Any]] = []
-        if slot.role == "flower_support":
+        if feedback_profile is not None:
+            candidates.extend(
+                _ordinary_candidates(
+                    slot,
+                    analysis,
+                    prior,
+                    latents,
+                    feedback_profile,
+                    curve_geometry_profile,
+                )
+            )
+        elif slot.role == "flower_support":
             candidates.extend(_sw1_support_candidates(slot, analysis, latents))
         elif slot.role == "terminal_flower_support":
             candidates.extend(_sw3_support_candidates(slot, analysis, latents))
         else:
             candidates.extend(_ordinary_candidates(slot, analysis, prior, latents))
-        candidates.extend(_fixed_warp_candidates(slot, analysis, prior, seed))
+        if feedback_profile is None:
+            candidates.extend(_fixed_warp_candidates(slot, analysis, prior, seed))
 
         feasible: list[dict[str, Any]] = []
         for candidate in candidates:
-            reasons = _candidate_rejections(candidate, analysis, family_id, prior)
+            reasons = _candidate_rejections(
+                candidate,
+                analysis,
+                family_id,
+                prior,
+                feedback_profile,
+            )
             inventory_row = dict(candidate)
             inventory_row["hard_rejections"] = reasons
             inventory_rows.append(inventory_row)
@@ -1226,7 +2153,13 @@ def generate_global_l1_flow_plan(
             )
         pools[slot.slot_id] = feasible
 
-    selected, solver = _solve(slots, pools, prior)
+    selected, solver = _solve(
+        slots,
+        pools,
+        prior,
+        feedback_profile,
+        curve_geometry_profile,
+    )
     selected_ids = {str(row["candidate_id"]) for row in selected}
     for row in inventory_rows:
         row["selected"] = str(row["candidate_id"]) in selected_ids
@@ -1234,14 +2167,17 @@ def generate_global_l1_flow_plan(
     role_counts = Counter(str(row["role"]) for row in selected)
     if sum(role_counts.values()) != count_derivation["selected_l1_count"]:
         raise GlobalL1FlowError("selected L1 count does not match count derivation")
-    if role_counts["flower_support"] + role_counts["terminal_flower_support"] != count_derivation[
-        "required_support_count"
-    ]:
+    if feedback_profile is None and (
+        role_counts["flower_support"] + role_counts["terminal_flower_support"]
+        != count_derivation["required_support_count"]
+    ):
         raise GlobalL1FlowError("selected support count does not match morphology requirement")
 
+    plan_schema = SCHEMA_V2 if feedback_profile is not None else SCHEMA
+    plan_version = "v2" if feedback_profile is not None else "v1"
     plan: dict[str, Any] = {
-        "schema": SCHEMA,
-        "plan_id": f"{prototype_id}__seed_{seed}__global_l1_flow_v1",
+        "schema": plan_schema,
+        "plan_id": f"{prototype_id}__seed_{seed}__global_l1_flow_{plan_version}",
         "prototype_id": prototype_id,
         "family_id": family_id,
         "seed": seed,
@@ -1255,6 +2191,31 @@ def generate_global_l1_flow_plan(
             "old_stage4_geometry_consumed": False,
         },
         "global_latents": latents,
+        "edit_feedback_policy": (
+            {
+                "consumed": True,
+                "prior_id": str(feedback_prior["prior_id"]),
+                "role_semantics": str(feedback_profile["role_semantics"]),
+                "mandatory_flower_service_lanes": bool(
+                    feedback_profile["mandatory_flower_service_lanes"]
+                ),
+                "curve_geometry_source": str(
+                    feedback_profile["curve_geometry_source"]
+                ),
+                "curve_geometry_prior_id": str(
+                    curve_geometry_prior["prior_id"]
+                ),
+                "fixed_curve_shape_quota": False,
+                "maximum_demonstration_correction_reuse_per_unit": int(
+                    feedback_profile[
+                        "maximum_demonstration_correction_reuse_per_unit"
+                    ]
+                ),
+                "fixed_svg_templates_consumed": False,
+            }
+            if feedback_profile is not None and feedback_prior is not None
+            else {"consumed": False}
+        ),
         "count_derivation": count_derivation,
         "slots": [
             {
@@ -1289,12 +2250,12 @@ def generate_global_l1_flow_plan(
             "numeric_checks_cannot_auto_approve_visual_gate": True,
             "criteria": [
                 "global_direction_position_and_distance",
-                "prototype_specific_flower_branch_relation",
-                "immediate_outward_departure",
+                "compact_medium_long_hierarchy",
+                "tangent_run_outward_turn_and_settle",
+                "flower_relation_is_soft_not_mandatory",
                 "root_and_target_spacing",
                 "white_space_distribution",
                 "non_crossing_periodic_flow",
-                "fixed_visual_capability_not_degraded",
             ],
         },
         "input_digests": {
@@ -1302,11 +2263,29 @@ def generate_global_l1_flow_plan(
             "analysis_digest": analysis["analysis_digest"],
             "morphology_digest": morphology["morphology_digest"],
             "fixed_visual_prior_digest": prior["prior_digest"],
+            **(
+                {"edit_feedback_prior_digest": canonical_digest(feedback_prior)}
+                if feedback_prior is not None
+                else {}
+            ),
+            **(
+                {
+                    "editor_curve_geometry_prior_digest": canonical_digest(
+                        curve_geometry_prior
+                    )
+                }
+                if curve_geometry_prior is not None
+                else {}
+            ),
         },
     }
     plan["plan_digest"] = canonical_digest(plan)
     inventory: dict[str, Any] = {
-        "schema": "dynamic_branch_global_l1_candidate_inventory_v1",
+        "schema": (
+            "dynamic_branch_global_l1_candidate_inventory_v2"
+            if feedback_profile is not None
+            else "dynamic_branch_global_l1_candidate_inventory_v1"
+        ),
         "prototype_id": prototype_id,
         "seed": seed,
         "single_forward_global_solve": True,
@@ -1320,7 +2299,7 @@ def generate_global_l1_flow_plan(
 
 
 def validate_global_l1_flow_plan(plan: Mapping[str, Any]) -> None:
-    if plan.get("schema") != SCHEMA:
+    if plan.get("schema") not in {SCHEMA, SCHEMA_V2}:
         raise GlobalL1FlowError("global L1 flow plan schema mismatch")
     digest = plan.get("plan_digest")
     if not isinstance(digest, str):
@@ -1342,3 +2321,45 @@ def validate_global_l1_flow_plan(plan: Mapping[str, Any]) -> None:
         raise GlobalL1FlowError("global L1 flow plan contains hard issues")
     if plan["review"]["status"] != "l1_flow_pending_visual_review":
         raise GlobalL1FlowError("global L1 flow plan has an invalid review state")
+    if plan.get("schema") == SCHEMA_V2:
+        policy = plan.get("edit_feedback_policy", {})
+        if policy.get("curve_geometry_source") != (
+            "saved_editor_l1_original_to_edited_correction"
+        ):
+            raise GlobalL1FlowError(
+                "V2 plan lacks saved-editor correction evidence"
+            )
+        if policy.get("fixed_curve_shape_quota") is not False:
+            raise GlobalL1FlowError("V2 plan reintroduced a fixed shape quota")
+        maximum_reuse = int(
+            policy.get("maximum_demonstration_correction_reuse_per_unit", 0)
+        )
+        if maximum_reuse <= 0:
+            raise GlobalL1FlowError(
+                "V2 plan lacks a demonstration reuse limit"
+            )
+        demonstration_rows = [
+            int(lane["features"]["editor_demonstration_row_index"])
+            for lane in plan["lanes"]
+        ]
+        if max(Counter(demonstration_rows).values()) > maximum_reuse:
+            raise GlobalL1FlowError(
+                "V2 plan exceeds the editor correction reuse limit"
+            )
+        for lane in plan["lanes"]:
+            features = lane.get("features", {})
+            if not all(
+                key in features
+                for key in (
+                    "editor_start_handle_chord_ratio",
+                    "editor_end_handle_chord_ratio",
+                    "editor_start_angle_abs_deg",
+                    "editor_end_angle_normalized_deg",
+                    "descriptor_mean_quantile",
+                    "editor_demonstration_row_index",
+                    "editor_demonstration_distance",
+                )
+            ):
+                raise GlobalL1FlowError(
+                    "V2 lane lacks editor-demonstrated descriptors"
+                )

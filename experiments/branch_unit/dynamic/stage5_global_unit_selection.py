@@ -11,13 +11,37 @@ from typing import Any, Mapping, Sequence
 from branch_unit_grammar_v1 import _curve_crosses
 
 
-SCHEMA = "dynamic_branch_stage5_global_unit_selection_v1"
-CONFLICT_SCHEMA = "dynamic_branch_stage5_candidate_conflict_graph_v1"
-CONTRACT_SCHEMA = "dynamic_branch_stage5_global_selection_contract_v1"
+SCHEMA_V1 = "dynamic_branch_stage5_global_unit_selection_v1"
+SCHEMA_V2 = "dynamic_branch_stage5_global_unit_selection_v2"
+CONFLICT_SCHEMA_V1 = "dynamic_branch_stage5_candidate_conflict_graph_v1"
+CONFLICT_SCHEMA_V2 = "dynamic_branch_stage5_candidate_conflict_graph_v2"
+CONTRACT_SCHEMA_V1 = "dynamic_branch_stage5_global_selection_contract_v1"
+CONTRACT_SCHEMA_V2 = "dynamic_branch_stage5_global_selection_contract_v2"
+EDITOR_L2_PRIOR_SCHEMA = "dynamic_branch_editor_l2_placement_prior_v1"
+SCHEMA = SCHEMA_V1
+CONFLICT_SCHEMA = CONFLICT_SCHEMA_V1
+CONTRACT_SCHEMA = CONTRACT_SCHEMA_V1
 
 
 class Stage5SelectionError(RuntimeError):
     """The immutable candidate pool cannot be processed under the contract."""
+
+
+def _editor_l2_profile(
+    editor_l2_prior: Mapping[str, Any],
+    prototype_id: str,
+) -> Mapping[str, Any]:
+    if editor_l2_prior.get("schema") != EDITOR_L2_PRIOR_SCHEMA:
+        raise Stage5SelectionError("editor L2 placement prior schema mismatch")
+    profiles = editor_l2_prior.get("profiles")
+    if not isinstance(profiles, Mapping):
+        raise Stage5SelectionError("editor L2 placement prior has no profiles")
+    profile = profiles.get(prototype_id) or profiles.get("global")
+    if not isinstance(profile, Mapping):
+        raise Stage5SelectionError(
+            f"editor L2 placement prior has no profile for {prototype_id}"
+        )
+    return profile
 
 
 def canonical_digest(value: object) -> str:
@@ -103,14 +127,66 @@ def candidate_pair_crossings(
     return crossings
 
 
+def candidate_pair_minimum_clearance(
+    first: Mapping[str, Any],
+    second: Mapping[str, Any],
+    repeat_shifts: Sequence[float],
+) -> float:
+    """Measure descendant clearance without treating the two immutable L1s."""
+
+    minimum = float("inf")
+    for first_curve in first["curves"]:
+        for second_curve in second["curves"]:
+            if (
+                first_curve["level"] == "L1"
+                and second_curve["level"] == "L1"
+            ):
+                continue
+            first_points = [
+                (float(point[0]), float(point[1]))
+                for point in first_curve["centerline"]
+            ]
+            for shift_x in repeat_shifts:
+                second_points = [
+                    (float(point[0]) + float(shift_x), float(point[1]))
+                    for point in second_curve["centerline"]
+                ]
+                minimum = min(
+                    minimum,
+                    min(
+                        ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
+                        for a in first_points
+                        for b in second_points
+                    ),
+                )
+    return minimum
+
+
 def build_conflict_graph(
     inventory: Mapping[str, Any],
     contract: Mapping[str, Any],
+    editor_l2_prior: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     repeat_shifts = [
         float(value)
         for value in contract["hard_constraints"]["repeat_shifts_checked"]
     ]
+    contract_schema = str(contract.get("schema"))
+    minimum_clearance: float | None = None
+    editor_l2_prior_id: str | None = None
+    if contract_schema == CONTRACT_SCHEMA_V2:
+        if editor_l2_prior is None:
+            raise Stage5SelectionError(
+                "stage-5 V2 requires the editor L2 placement prior"
+            )
+        profile = _editor_l2_profile(
+            editor_l2_prior,
+            str(inventory["prototype_id"]),
+        )
+        minimum_clearance = float(
+            profile["nonparent_curve_clearance_unit_ratio"]["q10"]
+        )
+        editor_l2_prior_id = str(editor_l2_prior["prior_id"])
     candidates = inventory["candidates"]
     nodes = [
         {
@@ -142,19 +218,49 @@ def build_conflict_graph(
                 second,
                 repeat_shifts,
             )
-            if crossings:
-                edges.append(
-                    {
-                        "first_candidate_id": first["candidate_id"],
-                        "first_lane_id": first["source_lane_id"],
-                        "second_candidate_id": second["candidate_id"],
-                        "second_lane_id": second["source_lane_id"],
-                        "reason": "cross_unit_curve_crossing",
-                        "crossings": crossings,
-                    }
-                )
+            pair_clearance = candidate_pair_minimum_clearance(
+                first,
+                second,
+                repeat_shifts,
+            )
+            crowded = (
+                minimum_clearance is not None
+                and pair_clearance < minimum_clearance
+            )
+            if crossings or crowded:
+                edge = {
+                    "first_candidate_id": first["candidate_id"],
+                    "first_lane_id": first["source_lane_id"],
+                    "second_candidate_id": second["candidate_id"],
+                    "second_lane_id": second["source_lane_id"],
+                    "reason": (
+                        "crossing_and_editor_clearance_violation"
+                        if crossings and crowded
+                        else "cross_unit_curve_crossing"
+                        if crossings
+                        else "editor_l2_clearance_violation"
+                    ),
+                    "crossings": crossings,
+                }
+                if contract_schema == CONTRACT_SCHEMA_V2:
+                    edge.update(
+                        {
+                            "minimum_descendant_clearance": round(
+                                pair_clearance, 9
+                            ),
+                            "required_descendant_clearance": round(
+                                float(minimum_clearance), 9
+                            ),
+                        }
+                    )
+                edges.append(edge)
+    graph_schema = (
+        CONFLICT_SCHEMA_V2
+        if contract_schema == CONTRACT_SCHEMA_V2
+        else CONFLICT_SCHEMA_V1
+    )
     graph: dict[str, Any] = {
-        "schema": CONFLICT_SCHEMA,
+        "schema": graph_schema,
         "contract_id": contract["contract_id"],
         "prototype_id": inventory["prototype_id"],
         "seed": inventory["seed"],
@@ -168,6 +274,15 @@ def build_conflict_graph(
         "nodes": nodes,
         "edges": edges,
     }
+    if contract_schema == CONTRACT_SCHEMA_V2:
+        graph.update(
+            {
+                "editor_l2_placement_prior_id": editor_l2_prior_id,
+                "minimum_descendant_clearance": round(
+                    float(minimum_clearance), 9
+                ),
+            }
+        )
     graph["conflict_graph_digest"] = canonical_digest(graph)
     return graph
 
@@ -200,6 +315,33 @@ def _blocking_lane_pairs(
     return rows
 
 
+def _derive_hierarchy_mix_counts(
+    lane_count: int,
+    fractions: Mapping[str, Any],
+) -> dict[str, int]:
+    """Convert edit-derived fractions to exact per-composition counts."""
+
+    class_order = ("l1_only", "single_child", "paired_child")
+    if set(fractions) != set(class_order):
+        raise Stage5SelectionError("hierarchy mix classes are incomplete")
+    total = sum(float(fractions[name]) for name in class_order)
+    if total <= 0.0:
+        raise Stage5SelectionError("hierarchy mix fractions must be positive")
+    raw = {
+        name: lane_count * float(fractions[name]) / total
+        for name in class_order
+    }
+    counts = {name: int(raw[name]) for name in class_order}
+    remainder = lane_count - sum(counts.values())
+    ranked = sorted(
+        class_order,
+        key=lambda name: (-(raw[name] - counts[name]), class_order.index(name)),
+    )
+    for name in ranked[:remainder]:
+        counts[name] += 1
+    return counts
+
+
 def select_global_units(
     inventory: Mapping[str, Any],
     conflict_graph: Mapping[str, Any],
@@ -225,50 +367,138 @@ def select_global_units(
         conflict_ids[first_id].add(second_id)
         conflict_ids[second_id].add(first_id)
 
-    priorities = contract["deterministic_order"]["role_stratum_priority"]
+    contract_schema = str(contract.get("schema"))
+    is_v2 = contract_schema == CONTRACT_SCHEMA_V2
+    if contract_schema not in {CONTRACT_SCHEMA_V1, CONTRACT_SCHEMA_V2}:
+        raise Stage5SelectionError("stage-5 contract schema mismatch")
 
-    def candidate_order(candidate: Mapping[str, Any]) -> tuple[int, int, str]:
-        role_priority = priorities[str(candidate["role"])]
-        return (
-            role_priority.index(str(candidate["parameter_stratum"])),
-            len(conflict_ids[str(candidate["candidate_id"])]),
-            str(candidate["candidate_id"]),
+    hierarchy_targets: dict[str, int] | None = None
+    if is_v2:
+        hierarchy_targets = _derive_hierarchy_mix_counts(
+            len(lane_ids),
+            contract["hierarchy_mix"]["class_fraction_targets"],
         )
+        class_cycle = list(contract["deterministic_order"]["class_cycle"])
+        stratum_priorities = contract["deterministic_order"][
+            "within_class_stratum_priority"
+        ]
 
-    for lane_id in lane_order:
-        eligible_by_lane[lane_id].sort(key=candidate_order)
+        def v2_candidate_order(
+            candidate: Mapping[str, Any],
+            lane_index: int,
+        ) -> tuple[int, int, int, str]:
+            density_class = str(
+                candidate["visual_features"]["hierarchy_density_class"]
+            )
+            desired_class_order = (
+                class_cycle[lane_index % len(class_cycle) :]
+                + class_cycle[: lane_index % len(class_cycle)]
+            )
+            strata = list(stratum_priorities[density_class])
+            # Repeated visits to the same hierarchy class rotate through its
+            # strata instead of cloning one child grammar across the unit.
+            offset = (lane_index // len(class_cycle)) % len(strata)
+            rotated_strata = strata[offset:] + strata[:offset]
+            return (
+                desired_class_order.index(density_class),
+                rotated_strata.index(str(candidate["parameter_stratum"])),
+                len(conflict_ids[str(candidate["candidate_id"])]),
+                str(candidate["candidate_id"]),
+            )
+
+        for lane_index, lane_id in enumerate(lane_order):
+            eligible_by_lane[lane_id].sort(
+                key=lambda candidate, index=lane_index: v2_candidate_order(
+                    candidate,
+                    index,
+                )
+            )
+    else:
+        priorities = contract["deterministic_order"]["role_stratum_priority"]
+
+        def v1_candidate_order(
+            candidate: Mapping[str, Any],
+        ) -> tuple[int, int, str]:
+            role_priority = priorities[str(candidate["role"])]
+            return (
+                role_priority.index(str(candidate["parameter_stratum"])),
+                len(conflict_ids[str(candidate["candidate_id"])]),
+                str(candidate["candidate_id"]),
+            )
+
+        for lane_id in lane_order:
+            eligible_by_lane[lane_id].sort(key=v1_candidate_order)
 
     selected: list[Mapping[str, Any]] = []
     selected_ids: set[str] = set()
+    selected_hierarchy_counts: dict[str, int] = defaultdict(int)
     search_node_count = 0
     backtrack_count = 0
 
     def search(lane_index: int) -> bool:
         nonlocal search_node_count, backtrack_count
         if lane_index == len(lane_order):
-            return True
+            return (
+                not is_v2
+                or dict(selected_hierarchy_counts) == hierarchy_targets
+            )
+        if is_v2 and hierarchy_targets is not None:
+            remaining_lanes = lane_order[lane_index:]
+            for density_class, target in hierarchy_targets.items():
+                deficit = target - selected_hierarchy_counts[density_class]
+                if deficit < 0:
+                    return False
+                available_lane_count = sum(
+                    any(
+                        str(
+                            candidate["visual_features"][
+                                "hierarchy_density_class"
+                            ]
+                        )
+                        == density_class
+                        for candidate in eligible_by_lane[remaining_lane]
+                    )
+                    for remaining_lane in remaining_lanes
+                )
+                if deficit > available_lane_count:
+                    return False
         lane_id = lane_order[lane_index]
         for candidate in eligible_by_lane[lane_id]:
             search_node_count += 1
             candidate_id = str(candidate["candidate_id"])
             if selected_ids & conflict_ids[candidate_id]:
                 continue
+            density_class = None
+            if is_v2 and hierarchy_targets is not None:
+                density_class = str(
+                    candidate["visual_features"]["hierarchy_density_class"]
+                )
+                if (
+                    selected_hierarchy_counts[density_class]
+                    >= hierarchy_targets[density_class]
+                ):
+                    continue
             selected.append(candidate)
             selected_ids.add(candidate_id)
+            if density_class is not None:
+                selected_hierarchy_counts[density_class] += 1
             if search(lane_index + 1):
                 return True
             selected.pop()
             selected_ids.remove(candidate_id)
+            if density_class is not None:
+                selected_hierarchy_counts[density_class] -= 1
             backtrack_count += 1
         return False
 
     feasible = search(0)
     selected_candidates = list(selected) if feasible else []
     result: dict[str, Any] = {
-        "schema": SCHEMA,
+        "schema": SCHEMA_V2 if is_v2 else SCHEMA_V1,
         "contract_id": contract["contract_id"],
         "selection_id": (
-            f"{inventory['inventory_id']}__global_unit_selection_v1"
+            f"{inventory['inventory_id']}__global_unit_selection_"
+            f"{'v2' if is_v2 else 'v1'}"
         ),
         "prototype_id": inventory["prototype_id"],
         "family_id": inventory["family_id"],
@@ -323,6 +553,16 @@ def select_global_units(
             ],
         },
     }
+    if is_v2:
+        result["solver_trace"].update(
+            {
+                "edit_feedback_structural_mix_enforced": True,
+                "hierarchy_mix_target_counts": hierarchy_targets,
+                "hierarchy_mix_selected_counts": dict(
+                    selected_hierarchy_counts
+                ),
+            }
+        )
     result["selection_digest"] = canonical_digest(result)
     validate_global_selection(result, conflict_graph)
     return result
@@ -332,7 +572,7 @@ def validate_global_selection(
     selection: Mapping[str, Any],
     conflict_graph: Mapping[str, Any],
 ) -> None:
-    if selection.get("schema") != SCHEMA:
+    if selection.get("schema") not in {SCHEMA_V1, SCHEMA_V2}:
         raise Stage5SelectionError("selection schema mismatch")
     if selection.get("source_conflict_graph_digest") != conflict_graph.get(
         "conflict_graph_digest"
@@ -368,6 +608,23 @@ def validate_global_selection(
             } <= selected_ids:
                 raise Stage5SelectionError(
                     "feasible composition contains a conflict edge"
+                )
+        if selection.get("schema") == SCHEMA_V2:
+            target_counts = selection.get("solver_trace", {}).get(
+                "hierarchy_mix_target_counts"
+            )
+            actual_counts: dict[str, int] = defaultdict(int)
+            for candidate in selected:
+                actual_counts[
+                    str(
+                        candidate["visual_features"][
+                            "hierarchy_density_class"
+                        ]
+                    )
+                ] += 1
+            if dict(actual_counts) != target_counts:
+                raise Stage5SelectionError(
+                    "V2 composition does not match its frozen hierarchy mix"
                 )
     elif selected:
         raise Stage5SelectionError(

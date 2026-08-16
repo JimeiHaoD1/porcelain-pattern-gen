@@ -85,6 +85,38 @@ def _draw_structure(
         color = COLORS["ink"] if shift_x == 0.0 else COLORS["ghost"]
         width = 4 if shift_x == 0.0 else 2
         draw.line(points, fill=color, width=width, joint="curve")
+
+
+def _draw_flower_mounts(
+    draw: ImageDraw.ImageDraw,
+    analysis: Mapping[str, Any],
+    flower_mount_plan: Mapping[str, Any],
+    box: tuple[int, int, int, int],
+    x_range: tuple[float, float],
+    shifts: Sequence[float],
+) -> None:
+    for shift_x in shifts:
+        for mount in flower_mount_plan["mounts"]:
+            points = [
+                _xy(analysis, point, box, x_range, shift_x)
+                for point in mount["centerline"]
+            ]
+            draw.line(
+                points,
+                fill=COLORS["flower_support"],
+                width=4,
+                joint="curve",
+            )
+
+
+def _draw_flowers(
+    draw: ImageDraw.ImageDraw,
+    analysis: Mapping[str, Any],
+    box: tuple[int, int, int, int],
+    x_range: tuple[float, float],
+    shifts: Sequence[float],
+) -> None:
+    for shift_x in shifts:
         for flower in analysis["flowers"]:
             center = _xy(
                 analysis,
@@ -158,6 +190,7 @@ def render_global_selection(
     output: Path,
     *,
     triple_repeat: bool,
+    flower_mount_plan: Mapping[str, Any] | None = None,
 ) -> None:
     width, height = (1240, 610) if triple_repeat else (940, 610)
     image = Image.new("RGB", (width, height), COLORS["background"])
@@ -187,8 +220,19 @@ def render_global_selection(
     plot = (18, 88, width - 18, height - 48)
     draw.rectangle(plot, fill=COLORS["panel"], outline=COLORS["grid"], width=2)
     shifts = (-1.0, 0.0, 1.0) if triple_repeat else (0.0,)
+    structure_shifts = shifts if triple_repeat else (-1.0, 0.0, 1.0)
     x_range = (-1.08, 2.08) if triple_repeat else (-0.18, 1.18)
-    _draw_structure(draw, analysis, plot, x_range, shifts)
+    _draw_structure(draw, analysis, plot, x_range, structure_shifts)
+    if flower_mount_plan is not None:
+        _draw_flower_mounts(
+            draw,
+            analysis,
+            flower_mount_plan,
+            plot,
+            x_range,
+            shifts,
+        )
+    _draw_flowers(draw, analysis, plot, x_range, shifts)
 
     if selection["feasible"]:
         for candidate in selection["selected_candidates"]:

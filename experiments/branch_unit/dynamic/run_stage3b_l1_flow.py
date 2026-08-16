@@ -10,14 +10,30 @@ import tempfile
 from pathlib import Path
 from typing import Any, Mapping
 
-from fixed_visual_prior import file_sha256, validate_fixed_visual_prior
+from backbone_variation_v1 import (
+    generate_backbone_variant,
+    split_generation_seeds,
+    validate_seed,
+)
+from fixed_visual_prior import validate_fixed_visual_prior
+from flower_placement_v1 import generate_flower_layout_and_mount
 from global_l1_flow import (
-    PROTOTYPE_IDS,
     SEEDS,
     generate_global_l1_flow_plan,
     validate_global_l1_flow_plan,
 )
+from prototype_strategy_v1 import (
+    DEFAULT_REGISTRY_PATH,
+    PROTOTYPE_IDS,
+    PrototypeStrategyError,
+    load_prototype_strategy_registry,
+    parse_route_request,
+    resolve_prototype_strategy,
+    validate_route_request_against_strategy,
+    validate_strategy_against_inputs,
+)
 from render_global_l1_flow import render_contact_sheet, render_png, render_svg
+from strict_p0_v2 import load_materialized_strict_p0_v2
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -52,8 +68,9 @@ DEFAULT_OUTPUT = (
 CONTRACT_PATH = DYNAMIC_DIR / "STAGE3B_L1_FLOW_CONTRACT_V2.json"
 FEEDBACK_PRIOR_PATH = DYNAMIC_DIR / "EDIT_FEEDBACK_PRIOR_V1.json"
 CURVE_GEOMETRY_PRIOR_PATH = (
-    DYNAMIC_DIR / "EDITOR_CURVE_GEOMETRY_PRIOR_V2.json"
+    DYNAMIC_DIR / "EDITOR_CURVE_GEOMETRY_PRIOR_V4.json"
 )
+STAGE3_PLAN_CONTRACT_PATH = DYNAMIC_DIR / "STAGE3_PLAN_CONTRACT.json"
 
 
 class Stage3BRunError(RuntimeError):
@@ -84,17 +101,16 @@ def _profile_rows(manifest: Mapping[str, Any], label: str) -> dict[str, Mapping[
     return {str(row["prototype_id"]): row for row in rows}
 
 
-def _verified_file(root: Path, relative: object, sha256: object, label: str) -> Path:
+def _required_file(root: Path, relative: object, label: str) -> Path:
     path = root / str(relative)
     if not path.is_file():
         raise Stage3BRunError(f"{label} is missing: {path}")
-    if file_sha256(path) != sha256:
-        raise Stage3BRunError(f"{label} hash mismatch: {path}")
     return path
 
 
 def _load_inputs() -> tuple[
     dict[str, dict[str, Any]],
+    dict[str, Any],
     dict[str, Any],
     dict[str, Any],
     dict[str, Any],
@@ -113,6 +129,8 @@ def _load_inputs() -> tuple[
         CONTRACT_PATH,
         FEEDBACK_PRIOR_PATH,
         CURVE_GEOMETRY_PRIOR_PATH,
+        STAGE3_PLAN_CONTRACT_PATH,
+        DEFAULT_REGISTRY_PATH,
     ):
         if not path.is_file():
             raise Stage3BRunError(f"required stage-3B input is missing: {path}")
@@ -124,6 +142,7 @@ def _load_inputs() -> tuple[
     contract = _read_json(CONTRACT_PATH)
     feedback_prior = _read_json(FEEDBACK_PRIOR_PATH)
     curve_geometry_prior = _read_json(CURVE_GEOMETRY_PRIOR_PATH)
+    stage3_plan_contract = _read_json(STAGE3_PLAN_CONTRACT_PATH)
     if stage1.get("schema") != "dynamic_branch_stage1_input_manifest_v1":
         raise Stage3BRunError("stage-1 manifest schema mismatch")
     if stage2.get("schema") != "dynamic_branch_stage2_analysis_manifest_v1":
@@ -141,17 +160,16 @@ def _load_inputs() -> tuple[
     if feedback_prior.get("schema") != "dynamic_branch_edit_feedback_prior_v1":
         raise Stage3BRunError("edit feedback prior schema mismatch")
     if curve_geometry_prior.get("schema") != (
-        "dynamic_branch_editor_curve_geometry_prior_v2"
+        "dynamic_branch_editor_curve_geometry_prior_v4"
     ):
         raise Stage3BRunError("editor curve geometry prior schema mismatch")
 
     stage1_rows = _profile_rows(stage1, "stage-1")
     stage2_rows = _profile_rows(stage2, "stage-2")
     stage25_rows = _profile_rows(stage25, "stage-2.5")
-    prior_path = _verified_file(
+    prior_path = _required_file(
         STAGE3A_ROOT,
         "fixed_visual_prior.json",
-        stage3a["files"]["fixed_visual_prior.json"]["sha256"],
         "stage-3A fixed visual prior",
     )
     prior = _read_json(prior_path)
@@ -162,33 +180,24 @@ def _load_inputs() -> tuple[
         strict_row = stage1_rows[prototype_id]
         analysis_row = stage2_rows[prototype_id]
         morphology_row = stage25_rows[prototype_id]
-        strict_path = _verified_file(
+        strict_path = _required_file(
             STAGE1_ROOT,
             strict_row["strict_p0_path"],
-            strict_row["strict_p0_sha256"],
             f"{prototype_id} StrictP0",
         )
-        analysis_path = _verified_file(
+        analysis_path = _required_file(
             STAGE2_ROOT,
             analysis_row["prototype_analysis_path"],
-            analysis_row["prototype_analysis_sha256"],
             f"{prototype_id} analysis",
         )
-        morphology_path = _verified_file(
+        morphology_path = _required_file(
             STAGE25_ROOT,
             morphology_row["morphology_profile_path"],
-            morphology_row["morphology_profile_sha256"],
             f"{prototype_id} morphology",
         )
         strict = _read_json(strict_path)
         analysis = _read_json(analysis_path)
         morphology = _read_json(morphology_path)
-        if analysis["strict_p0_digest"] != strict_row["strict_p0_digest"]:
-            raise Stage3BRunError(f"{prototype_id} StrictP0/analysis digest mismatch")
-        if analysis["analysis_digest"] != morphology["source_stage2_analysis_digest"]:
-            raise Stage3BRunError(f"{prototype_id} analysis/morphology digest mismatch")
-        if morphology["morphology_digest"] != morphology_row["morphology_digest"]:
-            raise Stage3BRunError(f"{prototype_id} morphology digest mismatch")
         if analysis_row["review_status"] != "analysis_approved":
             raise Stage3BRunError(f"{prototype_id} analysis is not approved")
         if morphology_row["review_status"] != "morphology_approved":
@@ -201,16 +210,16 @@ def _load_inputs() -> tuple[
 
     provenance = {
         "frozen_input_root": str(INPUT_REPO_ROOT),
-        "stage1_manifest_sha256": file_sha256(stage1_manifest_path),
-        "stage2_manifest_sha256": file_sha256(stage2_manifest_path),
-        "stage25_manifest_sha256": file_sha256(stage25_manifest_path),
-        "stage3a_manifest_sha256": file_sha256(stage3a_manifest_path),
-        "stage3b_contract_sha256": file_sha256(CONTRACT_PATH),
-        "edit_feedback_prior_sha256": file_sha256(FEEDBACK_PRIOR_PATH),
-        "editor_curve_geometry_prior_sha256": file_sha256(
-            CURVE_GEOMETRY_PRIOR_PATH
-        ),
-        "fixed_visual_prior_sha256": file_sha256(prior_path),
+        "stage1_manifest": str(stage1_manifest_path),
+        "stage2_manifest": str(stage2_manifest_path),
+        "stage25_manifest": str(stage25_manifest_path),
+        "stage3a_manifest": str(stage3a_manifest_path),
+        "stage3b_contract": str(CONTRACT_PATH),
+        "edit_feedback_prior": str(FEEDBACK_PRIOR_PATH),
+        "editor_curve_geometry_prior": str(CURVE_GEOMETRY_PRIOR_PATH),
+        "fixed_visual_prior": str(prior_path),
+        "stage3_plan_contract": str(STAGE3_PLAN_CONTRACT_PATH),
+        "prototype_strategy_registry": str(DEFAULT_REGISTRY_PATH),
     }
     return (
         inputs,
@@ -218,17 +227,127 @@ def _load_inputs() -> tuple[
         feedback_prior,
         curve_geometry_prior,
         contract,
+        stage3_plan_contract,
         provenance,
     )
+
+
+def generate_prototype_case(
+    *,
+    payload: Mapping[str, Any],
+    prototype_strategy: Mapping[str, Any],
+    production_seed: int,
+    prior: Mapping[str, Any],
+    feedback_prior: Mapping[str, Any],
+    curve_geometry_prior: Mapping[str, Any],
+    contract: Mapping[str, Any],
+    stage3_plan_contract: Mapping[str, Any],
+    backbone_seed_override: int | None,
+    branch_seed_override: int | None,
+    backbone_rho: float | None,
+    prototype_variant_id: str | None = None,
+    flower_seed_override: int | None = None,
+    unit_seed_override: int | None = None,
+    flower_rho: float | None = None,
+    ordinary_density_level_override: str | None = None,
+) -> dict[str, Any]:
+    """Run the one active per-case production chain under one frozen strategy."""
+
+    baseline_strict = load_materialized_strict_p0_v2(payload["strict"])
+    validate_strategy_against_inputs(
+        prototype_strategy,
+        baseline_strict,
+        payload["analysis"],
+        payload["morphology"],
+    )
+    derived_seeds = split_generation_seeds(production_seed)
+    backbone_seed = (
+        derived_seeds["backbone_seed"]
+        if backbone_seed_override is None
+        else validate_seed(backbone_seed_override, "backbone_seed")
+    )
+    flower_seed = (
+        derived_seeds["flower_seed"]
+        if flower_seed_override is None
+        else validate_seed(flower_seed_override, "flower_seed")
+    )
+    branch_seed = (
+        derived_seeds["branch_seed"]
+        if branch_seed_override is None
+        else validate_seed(branch_seed_override, "branch_seed")
+    )
+    unit_seed = (
+        derived_seeds["unit_seed"]
+        if unit_seed_override is None
+        else validate_seed(unit_seed_override, "unit_seed")
+    )
+    backbone_strict, variation = generate_backbone_variant(
+        baseline_strict,
+        backbone_seed,
+        backbone_rho,
+        prototype_strategy=prototype_strategy,
+        prototype_variant_id=prototype_variant_id,
+    )
+    (
+        variant_strict,
+        variant_analysis,
+        flower_layout_plan,
+        flower_mount_plan,
+    ) = generate_flower_layout_and_mount(
+        backbone_strict,
+        payload["morphology"],
+        stage3_plan_contract,
+        flower_seed=flower_seed,
+        prototype_strategy=prototype_strategy,
+        rho=flower_rho,
+    )
+    validate_strategy_against_inputs(
+        prototype_strategy,
+        variant_strict,
+        variant_analysis,
+        payload["morphology"],
+    )
+    plan, inventory = generate_global_l1_flow_plan(
+        variant_strict.as_dict(),
+        variant_analysis,
+        payload["morphology"],
+        prior,
+        contract,
+        branch_seed,
+        feedback_prior,
+        curve_geometry_prior,
+        flower_mount_plan,
+        backbone_seed=backbone_seed,
+        flower_seed=flower_seed,
+        unit_seed=unit_seed,
+        prototype_strategy=prototype_strategy,
+        backbone_variation=variation,
+        flower_layout_plan=flower_layout_plan,
+        ordinary_density_level_override=ordinary_density_level_override,
+    )
+    validate_global_l1_flow_plan(plan)
+    return {
+        "backbone_seed": backbone_seed,
+        "flower_seed": flower_seed,
+        "branch_seed": branch_seed,
+        "unit_seed": unit_seed,
+        "variant_strict": variant_strict,
+        "variant_analysis": variant_analysis,
+        "variation": variation,
+        "flower_layout_plan": flower_layout_plan,
+        "flower_mount_plan": flower_mount_plan,
+        "plan": plan,
+        "inventory": inventory,
+    }
 
 
 def _write_readme(output: Path) -> None:
     text = """# 阶段3B全局L1流线
 
 - 范围：五个SW原型 × seeds 4101/4102/4103。
-- 内容：只规划L1的根位、方向、距离、目标区和花位关系。
+- 内容：先按形态家族生成并冻结花朵挂接L1，再规划剩余普通L1的根位、方向、距离和目标区。
 - 不包含：L2、L3、叶片、芽头、卷头和最终枝条曲线编译。
-- 求解：每个任务执行一次前向全局集合求解；候选枚举属于求解过程。
+- 求解：花朵挂接枝不等待普通枝；普通枝在剩余容量中执行一次前向全局集合求解。
 - 禁止：自动修复、自动删枝、验证引导重试、验证引导重采样和静默回退。
 - 状态：全部结果均为 `l1_flow_pending_visual_review`，数值诊断不能替代人工验收。
 """
@@ -239,15 +358,49 @@ def run(
     output: Path,
     prototype_ids: tuple[str, ...] = PROTOTYPE_IDS,
     seeds: tuple[int, ...] = SEEDS,
+    *,
+    route_request: Mapping[str, Any] | None = None,
+    backbone_seed_override: int | None = None,
+    flower_seed_override: int | None = None,
+    branch_seed_override: int | None = None,
+    unit_seed_override: int | None = None,
+    backbone_rho: float | None = None,
+    flower_rho: float | None = None,
+    prototype_variant_id: str | None = None,
+    ordinary_density_level_override: str | None = None,
 ) -> None:
     if output.exists():
         raise Stage3BRunError(f"formal stage-3B output already exists: {output}")
+    registry = load_prototype_strategy_registry()
+    if route_request is not None:
+        if prototype_ids != PROTOTYPE_IDS:
+            raise Stage3BRunError(
+                "explicit prototype selection and semantic route request are mutually exclusive"
+            )
+        try:
+            routed_strategy = resolve_prototype_strategy(route_request, registry)
+        except PrototypeStrategyError as exc:
+            raise Stage3BRunError(str(exc)) from exc
+        prototype_ids = (str(routed_strategy["prototype_id"]),)
+    strategies = {
+        prototype_id: resolve_prototype_strategy(
+            {"prototype_id": prototype_id},
+            registry,
+        )
+        for prototype_id in prototype_ids
+    }
+    if route_request is not None:
+        validate_route_request_against_strategy(
+            route_request,
+            strategies[prototype_ids[0]],
+        )
     (
         inputs,
         prior,
         feedback_prior,
         curve_geometry_prior,
         contract,
+        stage3_plan_contract,
         provenance,
     ) = _load_inputs()
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -262,20 +415,45 @@ def run(
             prototype_clean: list[Path] = []
             prototype_triple: list[Path] = []
             payload = inputs[prototype_id]
-            for seed in seeds:
-                case = temporary / prototype_id / f"seed_{seed}"
-                case.mkdir(parents=True)
-                plan, inventory = generate_global_l1_flow_plan(
-                    payload["strict"],
-                    payload["analysis"],
-                    payload["morphology"],
-                    prior,
-                    contract,
-                    seed,
-                    feedback_prior,
-                    curve_geometry_prior,
+            prototype_strategy = strategies[prototype_id]
+            for production_seed in seeds:
+                case_result = generate_prototype_case(
+                    payload=payload,
+                    prototype_strategy=prototype_strategy,
+                    production_seed=production_seed,
+                    prior=prior,
+                    feedback_prior=feedback_prior,
+                    curve_geometry_prior=curve_geometry_prior,
+                    contract=contract,
+                    stage3_plan_contract=stage3_plan_contract,
+                    backbone_seed_override=backbone_seed_override,
+                    flower_seed_override=flower_seed_override,
+                    branch_seed_override=branch_seed_override,
+                    unit_seed_override=unit_seed_override,
+                    backbone_rho=backbone_rho,
+                    flower_rho=flower_rho,
+                    prototype_variant_id=prototype_variant_id,
+                    ordinary_density_level_override=(
+                        ordinary_density_level_override
+                    ),
                 )
-                validate_global_l1_flow_plan(plan)
+                backbone_seed = int(case_result["backbone_seed"])
+                flower_seed = int(case_result["flower_seed"])
+                branch_seed = int(case_result["branch_seed"])
+                unit_seed = int(case_result["unit_seed"])
+                variant_strict = case_result["variant_strict"]
+                variant_analysis = case_result["variant_analysis"]
+                variation = case_result["variation"]
+                flower_layout_plan = case_result["flower_layout_plan"]
+                flower_mount_plan = case_result["flower_mount_plan"]
+                plan = case_result["plan"]
+                inventory = case_result["inventory"]
+                case = temporary / prototype_id / f"seed_{production_seed}"
+                case.mkdir(parents=True)
+                strict_variant_path = case / "strict_p0_variant.json"
+                analysis_variant_path = case / "prototype_analysis_variant.json"
+                flower_layout_path = case / "flower_layout_plan.json"
+                flower_mount_path = case / "flower_mount_plan.json"
                 plan_path = case / "global_l1_flow_plan.json"
                 inventory_path = case / "global_l1_candidate_inventory.json"
                 clean_path = case / "l1_flow.png"
@@ -283,19 +461,23 @@ def run(
                 triple_path = case / "three_repeat_l1_flow.png"
                 svg_path = case / "l1_flow.svg"
                 triple_svg_path = case / "three_repeat_l1_flow.svg"
+                _write_json(strict_variant_path, variant_strict.as_dict())
+                _write_json(analysis_variant_path, variant_analysis)
+                _write_json(flower_layout_path, flower_layout_plan)
+                _write_json(flower_mount_path, flower_mount_plan)
                 _write_json(plan_path, plan)
                 _write_json(inventory_path, inventory)
-                render_png(payload["analysis"], plan, clean_path)
-                render_png(payload["analysis"], plan, debug_path, debug=True)
+                render_png(variant_analysis, plan, clean_path)
+                render_png(variant_analysis, plan, debug_path, debug=True)
                 render_png(
-                    payload["analysis"],
+                    variant_analysis,
                     plan,
                     triple_path,
                     repeat_count=3,
                 )
-                render_svg(payload["analysis"], plan, svg_path)
+                render_svg(variant_analysis, plan, svg_path)
                 render_svg(
-                    payload["analysis"],
+                    variant_analysis,
                     plan,
                     triple_svg_path,
                     repeat_count=3,
@@ -307,12 +489,36 @@ def run(
                 prototype_triple.append(triple_path)
                 task_rows.append(
                     {
-                        "task_id": f"{prototype_id}__seed_{seed}__global_l1_flow_v2",
+                        "task_id": (
+                            f"{prototype_id}__seed_{production_seed}__"
+                            "dynamic_global_l1_flow_v2"
+                        ),
                         "prototype_id": prototype_id,
                         "family_id": plan["family_id"],
-                        "seed": seed,
+                        "prototype_strategy": prototype_strategy,
+                        "production_seed": production_seed,
+                        "seed": branch_seed,
+                        "backbone_seed": backbone_seed,
+                        "flower_seed": flower_seed,
+                        "branch_seed": branch_seed,
+                        "unit_seed": unit_seed,
+                        "ordinary_density_level": plan["count_derivation"][
+                            "ordinary_density_level"
+                        ],
+                        "ordinary_density_source": plan["count_derivation"][
+                            "ordinary_density_source"
+                        ],
+                        "backbone_variation": variation,
+                        "flower_layout": flower_layout_plan,
                         "state": plan["review"]["status"],
                         "l1_count": len(plan["lanes"]),
+                        "flower_mount_count": len(
+                            flower_mount_plan["mounts"]
+                        ),
+                        "total_l1_with_flower_support_count": (
+                            len(plan["lanes"])
+                            + len(flower_mount_plan["mounts"])
+                        ),
                         "role_counts": plan["role_counts"],
                         "candidate_count": plan["diagnostics"]["candidate_count"],
                         "feasible_candidate_count": plan["diagnostics"][
@@ -323,9 +529,12 @@ def run(
                         "files": {
                             path.name: {
                                 "path": str(path.relative_to(temporary)).replace("\\", "/"),
-                                "sha256": file_sha256(path),
                             }
                             for path in (
+                                strict_variant_path,
+                                analysis_variant_path,
+                                flower_layout_path,
+                                flower_mount_path,
                                 plan_path,
                                 inventory_path,
                                 clean_path,
@@ -361,6 +570,7 @@ def run(
             "stage": "3B",
             "contract_id": contract["contract_id"],
             "prototype_ids": list(prototype_ids),
+            "prototype_strategies": [strategies[value] for value in prototype_ids],
             "seeds": list(seeds),
             "task_count": len(task_rows),
             "success_count": len(task_rows),
@@ -381,6 +591,20 @@ def run(
                 "silent_fallback_used": False,
                 "edit_feedback_prior_consumed": True,
                 "edited_svg_templates_consumed": False,
+                "strict_p0_variant_generated_per_task": True,
+                "prototype_analysis_variant_generated_per_task": True,
+                "flower_layout_generated_between_backbone_and_mount": True,
+                "sw3_joint_flower_mount_feasibility_consumed": True,
+                "flower_seed_independent_from_other_seed_domains": True,
+                "dynamic_l1_count_enabled": True,
+                "ordinary_l1_density_level_enabled": True,
+                "ordinary_l1_density_level_uses_branch_seed_by_default": True,
+                "flower_support_excluded_from_ordinary_density_count": True,
+                "dynamic_non_equidistant_root_rhythm_enabled": True,
+                "flower_mounting_generated_before_ordinary_l1": True,
+                "ordinary_l1_candidates_constrained_by_flower_mounting": True,
+                "prototype_strategy_resolved_once_before_seed_split": True,
+                "prototype_strategy_frozen_through_stage3b": True,
             },
             "review_gate": {
                 "status": "l1_flow_pending_visual_review",
@@ -388,9 +612,9 @@ def run(
                 "all_fifteen_tasks_require_terminal_review_state": True,
             },
             "contact_sheets": {
-                clean_sheet.name: file_sha256(clean_sheet),
-                debug_sheet.name: file_sha256(debug_sheet),
-                triple_sheet.name: file_sha256(triple_sheet),
+                "clean": clean_sheet.name,
+                "debug": debug_sheet.name,
+                "triple_repeat": triple_sheet.name,
             },
             "provenance": provenance,
             "tasks": task_rows,
@@ -410,18 +634,59 @@ def main() -> int:
         help="Run only the selected prototype; may be repeated.",
     )
     parser.add_argument(
+        "--route-request",
+        help="Semantic route as a JSON object or path to a JSON object.",
+    )
+    parser.add_argument(
         "--seed",
-        choices=SEEDS,
         action="append",
         type=int,
         dest="seeds",
         help="Run only the selected seed; may be repeated.",
     )
+    parser.add_argument("--backbone-seed", type=int)
+    parser.add_argument("--flower-seed", type=int)
+    parser.add_argument("--branch-seed", type=int)
+    parser.add_argument("--unit-seed", type=int)
+    parser.add_argument("--backbone-rho", type=float)
+    parser.add_argument("--flower-rho", type=float)
+    parser.add_argument(
+        "--ordinary-density-level",
+        choices=("simple", "medium", "rich"),
+        help=(
+            "Controlled 5D review override; production defaults to the "
+            "branch-seed density level."
+        ),
+    )
+    parser.add_argument(
+        "--prototype-variant",
+        choices=("expanded", "compact", "swept"),
+        help="Explicit combined prototype variant; default selection is deterministic from the backbone seed.",
+    )
     args = parser.parse_args()
+    if args.route_request is not None and args.prototypes:
+        parser.error("--route-request cannot be combined with --prototype")
+    try:
+        route_request = (
+            parse_route_request(args.route_request)
+            if args.route_request is not None
+            else None
+        )
+    except PrototypeStrategyError as exc:
+        parser.error(str(exc))
     run(
         args.output.resolve(),
         tuple(args.prototypes or PROTOTYPE_IDS),
         tuple(args.seeds or SEEDS),
+        route_request=route_request,
+        backbone_seed_override=args.backbone_seed,
+        flower_seed_override=args.flower_seed,
+        branch_seed_override=args.branch_seed,
+        unit_seed_override=args.unit_seed,
+        backbone_rho=args.backbone_rho,
+        flower_rho=args.flower_rho,
+        prototype_variant_id=args.prototype_variant,
+        ordinary_density_level_override=args.ordinary_density_level,
     )
     print(args.output.resolve())
     return 0

@@ -6,9 +6,12 @@ from __future__ import annotations
 import hashlib
 import json
 from collections import defaultdict
+from functools import lru_cache
 from typing import Any, Mapping, Sequence
 
-from branch_unit_grammar_v1 import _curve_crosses
+from branch_unit_grammar_v1 import _curve_crosses, _polyline_distance
+from composition_geometry import parallel_co_travel_score
+from prototype_strategy_v1 import validate_strategy_projection
 
 
 SCHEMA_V1 = "dynamic_branch_stage5_global_unit_selection_v1"
@@ -18,6 +21,12 @@ CONFLICT_SCHEMA_V2 = "dynamic_branch_stage5_candidate_conflict_graph_v2"
 CONTRACT_SCHEMA_V1 = "dynamic_branch_stage5_global_selection_contract_v1"
 CONTRACT_SCHEMA_V2 = "dynamic_branch_stage5_global_selection_contract_v2"
 EDITOR_L2_PRIOR_SCHEMA = "dynamic_branch_editor_l2_placement_prior_v1"
+FIXED_L1_ONLY_POLICY = "fixed_l1_only_for_5c_r6"
+FIXED_L1_ONLY_5D_POLICY = "fixed_l1_only_for_5d_density_review"
+FIXED_L1_ONLY_POLICIES = {
+    FIXED_L1_ONLY_POLICY,
+    FIXED_L1_ONLY_5D_POLICY,
+}
 SCHEMA = SCHEMA_V1
 CONFLICT_SCHEMA = CONFLICT_SCHEMA_V1
 CONTRACT_SCHEMA = CONTRACT_SCHEMA_V1
@@ -27,16 +36,33 @@ class Stage5SelectionError(RuntimeError):
     """The immutable candidate pool cannot be processed under the contract."""
 
 
+def _candidate_is_actual_l1_only(candidate: Mapping[str, Any]) -> bool:
+    hierarchy = candidate.get("hierarchy")
+    curves = candidate.get("curves")
+    return bool(
+        isinstance(hierarchy, Mapping)
+        and hierarchy.get("l2_count") == 0
+        and hierarchy.get("l3_count") == 0
+        and isinstance(curves, Sequence)
+        and curves
+        and all(
+            isinstance(curve, Mapping) and curve.get("level") == "L1"
+            for curve in curves
+        )
+    )
+
+
 def _editor_l2_profile(
     editor_l2_prior: Mapping[str, Any],
     prototype_id: str,
+    profile_key: str | None = None,
 ) -> Mapping[str, Any]:
     if editor_l2_prior.get("schema") != EDITOR_L2_PRIOR_SCHEMA:
         raise Stage5SelectionError("editor L2 placement prior schema mismatch")
     profiles = editor_l2_prior.get("profiles")
     if not isinstance(profiles, Mapping):
         raise Stage5SelectionError("editor L2 placement prior has no profiles")
-    profile = profiles.get(prototype_id) or profiles.get("global")
+    profile = profiles.get(profile_key or prototype_id) or profiles.get("global")
     if not isinstance(profile, Mapping):
         raise Stage5SelectionError(
             f"editor L2 placement prior has no profile for {prototype_id}"
@@ -92,6 +118,23 @@ def _shift_curve(
     }
 
 
+@lru_cache(maxsize=4096)
+def _cached_polyline_distance(
+    first_points: tuple[tuple[float, float], ...],
+    second_points: tuple[tuple[float, float], ...],
+) -> float:
+    return _polyline_distance(first_points, second_points)
+
+
+def _bounds_distance(
+    first: tuple[float, float, float, float],
+    second: tuple[float, float, float, float],
+) -> float:
+    gap_x = max(0.0, first[0] - second[2], second[0] - first[2])
+    gap_y = max(0.0, first[1] - second[3], second[1] - first[3])
+    return (gap_x * gap_x + gap_y * gap_y) ** 0.5
+
+
 def candidate_pair_crossings(
     first: Mapping[str, Any],
     second: Mapping[str, Any],
@@ -100,11 +143,6 @@ def candidate_pair_crossings(
     crossings: list[dict[str, Any]] = []
     for first_curve in first["curves"]:
         for second_curve in second["curves"]:
-            if (
-                first_curve["level"] == "L1"
-                and second_curve["level"] == "L1"
-            ):
-                continue
             first_bounds = _curve_bounds(first_curve)
             for shift_x in repeat_shifts:
                 second_bounds = _curve_bounds(second_curve, float(shift_x))
@@ -132,9 +170,40 @@ def candidate_pair_minimum_clearance(
     second: Mapping[str, Any],
     repeat_shifts: Sequence[float],
 ) -> float:
-    """Measure descendant clearance without treating the two immutable L1s."""
+    """Measure the full curve-to-curve clearance between two BranchUnits."""
 
     minimum = float("inf")
+    for first_curve in first["curves"]:
+        for second_curve in second["curves"]:
+            first_points = tuple(
+                (float(point[0]), float(point[1]))
+                for point in first_curve["centerline"]
+            )
+            first_bounds = _curve_bounds(first_curve)
+            for shift_x in repeat_shifts:
+                second_points = tuple(
+                    (float(point[0]) + float(shift_x), float(point[1]))
+                    for point in second_curve["centerline"]
+                )
+                second_bounds = _curve_bounds(second_curve, float(shift_x))
+                if _bounds_distance(first_bounds, second_bounds) >= minimum:
+                    continue
+                minimum = min(
+                    minimum,
+                    _cached_polyline_distance(first_points, second_points),
+                )
+    return minimum
+
+
+def candidate_pair_parallel_co_travel(
+    first: Mapping[str, Any],
+    second: Mapping[str, Any],
+    repeat_shifts: Sequence[float],
+) -> dict[str, Any]:
+    """Find the strongest cross-Unit co-travel pair involving a descendant."""
+
+    maximum = 0.0
+    maximum_pair: dict[str, Any] | None = None
     for first_curve in first["curves"]:
         for second_curve in second["curves"]:
             if (
@@ -142,24 +211,23 @@ def candidate_pair_minimum_clearance(
                 and second_curve["level"] == "L1"
             ):
                 continue
-            first_points = [
-                (float(point[0]), float(point[1]))
-                for point in first_curve["centerline"]
-            ]
-            for shift_x in repeat_shifts:
-                second_points = [
-                    (float(point[0]) + float(shift_x), float(point[1]))
-                    for point in second_curve["centerline"]
-                ]
-                minimum = min(
-                    minimum,
-                    min(
-                        ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
-                        for a in first_points
-                        for b in second_points
-                    ),
-                )
-    return minimum
+            score = parallel_co_travel_score(
+                first_curve["centerline"],
+                second_curve["centerline"],
+                repeat_shifts=repeat_shifts,
+            )
+            if score > maximum:
+                maximum = score
+                maximum_pair = {
+                    "first_curve_id": first_curve["curve_id"],
+                    "first_level": first_curve["level"],
+                    "second_curve_id": second_curve["curve_id"],
+                    "second_level": second_curve["level"],
+                }
+    return {
+        "score": maximum,
+        "curve_pair": maximum_pair,
+    }
 
 
 def build_conflict_graph(
@@ -167,12 +235,41 @@ def build_conflict_graph(
     contract: Mapping[str, Any],
     editor_l2_prior: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
+    contract_schema = str(contract.get("schema"))
+    fixed_l1_only = (
+        contract_schema == CONTRACT_SCHEMA_V2
+        and contract.get("selection", {}).get("hierarchy_policy")
+        in FIXED_L1_ONLY_POLICIES
+    )
+
+    def graph_eligible(candidate: Mapping[str, Any]) -> bool:
+        return bool(
+            candidate["intrinsic_diagnostics"]["valid"]
+            and (
+                not fixed_l1_only
+                or _candidate_is_actual_l1_only(candidate)
+            )
+        )
+
+    prototype_strategy = inventory.get("prototype_strategy")
+    if contract_schema == CONTRACT_SCHEMA_V2 and not isinstance(
+        prototype_strategy, Mapping
+    ):
+        raise Stage5SelectionError("stage-4 inventory lacks frozen prototype strategy")
+    if isinstance(prototype_strategy, Mapping):
+        validate_strategy_projection(
+            prototype_strategy,
+            prototype_id=str(inventory["prototype_id"]),
+            family_id=str(inventory["family_id"]),
+        )
     repeat_shifts = [
         float(value)
         for value in contract["hard_constraints"]["repeat_shifts_checked"]
     ]
-    contract_schema = str(contract.get("schema"))
     minimum_clearance: float | None = None
+    parallel_co_travel_soft_limit: float | None = None
+    parallel_co_travel_upper_tail: float | None = None
+    maximum_parallel_co_travel: float | None = None
     editor_l2_prior_id: str | None = None
     if contract_schema == CONTRACT_SCHEMA_V2:
         if editor_l2_prior is None:
@@ -182,10 +279,35 @@ def build_conflict_graph(
         profile = _editor_l2_profile(
             editor_l2_prior,
             str(inventory["prototype_id"]),
+            str(
+                prototype_strategy["branchunit_profile"][
+                    "editor_l2_profile_key"
+                ]
+            ),
         )
-        minimum_clearance = float(
-            profile["nonparent_curve_clearance_unit_ratio"]["q10"]
+        occupancy_radii = [
+            float(tube["radius"])
+            for candidate in inventory["candidates"]
+            if graph_eligible(candidate)
+            for tube in candidate["occupancy_tubes"]
+        ]
+        if not occupancy_radii:
+            raise Stage5SelectionError("stage-4 inventory lacks occupancy tubes")
+        occupancy_diameter = 2.0 * max(occupancy_radii)
+        minimum_clearance = max(
+            occupancy_diameter,
+            float(profile["nonparent_curve_clearance_unit_ratio"]["q10"]),
         )
+        parallel_distribution = profile[
+            "cross_unit_parallel_co_travel_score"
+        ]
+        parallel_co_travel_soft_limit = float(
+            parallel_distribution["q75"]
+        )
+        parallel_co_travel_upper_tail = float(
+            parallel_distribution["q95"]
+        )
+        maximum_parallel_co_travel = float(parallel_distribution["max"])
         editor_l2_prior_id = str(editor_l2_prior["prior_id"])
     candidates = inventory["candidates"]
     nodes = [
@@ -195,7 +317,7 @@ def build_conflict_graph(
             "role": candidate["role"],
             "grammar_id": candidate["grammar_id"],
             "parameter_stratum": candidate["parameter_stratum"],
-            "eligible": bool(candidate["intrinsic_diagnostics"]["valid"]),
+            "eligible": graph_eligible(candidate),
             "intrinsic_issue_codes": [
                 issue["code"]
                 for issue in candidate["intrinsic_diagnostics"]["issues"]
@@ -206,9 +328,10 @@ def build_conflict_graph(
     eligible = [
         candidate
         for candidate in candidates
-        if candidate["intrinsic_diagnostics"]["valid"]
+        if graph_eligible(candidate)
     ]
     edges: list[dict[str, Any]] = []
+    pair_penalties: list[dict[str, Any]] = []
     for index, first in enumerate(eligible):
         for second in eligible[index + 1 :]:
             if first["source_lane_id"] == second["source_lane_id"]:
@@ -227,19 +350,71 @@ def build_conflict_graph(
                 minimum_clearance is not None
                 and pair_clearance < minimum_clearance
             )
-            if crossings or crowded:
+            parallel = candidate_pair_parallel_co_travel(
+                first,
+                second,
+                repeat_shifts,
+            )
+            parallel_crowded = (
+                maximum_parallel_co_travel is not None
+                and float(parallel["score"])
+                > maximum_parallel_co_travel + 1e-9
+            )
+            if (
+                parallel_co_travel_soft_limit is not None
+                and maximum_parallel_co_travel is not None
+                and float(parallel["score"])
+                > parallel_co_travel_soft_limit + 1e-9
+            ):
+                pair_penalties.append(
+                    {
+                        "first_candidate_id": first["candidate_id"],
+                        "first_lane_id": first["source_lane_id"],
+                        "second_candidate_id": second["candidate_id"],
+                        "second_lane_id": second["source_lane_id"],
+                        "parallel_co_travel_score": round(
+                            float(parallel["score"]), 9
+                        ),
+                        "normalized_penalty": round(
+                            max(
+                                0.0,
+                                float(parallel["score"])
+                                - parallel_co_travel_soft_limit,
+                            )
+                            / max(
+                                maximum_parallel_co_travel
+                                - parallel_co_travel_soft_limit,
+                                0.01,
+                            ),
+                            9,
+                        ),
+                        "curve_pair": parallel["curve_pair"],
+                    }
+                )
+            if crossings or crowded or parallel_crowded:
+                conflict_kinds = [
+                    name
+                    for active, name in (
+                        (bool(crossings), "cross_unit_curve_crossing"),
+                        (crowded, "editor_l2_clearance_violation"),
+                        (
+                            parallel_crowded,
+                            "editor_parallel_co_travel_violation",
+                        ),
+                    )
+                    if active
+                ]
                 edge = {
                     "first_candidate_id": first["candidate_id"],
                     "first_lane_id": first["source_lane_id"],
                     "second_candidate_id": second["candidate_id"],
                     "second_lane_id": second["source_lane_id"],
                     "reason": (
-                        "crossing_and_editor_clearance_violation"
-                        if crossings and crowded
-                        else "cross_unit_curve_crossing"
-                        if crossings
-                        else "editor_l2_clearance_violation"
+                        conflict_kinds[0]
+                        if len(conflict_kinds) == 1
+                        else "multiple_cross_unit_geometry_conflicts"
                     ),
+                    "conflict_kinds": conflict_kinds,
                     "crossings": crossings,
                 }
                 if contract_schema == CONTRACT_SCHEMA_V2:
@@ -251,6 +426,15 @@ def build_conflict_graph(
                             "required_descendant_clearance": round(
                                 float(minimum_clearance), 9
                             ),
+                            "parallel_co_travel_score": round(
+                                float(parallel["score"]), 9
+                            ),
+                            "maximum_parallel_co_travel_score": round(
+                                float(maximum_parallel_co_travel), 9
+                            ),
+                            "parallel_co_travel_curve_pair": parallel[
+                                "curve_pair"
+                            ],
                         }
                     )
                 edges.append(edge)
@@ -263,6 +447,11 @@ def build_conflict_graph(
         "schema": graph_schema,
         "contract_id": contract["contract_id"],
         "prototype_id": inventory["prototype_id"],
+        "prototype_strategy": (
+            dict(prototype_strategy)
+            if isinstance(prototype_strategy, Mapping)
+            else None
+        ),
         "seed": inventory["seed"],
         "source_inventory_id": inventory["inventory_id"],
         "source_inventory_digest": inventory["inventory_digest"],
@@ -273,6 +462,8 @@ def build_conflict_graph(
         "repeat_shifts_checked": repeat_shifts,
         "nodes": nodes,
         "edges": edges,
+        "pair_penalty_count": len(pair_penalties),
+        "pair_penalties": pair_penalties,
     }
     if contract_schema == CONTRACT_SCHEMA_V2:
         graph.update(
@@ -280,6 +471,15 @@ def build_conflict_graph(
                 "editor_l2_placement_prior_id": editor_l2_prior_id,
                 "minimum_descendant_clearance": round(
                     float(minimum_clearance), 9
+                ),
+                "maximum_parallel_co_travel_score": round(
+                    float(maximum_parallel_co_travel), 9
+                ),
+                "parallel_co_travel_soft_limit": round(
+                    float(parallel_co_travel_soft_limit), 9
+                ),
+                "parallel_co_travel_editor_q95": round(
+                    float(parallel_co_travel_upper_tail), 9
                 ),
             }
         )
@@ -309,7 +509,7 @@ def _blocking_lane_pairs(
                         "second_lane_id": second_lane,
                         "first_candidate_count": len(first_candidates),
                         "second_candidate_count": len(second_candidates),
-                        "reason": "every_candidate_pair_crosses",
+                        "reason": "every_candidate_pair_conflicts",
                     }
                 )
     return rows
@@ -347,9 +547,34 @@ def select_global_units(
     conflict_graph: Mapping[str, Any],
     contract: Mapping[str, Any],
 ) -> dict[str, Any]:
+    contract_schema = str(contract.get("schema"))
+    is_v2 = contract_schema == CONTRACT_SCHEMA_V2
+    prototype_strategy = inventory.get("prototype_strategy")
+    if is_v2 and not isinstance(prototype_strategy, Mapping):
+        raise Stage5SelectionError("stage-4 inventory lacks frozen prototype strategy")
+    if isinstance(prototype_strategy, Mapping):
+        validate_strategy_projection(
+            prototype_strategy,
+            prototype_id=str(inventory["prototype_id"]),
+            family_id=str(inventory["family_id"]),
+        )
+    if (
+        isinstance(prototype_strategy, Mapping)
+        and conflict_graph.get("prototype_strategy") != prototype_strategy
+    ):
+        raise Stage5SelectionError("conflict graph strategy projection mismatch")
+    fixed_l1_only_policy = contract.get("selection", {}).get(
+        "hierarchy_policy"
+    )
+    fixed_l1_only = (
+        is_v2 and fixed_l1_only_policy in FIXED_L1_ONLY_POLICIES
+    )
+
     eligible_by_lane: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for candidate in inventory["candidates"]:
-        if candidate["intrinsic_diagnostics"]["valid"]:
+        if candidate["intrinsic_diagnostics"]["valid"] and (
+            not fixed_l1_only or _candidate_is_actual_l1_only(candidate)
+        ):
             eligible_by_lane[str(candidate["source_lane_id"])].append(candidate)
 
     lane_ids = [str(row["source_lane_id"]) for row in inventory["lanes"]]
@@ -367,18 +592,44 @@ def select_global_units(
         conflict_ids[first_id].add(second_id)
         conflict_ids[second_id].add(first_id)
 
-    contract_schema = str(contract.get("schema"))
-    is_v2 = contract_schema == CONTRACT_SCHEMA_V2
+    pair_penalties: dict[str, dict[str, float]] = defaultdict(dict)
+    for row in conflict_graph.get("pair_penalties", []):
+        first_id = str(row["first_candidate_id"])
+        second_id = str(row["second_candidate_id"])
+        penalty = float(row["normalized_penalty"])
+        pair_penalties[first_id][second_id] = penalty
+        pair_penalties[second_id][first_id] = penalty
+
     if contract_schema not in {CONTRACT_SCHEMA_V1, CONTRACT_SCHEMA_V2}:
         raise Stage5SelectionError("stage-5 contract schema mismatch")
 
     hierarchy_targets: dict[str, int] | None = None
-    if is_v2:
+    seed_class_offset: int | None = None
+    if fixed_l1_only:
+        for lane_id in lane_order:
+            eligible_by_lane[lane_id].sort(
+                key=lambda candidate: (
+                    len(conflict_ids[str(candidate["candidate_id"])]),
+                    str(candidate["candidate_id"]),
+                )
+            )
+    elif is_v2:
+        selection_policy = prototype_strategy["global_selection_profile"]
+        if selection_policy["hierarchy_mix_policy"] != "contract_fraction_targets":
+            raise Stage5SelectionError("unsupported hierarchy-mix strategy")
+        if selection_policy["candidate_order_policy"] != (
+            "contract_class_cycle_seed_phase"
+        ):
+            raise Stage5SelectionError("unsupported candidate-order strategy")
         hierarchy_targets = _derive_hierarchy_mix_counts(
             len(lane_ids),
             contract["hierarchy_mix"]["class_fraction_targets"],
         )
         class_cycle = list(contract["deterministic_order"]["class_cycle"])
+        seed_class_offset = (
+            int(inventory["seed"])
+            + int(selection_policy["class_cycle_phase_offset"])
+        ) % len(class_cycle)
         stratum_priorities = contract["deterministic_order"][
             "within_class_stratum_priority"
         ]
@@ -390,14 +641,18 @@ def select_global_units(
             density_class = str(
                 candidate["visual_features"]["hierarchy_density_class"]
             )
+            class_offset = (lane_index + seed_class_offset) % len(class_cycle)
             desired_class_order = (
-                class_cycle[lane_index % len(class_cycle) :]
-                + class_cycle[: lane_index % len(class_cycle)]
+                class_cycle[class_offset:]
+                + class_cycle[:class_offset]
             )
             strata = list(stratum_priorities[density_class])
             # Repeated visits to the same hierarchy class rotate through its
-            # strata instead of cloning one child grammar across the unit.
-            offset = (lane_index // len(class_cycle)) % len(strata)
+            # strata.  The branch seed rotates the first visited stratum while
+            # leaving crossing and clearance constraints unchanged.
+            offset = (
+                lane_index // len(class_cycle) + int(inventory["seed"])
+            ) % len(strata)
             rotated_strata = strata[offset:] + strata[:offset]
             return (
                 desired_class_order.index(density_class),
@@ -434,14 +689,36 @@ def select_global_units(
     selected_hierarchy_counts: dict[str, int] = defaultdict(int)
     search_node_count = 0
     backtrack_count = 0
+    best_selected: list[Mapping[str, Any]] = []
+    best_parallel_penalty = float("inf")
+    best_parallel_peak_penalty = float("inf")
 
-    def search(lane_index: int) -> bool:
+    def search(
+        lane_index: int,
+        parallel_penalty: float = 0.0,
+        parallel_peak_penalty: float = 0.0,
+    ) -> bool:
         nonlocal search_node_count, backtrack_count
+        nonlocal best_parallel_penalty, best_parallel_peak_penalty
         if lane_index == len(lane_order):
-            return (
-                not is_v2
-                or dict(selected_hierarchy_counts) == hierarchy_targets
-            )
+            if (
+                is_v2
+                and not fixed_l1_only
+                and dict(selected_hierarchy_counts) != hierarchy_targets
+            ):
+                return False
+            if is_v2:
+                objective = (parallel_peak_penalty, parallel_penalty)
+                best_objective = (
+                    best_parallel_peak_penalty,
+                    best_parallel_penalty,
+                )
+                if objective < best_objective:
+                    best_parallel_peak_penalty = parallel_peak_penalty
+                    best_parallel_penalty = parallel_penalty
+                    best_selected[:] = selected
+                return False
+            return True
         if is_v2 and hierarchy_targets is not None:
             remaining_lanes = lane_order[lane_index:]
             for density_class, target in hierarchy_targets.items():
@@ -468,6 +745,35 @@ def select_global_units(
             candidate_id = str(candidate["candidate_id"])
             if selected_ids & conflict_ids[candidate_id]:
                 continue
+            added_pair_penalties = [
+                pair_penalties[candidate_id].get(existing_id, 0.0)
+                for existing_id in selected_ids
+            ]
+            added_parallel_penalty = sum(added_pair_penalties)
+            next_parallel_penalty = (
+                parallel_penalty + added_parallel_penalty
+            )
+            next_parallel_peak_penalty = max(
+                parallel_peak_penalty,
+                max(added_pair_penalties, default=0.0),
+            )
+            if (
+                is_v2
+                and (
+                    next_parallel_peak_penalty
+                    > best_parallel_peak_penalty + 1e-12
+                    or (
+                        abs(
+                            next_parallel_peak_penalty
+                            - best_parallel_peak_penalty
+                        )
+                        <= 1e-12
+                        and next_parallel_penalty
+                        >= best_parallel_penalty - 1e-12
+                    )
+                )
+            ):
+                continue
             density_class = None
             if is_v2 and hierarchy_targets is not None:
                 density_class = str(
@@ -482,7 +788,11 @@ def select_global_units(
             selected_ids.add(candidate_id)
             if density_class is not None:
                 selected_hierarchy_counts[density_class] += 1
-            if search(lane_index + 1):
+            if search(
+                lane_index + 1,
+                next_parallel_penalty,
+                next_parallel_peak_penalty,
+            ):
                 return True
             selected.pop()
             selected_ids.remove(candidate_id)
@@ -491,7 +801,24 @@ def select_global_units(
             backtrack_count += 1
         return False
 
-    feasible = search(0)
+    first_assignment_feasible = search(0)
+    if is_v2:
+        feasible = bool(best_selected)
+        selected = list(best_selected)
+        selected_ids = {
+            str(candidate["candidate_id"]) for candidate in selected
+        }
+        selected_hierarchy_counts = defaultdict(int)
+        for candidate in selected:
+            selected_hierarchy_counts[
+                str(
+                    candidate["visual_features"][
+                        "hierarchy_density_class"
+                    ]
+                )
+            ] += 1
+    else:
+        feasible = first_assignment_feasible
     selected_candidates = list(selected) if feasible else []
     result: dict[str, Any] = {
         "schema": SCHEMA_V2 if is_v2 else SCHEMA_V1,
@@ -502,6 +829,11 @@ def select_global_units(
         ),
         "prototype_id": inventory["prototype_id"],
         "family_id": inventory["family_id"],
+        "prototype_strategy": (
+            dict(prototype_strategy)
+            if isinstance(prototype_strategy, Mapping)
+            else None
+        ),
         "seed": inventory["seed"],
         "source_inventory_id": inventory["inventory_id"],
         "source_inventory_digest": inventory["inventory_digest"],
@@ -527,13 +859,22 @@ def select_global_units(
         ),
         "solver_trace": {
             "method": contract["selection"]["solver"],
+            "hierarchy_policy": (
+                str(fixed_l1_only_policy)
+                if fixed_l1_only
+                else "contract_fraction_targets"
+                if is_v2
+                else "role_conditioned_v1"
+            ),
             "lane_order": lane_order,
             "candidate_order": contract["deterministic_order"][
                 "candidate_order"
             ],
             "search_node_count": search_node_count,
             "backtrack_count": backtrack_count,
-            "stopped_at_first_complete_legal_assignment": feasible,
+            "stopped_at_first_complete_legal_assignment": (
+                feasible and not is_v2
+            ),
             "best_of_n_visual_ranking_used": False,
             "composite_visual_score_used": False,
             "validation_guided_retry_used": False,
@@ -553,13 +894,51 @@ def select_global_units(
             ],
         },
     }
-    if is_v2:
+    if fixed_l1_only:
+        result["solver_trace"].update(
+            {
+                "selected_l1_only_count": len(selected_candidates),
+                "selected_l2_count": sum(
+                    int(candidate["hierarchy"]["l2_count"])
+                    for candidate in selected_candidates
+                ),
+                "selected_l3_count": sum(
+                    int(candidate["hierarchy"]["l3_count"])
+                    for candidate in selected_candidates
+                ),
+                "stage_scope_overrides_prototype_hierarchy_mix": True,
+                "global_pair_penalty_optimized": True,
+                "selected_parallel_co_travel_penalty": (
+                    round(best_parallel_penalty, 9)
+                    if feasible
+                    else None
+                ),
+                "selected_parallel_co_travel_peak_penalty": (
+                    round(best_parallel_peak_penalty, 9)
+                    if feasible
+                    else None
+                ),
+            }
+        )
+    elif is_v2:
         result["solver_trace"].update(
             {
                 "edit_feedback_structural_mix_enforced": True,
                 "hierarchy_mix_target_counts": hierarchy_targets,
                 "hierarchy_mix_selected_counts": dict(
                     selected_hierarchy_counts
+                ),
+                "branch_seed_class_phase": seed_class_offset,
+                "global_pair_penalty_optimized": True,
+                "selected_parallel_co_travel_penalty": (
+                    round(best_parallel_penalty, 9)
+                    if feasible
+                    else None
+                ),
+                "selected_parallel_co_travel_peak_penalty": (
+                    round(best_parallel_peak_penalty, 9)
+                    if feasible
+                    else None
                 ),
             }
         )
@@ -609,7 +988,28 @@ def validate_global_selection(
                 raise Stage5SelectionError(
                     "feasible composition contains a conflict edge"
                 )
-        if selection.get("schema") == SCHEMA_V2:
+        if selection.get("schema") == SCHEMA_V2 and selection.get(
+            "solver_trace", {}
+        ).get("hierarchy_policy") in FIXED_L1_ONLY_POLICIES:
+            for candidate in selected:
+                hierarchy = candidate.get("hierarchy")
+                curves = candidate.get("curves")
+                if (
+                    not isinstance(hierarchy, Mapping)
+                    or hierarchy.get("l2_count") != 0
+                    or hierarchy.get("l3_count") != 0
+                    or not isinstance(curves, Sequence)
+                    or not curves
+                    or any(
+                        not isinstance(curve, Mapping)
+                        or curve.get("level") != "L1"
+                        for curve in curves
+                    )
+                ):
+                    raise Stage5SelectionError(
+                        "fixed L1-only selection contains non-L1 hierarchy geometry"
+                    )
+        elif selection.get("schema") == SCHEMA_V2:
             target_counts = selection.get("solver_trace", {}).get(
                 "hierarchy_mix_target_counts"
             )

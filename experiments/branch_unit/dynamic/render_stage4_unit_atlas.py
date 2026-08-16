@@ -19,6 +19,7 @@ COLORS = {
     "ghost": "#c2c9ce",
     "flower": "#b53372",
     "flower_fill": "#fff7fb",
+    "flower_support": "#4f7d35",
     "l1": "#087c94",
     "l2": "#188566",
     "l3": "#d27918",

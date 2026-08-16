@@ -20,7 +20,8 @@
     "candidate_count_per_lane": 1,
     "eligible_candidate_rule": "intrinsic_diagnostics.valid == true",
     "solver": "deterministic_constraint_backtracking_with_exact_hierarchy_mix",
-    "stop_rule": "first_complete_legal_assignment_matching_the_edit_feedback_hierarchy_mix",
+    "stop_rule": "exhaust_legal_exact_mix_assignments_under_branch_and_bound",
+    "overlap_objective": "lexicographically_minimize_worst_then_total_editor_conditioned_parallel_co_travel_penalty",
     "best_of_n_visual_ranking_used": false,
     "composite_visual_score_used": false,
     "validation_guided_retry_used": false,
@@ -49,7 +50,8 @@
     "repeat_shifts_checked": [-1.0, 0.0, 1.0],
     "descendant_against_other_unit_l1_checked": true,
     "descendant_against_other_unit_descendant_checked": true,
-    "minimum_descendant_clearance_from_editor_profile_q10": true
+    "l1_against_other_unit_l1_checked": true,
+    "minimum_full_unit_clearance_uses_occupancy_diameter_and_editor_profile_q10": true
   },
   "deterministic_order": {
     "lane_order": "fewest_eligible_candidates_then_source_lane_id",

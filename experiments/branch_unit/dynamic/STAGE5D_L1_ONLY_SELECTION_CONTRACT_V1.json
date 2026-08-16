@@ -1,0 +1,62 @@
+{
+  "schema": "dynamic_branch_stage5_global_selection_contract_v2",
+  "contract_id": "stage5d_density_formal_l1_only_selection_v1",
+  "stage": "5D",
+  "scope": {
+    "old_mainline_only": true,
+    "branch_skeleton_only": true,
+    "new_curve_generation_present": false,
+    "curve_mutation_present": false,
+    "ordinary_l1_count_varies_upstream": true,
+    "flower_support_is_excluded_from_density_count": true,
+    "l2_candidates_may_exist_but_are_not_selectable": true,
+    "l3_candidates_may_exist_but_are_not_selectable": true,
+    "ordinary_l1_and_flower_mount_geometry_are_immutable": true
+  },
+  "required_inputs": {
+    "inventory_schema": "dynamic_branch_stage4_unit_candidate_inventory_v2",
+    "stage4_candidate_pool_is_immutable": true,
+    "intrinsically_invalid_candidates_are_preserved_but_not_selectable": true,
+    "editor_l2_placement_prior_consumed_for_clearance_only": true
+  },
+  "selection": {
+    "candidate_count_per_lane": 1,
+    "eligible_candidate_rule": "intrinsic geometry valid and actual hierarchy has zero L2/L3 and only L1 curves",
+    "hierarchy_policy": "fixed_l1_only_for_5d_density_review",
+    "solver": "deterministic_constraint_backtracking_over_actual_l1_only_candidates",
+    "stop_rule": "exhaust_legal_l1_only_assignments_under_branch_and_bound",
+    "overlap_objective": "lexicographically_minimize_worst_then_total_parallel_co_travel_penalty",
+    "best_of_n_visual_ranking_used": false,
+    "composite_visual_score_used": false,
+    "validation_guided_retry_used": false,
+    "validation_guided_resample_used": false,
+    "automatic_repair_used": false,
+    "automatic_deletion_used": false,
+    "silent_fallback_used": false
+  },
+  "hard_constraints": {
+    "one_complete_unit_per_approved_lane": true,
+    "selected_candidate_must_be_intrinsically_valid": true,
+    "selected_candidate_actual_l2_count": 0,
+    "selected_candidate_actual_l3_count": 0,
+    "selected_candidate_curve_levels": ["L1"],
+    "cross_unit_curve_crossing_allowed": false,
+    "periodic_repeat_crossing_allowed": false,
+    "repeat_shifts_checked": [-1.0, 0.0, 1.0],
+    "minimum_full_unit_clearance_uses_occupancy_diameter_and_editor_profile_q10": true
+  },
+  "deterministic_order": {
+    "lane_order": "fewest_eligible_l1_only_candidates_then_source_lane_id",
+    "candidate_order": [
+      "cross_unit_conflict_degree",
+      "candidate_id"
+    ]
+  },
+  "output": {
+    "conflict_graph_saved": true,
+    "selected_complete_composition_saved_when_feasible": true,
+    "selected_hierarchy_is_recomputed_from_geometry": true,
+    "review_state": "stage5d_density_l1_only_pending_visual_review",
+    "numeric_checks_cannot_auto_approve_visual_gate": true
+  }
+}

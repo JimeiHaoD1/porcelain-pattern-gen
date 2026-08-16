@@ -15,6 +15,8 @@ import math
 from collections import Counter
 from typing import Any, Mapping, Sequence
 
+from prototype_strategy_v1 import validate_strategy_projection
+
 
 SCHEMA = "dynamic_branch_stage4_unit_candidate_inventory_v1"
 SCHEMA_V2 = "dynamic_branch_stage4_unit_candidate_inventory_v2"
@@ -33,13 +35,14 @@ class UnitGrammarError(RuntimeError):
 def _editor_l2_profile(
     editor_l2_prior: Mapping[str, Any],
     prototype_id: str,
+    profile_key: str | None = None,
 ) -> Mapping[str, Any]:
     if editor_l2_prior.get("schema") != EDITOR_L2_PRIOR_SCHEMA:
         raise UnitGrammarError("editor L2 placement prior schema mismatch")
     profiles = editor_l2_prior.get("profiles")
     if not isinstance(profiles, Mapping):
         raise UnitGrammarError("editor L2 placement prior has no profiles")
-    profile = profiles.get(prototype_id) or profiles.get("global")
+    profile = profiles.get(profile_key or prototype_id) or profiles.get("global")
     if not isinstance(profile, Mapping):
         raise UnitGrammarError(
             f"editor L2 placement prior has no profile for {prototype_id}"
@@ -318,18 +321,57 @@ def _stat(
 def _candidate_strata(
     lane: Mapping[str, Any],
     contract: Mapping[str, Any],
-) -> list[tuple[str, str, bool]]:
+    editor_l2_profile: Mapping[str, Any] | None = None,
+) -> list[tuple[str, str, bool, str]]:
     if contract.get("schema") == CONTRACT_SCHEMA_V2:
         coverage = contract["candidate_coverage"]["weak_role_grammar_strata"]
+        paired_histogram = (
+            editor_l2_profile.get(
+                "paired_child_departure_turn_pattern_histogram",
+                {},
+            )
+            if editor_l2_profile
+            else {}
+        )
+        paired_variants = [
+            str(variant)
+            for variant in contract["candidate_coverage"][
+                "paired_child_turn_sign_variants"
+            ]
+            if variant != "context_swapped"
+            or (
+                isinstance(paired_histogram, Mapping)
+                and int(paired_histogram.get("negative+positive", 0)) > 0
+                and int(paired_histogram.get("positive+negative", 0)) > 0
+            )
+            if variant != "editor_same_sign"
+            or (
+                isinstance(paired_histogram, Mapping)
+                and (
+                    int(paired_histogram.get("negative+negative", 0)) > 0
+                    or int(paired_histogram.get("positive+positive", 0)) > 0
+                )
+            )
+        ]
         return [
-            (grammar_id, str(stratum), False)
+            (grammar_id, str(stratum), False, str(turn_sign_variant))
             for grammar_id in ("L1-Only", "Y-C", "Y-2C")
+            for sample_index in range(3 if grammar_id == "Y-2C" else 1)
             for stratum in coverage[grammar_id]
+            for turn_sign_variant in (
+                contract["candidate_coverage"][
+                    "single_child_turn_sign_variants"
+                ]
+                if grammar_id == "Y-C"
+                else paired_variants
+                if grammar_id == "Y-2C"
+                else ("context_preferred",)
+            )
         ]
     role = str(lane["role"])
     coverage = contract["candidate_coverage"]
     if role in {"primary_sweep", "balance"}:
-        rows: list[tuple[str, str, bool]] = []
+        rows: list[tuple[str, str, bool, str]] = []
         for grammar_id in ("Y-C", "Y-2C"):
             for stratum in coverage["ordinary_grammar_strata"][grammar_id]:
                 rows.append(
@@ -337,6 +379,7 @@ def _candidate_strata(
                         grammar_id,
                         str(stratum),
                         stratum in {"open_c", "open_asymmetric"},
+                        "context_preferred",
                     )
                 )
         return rows
@@ -346,17 +389,23 @@ def _candidate_strata(
                 "Frontier-Y-C",
                 str(stratum),
                 stratum == "outer_hook",
+                "context_preferred",
             )
             for stratum in coverage["frontier_strata"]
         ]
     if role == "flower_support":
         return [
-            ("FlowerSupport-C", str(stratum), False)
+            ("FlowerSupport-C", str(stratum), False, "context_preferred")
             for stratum in coverage["flower_support_strata"]
         ]
     if role == "terminal_flower_support":
         return [
-            ("TerminalSupport-C", str(stratum), False)
+            (
+                "TerminalSupport-C",
+                str(stratum),
+                False,
+                "context_preferred",
+            )
             for stratum in coverage["terminal_support_strata"]
         ]
     raise UnitGrammarError(f"unsupported stage-3B lane role: {role}")
@@ -413,6 +462,8 @@ def _child_signs(
     analysis: Mapping[str, Any],
     lane: Mapping[str, Any],
     asymmetry: float,
+    turn_sign_variant: str,
+    editor_l2_profile: Mapping[str, Any] | None,
 ) -> list[int]:
     signs: list[int] = []
     for index, mount in enumerate(mounts):
@@ -455,6 +506,71 @@ def _child_signs(
         if len(mounts) == 2 and index == 1:
             preferred *= -1
         signs.append(preferred)
+    if len(signs) == 1 and turn_sign_variant == "context_opposed":
+        if editor_l2_profile is None:
+            raise UnitGrammarError(
+                "opposed child turn candidate lacks editor evidence"
+            )
+        histogram = editor_l2_profile.get(
+            "single_child_departure_turn_sign_histogram",
+            {},
+        )
+        if not (
+            isinstance(histogram, Mapping)
+            and int(histogram.get("positive", 0)) > 0
+            and int(histogram.get("negative", 0)) > 0
+        ):
+            raise UnitGrammarError(
+                "editor profile does not demonstrate both child turn signs"
+            )
+        signs[0] *= -1
+    elif len(signs) == 2 and turn_sign_variant == "context_swapped":
+        if editor_l2_profile is None:
+            raise UnitGrammarError(
+                "swapped paired-child candidate lacks editor evidence"
+            )
+        histogram = editor_l2_profile.get(
+            "paired_child_departure_turn_pattern_histogram",
+            {},
+        )
+        if not (
+            isinstance(histogram, Mapping)
+            and int(histogram.get("negative+positive", 0)) > 0
+            and int(histogram.get("positive+negative", 0)) > 0
+        ):
+            raise UnitGrammarError(
+                "editor profile does not demonstrate both paired turn orders"
+            )
+        signs = [-sign for sign in signs]
+    elif len(signs) == 2 and turn_sign_variant == "editor_same_sign":
+        if editor_l2_profile is None:
+            raise UnitGrammarError(
+                "same-sign paired-child candidate lacks editor evidence"
+            )
+        histogram = editor_l2_profile.get(
+            "paired_child_departure_turn_pattern_histogram",
+            {},
+        )
+        negative_count = (
+            int(histogram.get("negative+negative", 0))
+            if isinstance(histogram, Mapping)
+            else 0
+        )
+        positive_count = (
+            int(histogram.get("positive+positive", 0))
+            if isinstance(histogram, Mapping)
+            else 0
+        )
+        if max(negative_count, positive_count) <= 0:
+            raise UnitGrammarError(
+                "editor profile does not demonstrate same-sign paired turns"
+            )
+        editor_sign = -1 if negative_count >= positive_count else 1
+        signs = [editor_sign, editor_sign]
+    elif turn_sign_variant != "context_preferred":
+        raise UnitGrammarError(
+            f"unsupported child turn sign variant: {turn_sign_variant}"
+        )
     return signs
 
 
@@ -674,12 +790,38 @@ def _compile_child_curve(
         s_internal_turn = s_turn_low + (
             s_turn_high - s_turn_low
         ) * quantiles[2]
-        segments = _circular_arc_cubics(
+        first_turn = -sign * s_internal_turn * (
+            0.52 + 0.16 * quantiles[3]
+        )
+        first_length = intended_length * (
+            0.46 + 0.10 * quantiles[4]
+        )
+        first_segment = _circular_arc_cubics(
             root,
             entry,
-            -sign * s_internal_turn,
-            intended_length,
+            first_turn,
+            first_length,
+            segment_count=1,
+        )[0]
+        inflection = _point(first_segment["p3"])
+        inflection_tangent = _unit(
+            _sub(
+                _point(first_segment["p3"]),
+                _point(first_segment["p2"]),
+            ),
+            "child S inflection tangent",
         )
+        second_turn = sign * (
+            8.0 + (s_internal_turn - 8.0) * (0.16 + 0.16 * quantiles[0])
+        )
+        second_segment = _circular_arc_cubics(
+            inflection,
+            inflection_tangent,
+            second_turn,
+            intended_length - first_length,
+            segment_count=1,
+        )[0]
+        segments = [first_segment, second_segment]
     else:
         c_turn_low, c_turn_high = [
             float(value)
@@ -901,7 +1043,25 @@ def _segments_intersect(a0: Point, a1: Point, b0: Point, b1: Point) -> bool:
     o2 = _orientation(a0, a1, b1)
     o3 = _orientation(b0, b1, a0)
     o4 = _orientation(b0, b1, a1)
-    return o1 * o2 < -tolerance and o3 * o4 < -tolerance
+    if o1 * o2 < -tolerance and o3 * o4 < -tolerance:
+        return True
+
+    def on_segment(point: Point, start: Point, end: Point) -> bool:
+        return (
+            min(start[0], end[0]) - tolerance
+            <= point[0]
+            <= max(start[0], end[0]) + tolerance
+            and min(start[1], end[1]) - tolerance
+            <= point[1]
+            <= max(start[1], end[1]) + tolerance
+        )
+
+    return (
+        (abs(o1) <= tolerance and on_segment(b0, a0, a1))
+        or (abs(o2) <= tolerance and on_segment(b1, a0, a1))
+        or (abs(o3) <= tolerance and on_segment(a0, b0, b1))
+        or (abs(o4) <= tolerance and on_segment(a1, b0, b1))
+    )
 
 
 def _point_segment_distance(point: Point, start: Point, end: Point) -> float:
@@ -950,12 +1110,11 @@ def _curve_crosses(
             b0, b1 = b_points[other_index - 1], b_points[other_index]
             if not _segments_intersect(a0, a1, b0, b1):
                 continue
-            if allowed_junction is not None and min(
-                _distance(a0, allowed_junction),
-                _distance(a1, allowed_junction),
-                _distance(b0, allowed_junction),
-                _distance(b1, allowed_junction),
-            ) <= 0.010:
+            if (
+                allowed_junction is not None
+                and _point_segment_distance(allowed_junction, a0, a1) <= 1e-7
+                and _point_segment_distance(allowed_junction, b0, b1) <= 1e-7
+            ):
                 continue
             return True
     return False
@@ -982,6 +1141,7 @@ def _diagnose_candidate(
     analysis: Mapping[str, Any],
     contract: Mapping[str, Any],
     editor_l2_profile: Mapping[str, Any] | None = None,
+    flower_mount_plan: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     issues: list[dict[str, Any]] = []
     curves = candidate["curves"]
@@ -1006,6 +1166,12 @@ def _diagnose_candidate(
     openings: list[float] = []
     root_errors: list[float] = []
     departure_distances: list[float] = []
+    parent_clearance_onset_fractions: list[float] = []
+    post_departure_parent_clearances: list[float] = []
+    parent_occupancy_reentry_count = 0
+    parent_occupancy_clearance = 2.0 * float(
+        contract["geometry"]["occupancy_radius"]
+    )
     for curve in curves:
         for segment in curve["cubic_segments"]:
             for key in ("p0", "p1", "p2", "p3"):
@@ -1055,14 +1221,18 @@ def _diagnose_candidate(
             )
         child_points = [_point(value) for value in curve["centerline"]]
         probe_index = max(2, int(len(child_points) * 0.30))
-        departure = min(
-            _point_segment_distance(
-                child_points[probe_index],
-                parent_points[index - 1],
-                parent_points[index],
+        parent_distances = [
+            min(
+                _point_segment_distance(
+                    child_point,
+                    parent_points[index - 1],
+                    parent_points[index],
+                )
+                for index in range(1, len(parent_points))
             )
-            for index in range(1, len(parent_points))
-        )
+            for child_point in child_points
+        ]
+        departure = parent_distances[probe_index]
         departure_distances.append(departure)
         minimum_departure = min(
             float(contract["geometry"]["minimum_immediate_departure_distance"]),
@@ -1076,6 +1246,60 @@ def _diagnose_candidate(
                     "value": _round(departure),
                 }
             )
+        first_clear_index = next(
+            (
+                index
+                for index, distance in enumerate(parent_distances[1:], start=1)
+                if distance >= parent_occupancy_clearance
+            ),
+            None,
+        )
+        if first_clear_index is None:
+            issues.append(
+                {
+                    "code": "child_does_not_clear_parent_occupancy",
+                    "curve_id": curve["curve_id"],
+                    "required_clearance": _round(parent_occupancy_clearance),
+                    "maximum_parent_clearance": _round(
+                        max(parent_distances, default=0.0)
+                    ),
+                }
+            )
+        else:
+            cumulative = [0.0]
+            for index in range(1, len(child_points)):
+                cumulative.append(
+                    cumulative[-1]
+                    + _distance(child_points[index - 1], child_points[index])
+                )
+            total_child_length = cumulative[-1]
+            parent_clearance_onset_fractions.append(
+                cumulative[first_clear_index] / max(total_child_length, 1e-12)
+            )
+            post_clearance = parent_distances[first_clear_index:]
+            post_departure_parent_clearances.append(min(post_clearance))
+            reentry_indices = [
+                index
+                for index in range(first_clear_index + 1, len(parent_distances))
+                if (
+                    parent_distances[index] < parent_occupancy_clearance
+                    and parent_distances[index - 1]
+                    >= parent_occupancy_clearance
+                )
+            ]
+            if reentry_indices:
+                parent_occupancy_reentry_count += len(reentry_indices)
+                issues.append(
+                    {
+                        "code": "child_reenters_parent_occupancy",
+                        "curve_id": curve["curve_id"],
+                        "required_clearance": _round(parent_occupancy_clearance),
+                        "reentry_count": len(reentry_indices),
+                        "minimum_post_departure_clearance": _round(
+                            min(post_clearance)
+                        ),
+                    }
+                )
         parent_length = float(parent["actual_length"])
         ratio = float(curve["actual_length"]) / parent_length
         if curve["level"] == "L3":
@@ -1106,8 +1330,9 @@ def _diagnose_candidate(
         ),
         default=1.0,
     )
-    if minimum_mount_gap < float(
-        contract["geometry"]["minimum_sibling_mount_separation"]
+    if minimum_mount_gap < (
+        float(contract["geometry"]["minimum_sibling_mount_separation"])
+        - 1e-9
     ):
         issues.append(
             {
@@ -1129,16 +1354,21 @@ def _diagnose_candidate(
         default=1.0,
     )
     required_sibling_clearance = 0.0
-    if editor_l2_profile is not None and len(l2_curves) > 1:
-        required_sibling_clearance = float(
-            editor_l2_profile[
-                "paired_child_curve_clearance_unit_ratio"
-            ]["q10"]
-        )
+    if len(l2_curves) > 1:
+        required_sibling_clearance = parent_occupancy_clearance
+        if editor_l2_profile is not None:
+            required_sibling_clearance = max(
+                required_sibling_clearance,
+                float(
+                    editor_l2_profile[
+                        "paired_child_curve_clearance_unit_ratio"
+                    ]["q10"]
+                ),
+            )
         if sibling_curve_clearance < required_sibling_clearance:
             issues.append(
                 {
-                    "code": "sibling_curves_below_editor_clearance",
+                    "code": "sibling_curves_below_occupancy_clearance",
                     "value": _round(sibling_curve_clearance),
                     "required": _round(required_sibling_clearance),
                 }
@@ -1268,18 +1498,72 @@ def _diagnose_candidate(
             }
         )
 
+    flower_support_clearance = float("inf")
+    flower_support_conflict_count = 0
+    if flower_mount_plan is not None:
+        required_clearance = 2.0 * float(
+            contract["geometry"]["occupancy_radius"]
+        )
+        for curve in curves:
+            curve_points = [_point(value) for value in curve["centerline"]]
+            for mount in flower_mount_plan.get("mounts", []):
+                mount_points = [
+                    _point(value) for value in mount["centerline"]
+                ]
+                minimum = min(
+                    _polyline_distance(
+                        curve_points,
+                        [
+                            (point[0] + offset, point[1])
+                            for point in mount_points
+                        ],
+                    )
+                    for offset in (-1.0, 0.0, 1.0)
+                )
+                flower_support_clearance = min(
+                    flower_support_clearance,
+                    minimum,
+                )
+                if minimum < required_clearance:
+                    flower_support_conflict_count += 1
+                    break
+        if flower_support_conflict_count:
+            issues.append(
+                {
+                    "code": "unit_conflicts_with_frozen_flower_support",
+                    "count": flower_support_conflict_count,
+                    "required_clearance": _round(required_clearance),
+                }
+            )
+
     metrics = {
         "maximum_attachment_error": _round(max(root_errors, default=0.0)),
         "minimum_entry_opening_degrees": _round(min(openings, default=0.0)),
         "minimum_immediate_departure": _round(
             min(departure_distances, default=0.0)
         ),
+        "parent_occupancy_clearance": _round(parent_occupancy_clearance),
+        "maximum_parent_clearance_onset_fraction": _round(
+            max(parent_clearance_onset_fractions, default=0.0)
+        ),
+        "minimum_post_departure_parent_clearance": _round(
+            min(post_departure_parent_clearances, default=1.0)
+        ),
+        "parent_occupancy_reentry_count": parent_occupancy_reentry_count,
         "minimum_sibling_mount_separation": _round(minimum_mount_gap),
         "unit_self_crossing_count": crossing_count,
         "backbone_crossing_count": backbone_crossing_count,
         "flower_reserve_entry_count": reserve_entry_count,
         "support_contact_error": _round(support_contact_error),
         "periodic_self_crossing_count": periodic_crossing_count,
+        "minimum_frozen_flower_support_clearance": _round(
+            flower_support_clearance
+            if math.isfinite(flower_support_clearance)
+            else 1.0
+        ),
+        "frozen_flower_support_conflict_count": (
+            flower_support_conflict_count
+        ),
     }
     if editor_l2_profile is not None:
         metrics.update(
@@ -1310,14 +1594,23 @@ def _build_candidate(
     grammar_id: str,
     stratum: str,
     include_l3: bool,
+    turn_sign_variant: str,
     candidate_index: int,
     editor_l2_profile: Mapping[str, Any] | None,
+    flower_mount_plan: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
-    seed = int(plan["seed"])
+    seed = int(
+        plan["unit_seed"]
+        if plan.get("unit_seed") is not None
+        else plan["seed"]
+    )
     lane_id = str(lane["slot_id"])
     quantiles = _candidate_quantiles(seed, lane_id, candidate_index)
     branch_unit_id = f"{plan['plan_id']}__{lane_id}"
-    candidate_id = f"{branch_unit_id}__{grammar_id}__{stratum}"
+    candidate_id = (
+        f"{branch_unit_id}__{grammar_id}__{stratum}"
+        f"__{turn_sign_variant}__sample_{candidate_index:04d}"
+    )
     l1 = _l1_curve(lane, branch_unit_id)
     curves: list[dict[str, Any]] = [l1]
     grammar = contract["grammar"][grammar_id]
@@ -1335,24 +1628,39 @@ def _build_candidate(
         editor_l2_profile,
     )
     l1_points = [_point(value) for value in l1["centerline"]]
-    mounts = (
-        list(preferred_mounts)
-        if editor_l2_profile is not None
-        else _contextual_mounts(
-            l1_points,
-            preferred_mounts,
-            lane,
-            analysis,
-            contract,
-            quantiles[7],
-        )
+    mounts = _contextual_mounts(
+        l1_points,
+        preferred_mounts,
+        lane,
+        analysis,
+        contract,
+        quantiles[7],
     )
+    if l2_count == 2:
+        low, high = [
+            float(value)
+            for value in contract["geometry"]["mount_fraction_range"]
+        ]
+        separation = max(
+            float(contract["geometry"]["minimum_sibling_mount_separation"]),
+            mounts[1] - mounts[0],
+        )
+        extra_separation = min(
+            0.10,
+            max(0.0, high - low - separation) * quantiles[6],
+        )
+        center = 0.5 * (mounts[0] + mounts[1])
+        half_gap = 0.5 * (separation + extra_separation)
+        lower_mount = max(low, min(high - 2.0 * half_gap, center - half_gap))
+        mounts = [lower_mount, lower_mount + 2.0 * half_gap]
     signs = _child_signs(
         l1_points,
         mounts,
         analysis,
         lane,
         float(plan["global_latents"]["asymmetry"]),
+        turn_sign_variant,
+        editor_l2_profile,
     )
     target_flower = next(
         (
@@ -1458,6 +1766,7 @@ def _build_candidate(
         "role": role,
         "grammar_id": grammar_id,
         "parameter_stratum": stratum,
+        "turn_sign_variant": turn_sign_variant,
         "hierarchy": {
             "l1_count": 1,
             "l2_count": l2_count,
@@ -1483,6 +1792,26 @@ def _build_candidate(
             "l2_sign_sequence": [
                 curve["turn_sign"] for curve in curves if curve["level"] == "L2"
             ],
+            "l2_turn_sign_candidate_coverage": (
+                "editor_bidirectional_single_child"
+                if l2_count == 1
+                and editor_l2_profile
+                and int(
+                    editor_l2_profile.get(
+                        "single_child_departure_turn_sign_histogram",
+                        {},
+                    ).get("positive", 0)
+                )
+                > 0
+                and int(
+                    editor_l2_profile.get(
+                        "single_child_departure_turn_sign_histogram",
+                        {},
+                    ).get("negative", 0)
+                )
+                > 0
+                else "context_preferred"
+            ),
             "l2_shape_sequence": [
                 curve["shape_signature"]
                 for curve in curves
@@ -1521,6 +1850,7 @@ def _build_candidate(
         analysis,
         contract,
         editor_l2_profile,
+        flower_mount_plan,
     )
     digest_source = dict(candidate)
     candidate["candidate_digest"] = canonical_digest(digest_source)
@@ -1552,6 +1882,30 @@ def generate_unit_candidate_inventory(
         raise UnitGrammarError("analysis/plan prototype mismatch")
     if plan.get("review", {}).get("status") != "l1_flow_pending_visual_review":
         raise UnitGrammarError("approved source plan content was unexpectedly mutated")
+    prototype_strategy = plan.get("prototype_strategy")
+    if contract_schema == CONTRACT_SCHEMA_V2 and not isinstance(
+        prototype_strategy, Mapping
+    ):
+        raise UnitGrammarError("stage-3B plan lacks frozen prototype strategy")
+    if isinstance(prototype_strategy, Mapping):
+        validate_strategy_projection(
+            prototype_strategy,
+            prototype_id=str(plan["prototype_id"]),
+            family_id=str(plan["family_id"]),
+            flower_count=len(analysis["flowers"]),
+        )
+        branchunit_policy = prototype_strategy["branchunit_profile"]
+        if branchunit_policy["candidate_coverage_policy"] != (
+            "contract_weak_role_grammar_strata"
+        ):
+            raise UnitGrammarError("unsupported BranchUnit candidate coverage strategy")
+    flower_mount_plan = plan.get("flower_mount_plan")
+    if not isinstance(flower_mount_plan, Mapping):
+        raise UnitGrammarError("stage-3B plan lacks frozen flower mounting")
+    if flower_mount_plan.get("mount_policy", {}).get(
+        "mounts_frozen_before_ordinary_l1"
+    ) is not True:
+        raise UnitGrammarError("flower mounting is not an upstream constraint")
     editor_l2_profile: Mapping[str, Any] | None = None
     if contract_schema == CONTRACT_SCHEMA_V2:
         if editor_l2_prior is None:
@@ -1561,6 +1915,11 @@ def generate_unit_candidate_inventory(
         editor_l2_profile = _editor_l2_profile(
             editor_l2_prior,
             str(plan["prototype_id"]),
+            str(
+                prototype_strategy["branchunit_profile"][
+                    "editor_l2_profile_key"
+                ]
+            ),
         )
 
     candidates: list[dict[str, Any]] = []
@@ -1568,7 +1927,12 @@ def generate_unit_candidate_inventory(
     candidate_index = 0
     for lane in plan["lanes"]:
         lane_candidates: list[dict[str, Any]] = []
-        for grammar_id, stratum, include_l3 in _candidate_strata(lane, contract):
+        for (
+            grammar_id,
+            stratum,
+            include_l3,
+            turn_sign_variant,
+        ) in _candidate_strata(lane, contract, editor_l2_profile):
             candidate = _build_candidate(
                 plan=plan,
                 lane=lane,
@@ -1578,8 +1942,10 @@ def generate_unit_candidate_inventory(
                 grammar_id=grammar_id,
                 stratum=stratum,
                 include_l3=include_l3,
+                turn_sign_variant=turn_sign_variant,
                 candidate_index=candidate_index,
                 editor_l2_profile=editor_l2_profile,
+                flower_mount_plan=flower_mount_plan,
             )
             candidate_index += 1
             candidates.append(candidate)
@@ -1621,7 +1987,22 @@ def generate_unit_candidate_inventory(
         ),
         "prototype_id": plan["prototype_id"],
         "family_id": plan["family_id"],
-        "seed": plan["seed"],
+        "prototype_strategy": (
+            dict(prototype_strategy)
+            if isinstance(prototype_strategy, Mapping)
+            else None
+        ),
+        "seed": (
+            plan["unit_seed"]
+            if plan.get("unit_seed") is not None
+            else plan["seed"]
+        ),
+        "branch_seed": plan["seed"],
+        "unit_seed": (
+            plan["unit_seed"]
+            if plan.get("unit_seed") is not None
+            else plan["seed"]
+        ),
         "source_plan_id": plan["plan_id"],
         "source_plan_digest": plan["plan_digest"],
         "source_l1_geometry_policy": "approved_stage3b_l1_is_immutable",
@@ -1631,6 +2012,7 @@ def generate_unit_candidate_inventory(
             else "role_conditioned_v1"
         ),
         "global_latents": plan["global_latents"],
+        "flower_mount_plan_id": str(flower_mount_plan["plan_id"]),
         "lane_count": len(plan["lanes"]),
         "candidate_count": len(candidates),
         "feasible_candidate_count": sum(
@@ -1657,6 +2039,7 @@ def generate_unit_candidate_inventory(
             "automatic_deletion_used": False,
             "silent_fallback_used": False,
             "best_of_n_selection_used": False,
+            "frozen_flower_support_geometry_consumed": True,
         },
         "review": {
             "status": contract["output"]["review_state"],

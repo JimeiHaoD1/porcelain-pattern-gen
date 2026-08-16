@@ -64,6 +64,17 @@
         "open_asymmetric"
       ]
     },
+    "single_child_turn_sign_variants": [
+      "context_preferred",
+      "context_opposed"
+    ],
+    "paired_child_turn_sign_variants": [
+      "context_preferred",
+      "context_swapped",
+      "editor_same_sign"
+    ],
+    "turn_sign_variants_require_editor_evidence": true,
+    "turn_sign_variants_filtered_by_prototype_editor_evidence": true,
     "l1_only_candidate_required_for_every_lane": true,
     "single_child_candidate_required_for_every_lane": true,
     "paired_child_candidate_required_for_every_lane": true,
@@ -76,6 +87,7 @@
     "role_conditioned_empirical_distributions": false,
     "edit_feedback_conditioned_hierarchy": true,
     "editor_demonstrated_l2_mount_distribution": true,
+    "editor_demonstrated_l2_turn_sign_coverage": true,
     "independent_uniform_sampling_allowed": false,
     "validation_guided_retry_allowed": false,
     "validation_guided_resample_allowed": false,
@@ -153,6 +165,9 @@
     "minimum_child_mount_separation",
     "minimum_sibling_curve_clearance_from_editor_profile",
     "immediate_child_departure",
+    "child_clears_parent_occupancy_after_attachment",
+    "no_child_parent_occupancy_reentry",
+    "sibling_centerlines_separated_by_combined_occupancy_radius",
     "no_unit_self_crossing",
     "no_non_root_backbone_crossing",
     "descendants_outside_flower_reserves",

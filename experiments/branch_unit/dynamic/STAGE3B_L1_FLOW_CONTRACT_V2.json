@@ -37,7 +37,11 @@
     "automatic_repair_allowed": false,
     "automatic_lane_deletion_allowed": false,
     "silent_fallback_allowed": false,
-    "selected_layout_count_per_task": 1
+    "selected_layout_count_per_task": 1,
+    "ordinary_density_level_selected_once_per_task": true,
+    "ordinary_density_level_seed_domain": "branch_seed",
+    "flower_support_excluded_from_ordinary_density_count": true,
+    "controlled_density_override_changes_only_set_cardinality_policy": true
   },
   "lane_semantics": {
     "role_labels_are_weak_compatibility_metadata": true,
@@ -52,7 +56,8 @@
     "no_lane_crossing",
     "no_periodic_lane_crossing",
     "minimum_root_spacing",
-    "minimum_lane_clearance",
+    "minimum_visible_lane_clearance",
+    "maximum_editor_conditioned_parallel_co_travel",
     "flower_reserve_not_entered"
   ],
   "soft_objectives": [
@@ -65,6 +70,7 @@
     "controlled_backbone_excursion",
     "controlled_vertical_span",
     "flower_proximity_without_mandatory_wrap",
+    "ordinary_l1_simple_medium_rich_density",
     "prototype_identity",
     "seed_diversity_without_identity_drift"
   ],

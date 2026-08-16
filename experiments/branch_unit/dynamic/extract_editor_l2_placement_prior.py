@@ -11,12 +11,13 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from extract_editor_curve_geometry_prior import (
+    ORDINARY_L1_ROLES,
     PROTOTYPE_IDS,
     _distribution,
     _read_json,
     _sample_cubics,
-    _sha256,
 )
+from composition_geometry import parallel_co_travel_score
 
 
 SCHEMA = "dynamic_branch_editor_l2_placement_prior_v1"
@@ -38,6 +39,46 @@ def _point_set_distance(
     second: Sequence[tuple[float, float]],
 ) -> float:
     return min(math.dist(a, b) for a in first for b in second)
+
+
+def _tangent_at_fraction(
+    points: Sequence[tuple[float, float]],
+    fraction: float,
+) -> tuple[float, float]:
+    lengths = [
+        math.dist(points[index - 1], points[index])
+        for index in range(1, len(points))
+    ]
+    target = max(0.0, min(1.0, fraction)) * sum(lengths)
+    travelled = 0.0
+    for index, segment_length in enumerate(lengths, start=1):
+        if travelled + segment_length >= target:
+            return (
+                points[index][0] - points[index - 1][0],
+                points[index][1] - points[index - 1][1],
+            )
+        travelled += segment_length
+    return (
+        points[-1][0] - points[-2][0],
+        points[-1][1] - points[-2][1],
+    )
+
+
+def _departure_turn_sign(
+    parent_points: Sequence[tuple[float, float]],
+    child_points: Sequence[tuple[float, float]],
+    mount_fraction: float,
+) -> str:
+    parent_tangent = _tangent_at_fraction(parent_points, mount_fraction)
+    child_tangent = (
+        child_points[1][0] - child_points[0][0],
+        child_points[1][1] - child_points[0][1],
+    )
+    cross = (
+        parent_tangent[0] * child_tangent[1]
+        - parent_tangent[1] * child_tangent[0]
+    )
+    return "positive" if cross >= 0.0 else "negative"
 
 
 def _profile(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
@@ -64,11 +105,31 @@ def _profile(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         for case in rows
         for value in case["paired_child_curve_clearances"]
     ]
-    if not l2_rows or not single_mounts or not paired_separations:
+    cross_unit_parallel_scores = [
+        float(value)
+        for case in rows
+        for value in case["cross_unit_parallel_co_travel_scores"]
+    ]
+    if (
+        not l2_rows
+        or not single_mounts
+        or not paired_separations
+        or not cross_unit_parallel_scores
+    ):
         raise EditorL2PriorError("L2 profile lacks mount evidence")
     child_histogram: Counter[int] = Counter()
+    child_turn_histogram: Counter[str] = Counter()
+    single_child_turn_histogram: Counter[str] = Counter()
+    paired_child_turn_pattern_histogram: Counter[str] = Counter()
     for case in rows:
         child_histogram.update(case["children_per_l1"])
+        child_turn_histogram.update(case["child_departure_turn_signs"])
+        single_child_turn_histogram.update(
+            case["single_child_departure_turn_signs"]
+        )
+        paired_child_turn_pattern_histogram.update(
+            case["paired_child_departure_turn_patterns"]
+        )
     mount_deltas = [
         float(row["mount_fraction_delta"])
         for row in l2_rows
@@ -80,6 +141,20 @@ def _profile(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "children_per_l1_histogram": {
             str(key): int(value)
             for key, value in sorted(child_histogram.items())
+        },
+        "child_departure_turn_sign_histogram": {
+            key: int(value)
+            for key, value in sorted(child_turn_histogram.items())
+        },
+        "single_child_departure_turn_sign_histogram": {
+            key: int(value)
+            for key, value in sorted(single_child_turn_histogram.items())
+        },
+        "paired_child_departure_turn_pattern_histogram": {
+            key: int(value)
+            for key, value in sorted(
+                paired_child_turn_pattern_histogram.items()
+            )
         },
         "mount_fraction": _distribution(
             [float(row["mount_fraction"]) for row in l2_rows]
@@ -107,6 +182,9 @@ def _profile(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         ),
         "tip_clearance_unit_ratio": _distribution(
             [float(row["tip_clearance_unit_ratio"]) for row in l2_rows]
+        ),
+        "cross_unit_parallel_co_travel_score": _distribution(
+            cross_unit_parallel_scores
         ),
     }
 
@@ -148,28 +226,71 @@ def extract(session_root: Path) -> dict[str, Any]:
             ]
             for curve_id, branch in active.items()
         }
+        ordinary_l1_ids = {
+            curve_id
+            for curve_id, branch in active.items()
+            if int(branch["level"]) == 1
+            and str(branch.get("role", "")) in ORDINARY_L1_ROLES
+        }
+        unit_curves: list[
+            tuple[str, int, Sequence[tuple[float, float]]]
+        ] = []
+        for curve_id, branch in active.items():
+            level = int(branch["level"])
+            if level == 1 and curve_id in ordinary_l1_ids:
+                unit_curves.append((curve_id, level, points[curve_id]))
+            elif level == 2 and str(branch.get("parent_id")) in ordinary_l1_ids:
+                unit_curves.append(
+                    (str(branch["parent_id"]), level, points[curve_id])
+                )
+        cross_unit_parallel_scores = [
+            parallel_co_travel_score(first[2], second[2])
+            for index, first in enumerate(unit_curves)
+            for second in unit_curves[index + 1 :]
+            if first[0] != second[0]
+            and (first[1] == 2 or second[1] == 2)
+        ]
         l2_rows: list[dict[str, Any]] = []
         single_child_mounts: list[float] = []
         paired_centers: list[float] = []
         paired_separations: list[float] = []
         paired_curve_clearances: list[float] = []
         children_per_l1: list[int] = []
+        child_departure_turn_signs: list[str] = []
+        single_child_departure_turn_signs: list[str] = []
+        paired_child_departure_turn_patterns: list[str] = []
         for parent_id, parent in active.items():
             if int(parent["level"]) != 1:
                 continue
-            children = [
+            children = sorted(
+                [
                 branch
                 for branch in active.values()
                 if int(branch["level"]) == 2
                 and str(branch.get("parent_id")) == parent_id
-            ]
+                ],
+                key=lambda branch: float(branch["mount_fraction"]),
+            )
             children_per_l1.append(len(children))
             mounts = sorted(float(child["mount_fraction"]) for child in children)
+            turn_signs = [
+                _departure_turn_sign(
+                    points[parent_id],
+                    points[str(child["curve_id"])],
+                    float(child["mount_fraction"]),
+                )
+                for child in children
+            ]
+            child_departure_turn_signs.extend(turn_signs)
             if len(mounts) == 1:
                 single_child_mounts.append(mounts[0])
+                single_child_departure_turn_signs.append(turn_signs[0])
             elif len(mounts) == 2:
                 paired_centers.append(0.5 * (mounts[0] + mounts[1]))
                 paired_separations.append(mounts[1] - mounts[0])
+                paired_child_departure_turn_patterns.append(
+                    "+".join(turn_signs)
+                )
                 paired_curve_clearances.append(
                     _point_set_distance(
                         points[str(children[0]["curve_id"])],
@@ -224,6 +345,16 @@ def extract(session_root: Path) -> dict[str, Any]:
             "paired_child_mount_separations": paired_separations,
             "paired_child_curve_clearances": paired_curve_clearances,
             "children_per_l1": children_per_l1,
+            "child_departure_turn_signs": child_departure_turn_signs,
+            "single_child_departure_turn_signs": (
+                single_child_departure_turn_signs
+            ),
+            "paired_child_departure_turn_patterns": (
+                paired_child_departure_turn_patterns
+            ),
+            "cross_unit_parallel_co_travel_scores": (
+                cross_unit_parallel_scores
+            ),
         }
         cases_by_profile["global"].append(case)
         cases_by_profile.setdefault(prototype_id, []).append(case)
@@ -232,8 +363,10 @@ def extract(session_root: Path) -> dict[str, Any]:
                 "prototype_id": prototype_id,
                 "seed": seed,
                 "session_id": path.parent.name,
-                "session_sha256": _sha256(path),
                 "active_l2_count": len(l2_rows),
+                "cross_unit_parallel_pair_count": len(
+                    cross_unit_parallel_scores
+                ),
             }
         )
 
@@ -246,6 +379,10 @@ def extract(session_root: Path) -> dict[str, Any]:
             "coordinates_stored": False,
             "all_distances_normalized_by_unit_width": True,
             "mounts_grouped_by_edited_parent_l1": True,
+            "cross_unit_parallel_metric": (
+                "shorter-curve arc-length occupancy weighted by periodic "
+                "nearest-point tangent alignment and relative distance"
+            ),
         },
         "edited_case_count": len(provenance),
         "profiles": {

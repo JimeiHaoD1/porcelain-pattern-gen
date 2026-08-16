@@ -1,0 +1,202 @@
+<mxfile host="app.diagrams.net" agent="Codex" version="24.7.17">
+  <diagram id="prototype-routing-v1" name="原型路由与领域生成主链">
+    <mxGraphModel dx="1800" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="缠枝结构生成：原型路由、领域内变化与共享生产主链" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1F4E78;fontColor=#FFFFFF;strokeColor=#15344F;fontSize=24;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="2080" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="input" value="输入需求 / 场景条件&#xa;可选：显式 prototype_id、花朵数量、花—主干关系、期望疏密繁简、production seed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAF7;strokeColor=#5B9BD5;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="110" width="600" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="route_features" value="路由特征提取&#xa;① 花是否属于主轴视觉元素  ② 花是否位于枝端  ③ 花数  ④ 谷位承托关系  ⑤ 目标疏密风格" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2F8;strokeColor=#5B9BD5;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="760" y="235" width="600" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="router" value="原型路由器&#xa;显式指定优先；否则先判定 SW 领域，再选择具体原型&#xa;原型选择不由 seed 决定" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="360" width="440" height="155" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_input_features" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeWidth=2;strokeColor=#5B9BD5;" edge="1" parent="1" source="input" target="route_features">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_features_router" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeWidth=2;strokeColor=#5B9BD5;" edge="1" parent="1" source="route_features" target="router">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw1_box" value="SW-1 领域：波峰波谷 / 谷位承托" style="swimlane;horizontal=1;startSize=40;rounded=1;whiteSpace=wrap;html=1;fillColor=#E2F0D9;swimlaneFillColor=#F4FAF1;strokeColor=#70AD47;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="570" width="650" height="570" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw2_box" value="SW-2 领域：轴线贯穿 / 花轴一体" style="swimlane;horizontal=1;startSize=40;rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBF7;swimlaneFillColor=#F3F8FC;strokeColor=#5B9BD5;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="735" y="570" width="650" height="570" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw3_box" value="SW-3 领域：切线延伸 / 枝端着花" style="swimlane;horizontal=1;startSize=40;rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4D6;swimlaneFillColor=#FFF7F2;strokeColor=#ED7D31;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1430" y="570" width="650" height="570" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw1_condition" value="进入条件&#xa;花位固定；花位与波谷/谷侧具有承托关系" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#70AD47;fontSize=14;" vertex="1" parent="sw1_box">
+          <mxGeometry x="30" y="65" width="590" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw1_choice" value="目标风格？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=14;fontStyle=1;" vertex="1" parent="sw1_box">
+          <mxGeometry x="220" y="160" width="210" height="95" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw11" value="proto_sw_1_1&#xa;密 / 短枝频繁交替&#xa;承托 + 包绕倾向" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C6E0B4;strokeColor=#548235;fontSize=14;fontStyle=1;" vertex="1" parent="sw1_box">
+          <mxGeometry x="35" y="285" width="260" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw13" value="proto_sw_1_3&#xa;疏 / 少量长扫枝&#xa;承托为主，不强制包绕" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C6E0B4;strokeColor=#548235;fontSize=14;fontStyle=1;" vertex="1" parent="sw1_box">
+          <mxGeometry x="355" y="285" width="260" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw1_rules" value="领域内变化规则&#xa;固定：花位、花数、谷位对应语义&#xa;可变：主干振幅/弧长/曲率、L1数量、疏密繁简&#xa;约束：变形后波谷仍服务固定花位；先生成承托枝" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4FAF1;strokeColor=#70AD47;fontSize=14;align=left;spacingLeft=12;" vertex="1" parent="sw1_box">
+          <mxGeometry x="35" y="405" width="580" height="125" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw2_condition" value="进入条件&#xa;花朵是连续主轴视觉元素，不需要独立承托枝" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5B9BD5;fontSize=14;" vertex="1" parent="sw2_box">
+          <mxGeometry x="30" y="65" width="590" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw23" value="proto_sw_2_3&#xa;宽阔主扫枝主导&#xa;沿主轴两侧组织节奏" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BDD7EE;strokeColor=#2E75B6;fontSize=15;fontStyle=1;" vertex="1" parent="sw2_box">
+          <mxGeometry x="180" y="180" width="290" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw2_rules" value="领域内变化规则&#xa;固定：花位、花数、主轴贯穿语义&#xa;可变：主干振幅/弧长/局部曲率、L1数量、疏密繁简&#xa;约束：轴线变形仍穿过/连贯经过花朵；禁止补造承托枝" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F8FC;strokeColor=#5B9BD5;fontSize=14;align=left;spacingLeft=12;" vertex="1" parent="sw2_box">
+          <mxGeometry x="35" y="320" width="580" height="135" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw2_mount" value="花朵挂接策略：axis integration&#xa;记录主轴—花朵融合关系，承托枝数量 = 0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAF7;strokeColor=#5B9BD5;fontSize=14;" vertex="1" parent="sw2_box">
+          <mxGeometry x="80" y="480" width="490" height="65" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw3_condition" value="进入条件&#xa;花朵作为方向明确的枝端；允许花位在领域内变化" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#ED7D31;fontSize=14;" vertex="1" parent="sw3_box">
+          <mxGeometry x="30" y="65" width="590" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw3_choice" value="枝端花数？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=14;fontStyle=1;" vertex="1" parent="sw3_box">
+          <mxGeometry x="220" y="160" width="210" height="95" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw31" value="proto_sw_3_1&#xa;单枝端花 / 轻量&#xa;侧枝服从终端方向" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CBAD;strokeColor=#C65911;fontSize=14;fontStyle=1;" vertex="1" parent="sw3_box">
+          <mxGeometry x="35" y="285" width="260" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw32" value="proto_sw_3_2&#xa;双枝端花 / 中等密度&#xa;较强主枝 + 上侧倾向" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CBAD;strokeColor=#C65911;fontSize=14;fontStyle=1;" vertex="1" parent="sw3_box">
+          <mxGeometry x="355" y="285" width="260" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="sw3_rules" value="领域内变化规则&#xa;可变：花位 anchor_s/高低/法向距离、主干振幅/弧长、L1数量、疏密繁简&#xa;固定：枝端着花语义与花数（由具体原型决定）&#xa;约束：先确定新花位，再从远端沿父切线延伸至花下" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7F2;strokeColor=#ED7D31;fontSize=14;align=left;spacingLeft=12;" vertex="1" parent="sw3_box">
+          <mxGeometry x="35" y="405" width="580" height="125" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_router_sw1" value="谷位承托" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeWidth=2;strokeColor=#70AD47;fontSize=13;" edge="1" parent="1" source="router" target="sw1_condition">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_router_sw2" value="主轴融合" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeWidth=2;strokeColor=#5B9BD5;fontSize=13;" edge="1" parent="1" source="router" target="sw2_condition">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_router_sw3" value="枝端着花" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeWidth=2;strokeColor=#ED7D31;fontSize=13;" edge="1" parent="1" source="router" target="sw3_condition">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw1_condition_choice" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#70AD47;" edge="1" parent="sw1_box" source="sw1_condition" target="sw1_choice">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw1_choice_11" value="密" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#70AD47;" edge="1" parent="sw1_box" source="sw1_choice" target="sw11">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw1_choice_13" value="疏" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#70AD47;" edge="1" parent="sw1_box" source="sw1_choice" target="sw13">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw11_rules" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#70AD47;" edge="1" parent="sw1_box" source="sw11" target="sw1_rules">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw13_rules" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#70AD47;" edge="1" parent="sw1_box" source="sw13" target="sw1_rules">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw2_condition_23" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#5B9BD5;" edge="1" parent="sw2_box" source="sw2_condition" target="sw23">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw23_rules" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#5B9BD5;" edge="1" parent="sw2_box" source="sw23" target="sw2_rules">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw2_rules_mount" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#5B9BD5;" edge="1" parent="sw2_box" source="sw2_rules" target="sw2_mount">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw3_condition_choice" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#ED7D31;" edge="1" parent="sw3_box" source="sw3_condition" target="sw3_choice">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw3_choice_31" value="单花" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#ED7D31;" edge="1" parent="sw3_box" source="sw3_choice" target="sw31">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw3_choice_32" value="双花" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#ED7D31;" edge="1" parent="sw3_box" source="sw3_choice" target="sw32">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw31_rules" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#ED7D31;" edge="1" parent="sw3_box" source="sw31" target="sw3_rules">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw32_rules" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#ED7D31;" edge="1" parent="sw3_box" source="sw32" target="sw3_rules">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="strategy" value="PrototypeStrategy 状态&#xa;具体原型 + 不变量 + 可控变量域 + 花朵挂接策略 + 密度/繁简预算 + 专属验证规则" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E4DFEC;strokeColor=#8064A2;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="710" y="1190" width="700" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw1_strategy" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#70AD47;" edge="1" parent="1" source="sw1_rules" target="strategy">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw2_strategy" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#5B9BD5;" edge="1" parent="1" source="sw2_mount" target="strategy">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_sw3_strategy" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#ED7D31;" edge="1" parent="1" source="sw3_rules" target="strategy">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="seed_split" value="seed域拆分&#xa;主干 / 花位（仅SW-3）/ 分支 / BranchUnit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#7F7F7F;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="45" y="1340" width="245" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="instantiate" value="实例化主干与花位&#xa;按策略执行固定/变化边界" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2F8;strokeColor=#5B9BD5;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="330" y="1340" width="245" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="mount_first" value="花朵关系优先&#xa;SW-1谷位承托 / SW-2轴线融合 / SW-3远端枝端" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="615" y="1340" width="280" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1_plan" value="L1全局规划&#xa;数量、根位密度场、留白、长度层级" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E2F0D9;strokeColor=#70AD47;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="935" y="1340" width="245" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="unit_candidates" value="完整 BranchUnit 候选&#xa;局部繁简预算 + 编辑器先验" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4D6;strokeColor=#ED7D31;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="1340" width="245" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="global_select" value="Stage5全局选择&#xa;精确结构预算；先压最坏重合，再压总重合" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E4DFEC;strokeColor=#8064A2;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1505" y="1340" width="270" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="mechanical" value="结构验证&#xa;周期连续、真实挂接、无相交、保护区、领域规则" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#7F7F7F;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1815" y="1340" width="270" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_strategy_seed" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#8064A2;" edge="1" parent="1" source="strategy" target="seed_split">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_seed_instantiate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#7F7F7F;" edge="1" parent="1" source="seed_split" target="instantiate">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_instantiate_mount" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#5B9BD5;" edge="1" parent="1" source="instantiate" target="mount_first">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_mount_l1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#D6B656;" edge="1" parent="1" source="mount_first" target="l1_plan">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_l1_units" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#70AD47;" edge="1" parent="1" source="l1_plan" target="unit_candidates">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_units_select" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#ED7D31;" edge="1" parent="1" source="unit_candidates" target="global_select">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_select_mechanical" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#8064A2;" edge="1" parent="1" source="global_select" target="mechanical">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="visual_gate" value="人工视觉门&#xa;整体流动、疏密繁简、花枝关系、原型身份是否成立？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#BF9000;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="1500" width="440" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="promote" value="视觉认可&#xa;发布 / 收集为正样本" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C6E0B4;strokeColor=#548235;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1370" y="1535" width="300" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="reject" value="视觉拒绝&#xa;记录修改/拒绝原因，回流到原型策略或学习排序&#xa;不在本次生成中临时改规则重试" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4CCCC;strokeColor=#CC0000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="1525" width="340" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="shared_constraints" value="所有原型共享硬约束：局部坐标挂接 · 周期连续 · 花位保护 · 无曲线相交 · 同种子可复现&#xa;所有原型共享发布规则：结构合法 ≠ 视觉通过" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDF2;strokeColor=#A5A5A5;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="1690" width="1200" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_mechanical_visual" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#7F7F7F;" edge="1" parent="1" source="mechanical" target="visual_gate">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_visual_promote" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#548235;fontSize=14;" edge="1" parent="1" source="visual_gate" target="promote">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_visual_reject" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;strokeColor=#CC0000;fontSize=14;" edge="1" parent="1" source="visual_gate" target="reject">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

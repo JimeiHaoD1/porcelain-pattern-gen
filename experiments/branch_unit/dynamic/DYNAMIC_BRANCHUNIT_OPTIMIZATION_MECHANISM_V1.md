@@ -714,7 +714,8 @@ OPPOSED_L2_PAIR
 冲突边集、合格节点、配对惩罚、净空阈值、最终选择全部一致，0 处不一致；
 `proto_sw_2_3` seed 4101 的冲突图构建从 71.8 秒降到 3.98 秒。重构后完整重跑
 `dynamic_branch_stage5f_full_integration_v2`，与 v1 的 plan_id、最终选择、
-selection_digest 和机械事实全部一致。
+selection_digest 和机械事实全部一致；用户已于 2026-08-16 视觉确认 v2 与
+v1 一致。实测剩余热点转移到 Stage4 候选内在诊断（同一批处理原语可继续复用）。
 
 用户确认后才允许：
 

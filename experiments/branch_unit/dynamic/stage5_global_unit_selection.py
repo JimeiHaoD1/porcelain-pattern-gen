@@ -10,8 +10,13 @@ from collections import defaultdict
 from functools import lru_cache
 from typing import Any, Mapping, Sequence
 
-from branch_unit_grammar_v1 import _curve_crosses, _polyline_distance
+import numpy as np
+
 from composition_geometry import parallel_co_travel_score
+from geometry_batch import (
+    polyline_pair_intersects,
+    polyline_pair_minimum_distance,
+)
 from prototype_strategy_v1 import validate_strategy_projection
 
 
@@ -361,24 +366,14 @@ def _bounds_overlap(
     )
 
 
-def _shift_curve(
-    curve: Mapping[str, Any],
-    shift_x: float,
-) -> dict[str, Any]:
-    return {
-        "centerline": [
-            [float(point[0]) + shift_x, float(point[1])]
-            for point in curve["centerline"]
-        ]
-    }
-
-
 @lru_cache(maxsize=4096)
 def _cached_polyline_distance(
     first_points: tuple[tuple[float, float], ...],
     second_points: tuple[tuple[float, float], ...],
 ) -> float:
-    return _polyline_distance(first_points, second_points)
+    first_array = np.asarray(first_points, dtype=np.float64)
+    second_array = np.asarray(second_points, dtype=np.float64)
+    return polyline_pair_minimum_distance(first_array, second_array)
 
 
 def _bounds_distance(
@@ -403,10 +398,23 @@ def candidate_pair_crossings(
                 second_bounds = _curve_bounds(second_curve, float(shift_x))
                 if not _bounds_overlap(first_bounds, second_bounds):
                     continue
-                if _curve_crosses(
-                    first_curve,
-                    _shift_curve(second_curve, float(shift_x)),
-                    None,
+                first_points_array = np.asarray(
+                    [
+                        [float(point[0]), float(point[1])]
+                        for point in first_curve["centerline"]
+                    ],
+                    dtype=np.float64,
+                )
+                second_points_array = np.asarray(
+                    [
+                        [float(point[0]) + float(shift_x), float(point[1])]
+                        for point in second_curve["centerline"]
+                    ],
+                    dtype=np.float64,
+                )
+                if polyline_pair_intersects(
+                    first_points_array,
+                    second_points_array,
                 ):
                     crossings.append(
                         {

@@ -709,6 +709,13 @@ OPPOSED_L2_PAIR
 - 视觉状态：用户已于 2026-08-16 按 §13.3 的机械项和视觉项确认；确认记录见
   `STAGE5F_VISUAL_APPROVAL_V1.json`。
 
+实现重构（2026-08-16）：冲突图几何检查由逐点标量调用改为 float64 批处理
+（`geometry_batch.py`，公式与容差完全不变），并用 15 个冻结案例做了逐边对照：
+冲突边集、合格节点、配对惩罚、净空阈值、最终选择全部一致，0 处不一致；
+`proto_sw_2_3` seed 4101 的冲突图构建从 71.8 秒降到 3.98 秒。重构后完整重跑
+`dynamic_branch_stage5f_full_integration_v2`，与 v1 的 plan_id、最终选择、
+selection_digest 和机械事实全部一致。
+
 用户确认后才允许：
 
 - 标记整套结构生成机制通过；
@@ -859,3 +866,5 @@ VISUAL_REJECTED
 | 5F 视觉确认 | `STAGE5F_VISUAL_APPROVAL_V1.json` |
 | 下游挂接投影 | `run_stage3b_l1_flow.py` |
 | 最终冻结合同 | `FINAL_FROZEN_CONTRACT_V1.json` |
+| 批处理几何原语 | `geometry_batch.py` |
+| 5F 重构对照产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v2` |

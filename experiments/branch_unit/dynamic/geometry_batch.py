@@ -121,3 +121,111 @@ def segments_intersect_batch(
         | ((lib.abs(o4) <= tolerance) & on_segment(a1x, a1y, b0x, b0y, b1x, b1y))
     )
     return proper_crossing | touching
+
+
+def _segment_pair_arrays(pa, pb):
+    """Flatten all segment pairs between two polylines into coordinate arrays."""
+
+    a0 = pa[:-1]
+    a1 = pa[1:]
+    b0 = pb[:-1]
+    b1 = pb[1:]
+    repeat_count = b0.shape[0]
+    tile_count = a0.shape[0]
+    return (
+        np.repeat(a0[:, 0], repeat_count),
+        np.repeat(a0[:, 1], repeat_count),
+        np.repeat(a1[:, 0], repeat_count),
+        np.repeat(a1[:, 1], repeat_count),
+        np.tile(b0[:, 0], tile_count),
+        np.tile(b0[:, 1], tile_count),
+        np.tile(b1[:, 0], tile_count),
+        np.tile(b1[:, 1], tile_count),
+    )
+
+
+def polyline_pair_intersects(pa, pb) -> bool:
+    """Return True when any segment pair between two polylines intersects.
+
+    Mirrors `branch_unit_grammar_v1._curve_crosses` with no allowed junction.
+    """
+
+    if pa.shape[0] < 2 or pb.shape[0] < 2:
+        return False
+    arrays = _segment_pair_arrays(pa, pb)
+    return bool(
+        np.any(
+            segments_intersect_batch(
+                arrays[0],
+                arrays[1],
+                arrays[2],
+                arrays[3],
+                arrays[4],
+                arrays[5],
+                arrays[6],
+                arrays[7],
+            )
+        )
+    )
+
+
+def polyline_pair_minimum_distance(pa, pb) -> float:
+    """Minimum distance between two polylines, zero on any intersection.
+
+    Mirrors `branch_unit_grammar_v1._polyline_distance`: the minimum over the
+    four point-to-segment distances of every segment pair, or zero when any
+    pair intersects. An empty polyline yields infinity.
+    """
+
+    if pa.shape[0] < 2 or pb.shape[0] < 2:
+        return float("inf")
+    arrays = _segment_pair_arrays(pa, pb)
+    intersects = segments_intersect_batch(
+        arrays[0],
+        arrays[1],
+        arrays[2],
+        arrays[3],
+        arrays[4],
+        arrays[5],
+        arrays[6],
+        arrays[7],
+    )
+    if bool(np.any(intersects)):
+        return 0.0
+    distances = np.minimum.reduce(
+        [
+            point_segment_distance_batch(
+                arrays[0],
+                arrays[1],
+                arrays[4],
+                arrays[5],
+                arrays[6],
+                arrays[7],
+            ),
+            point_segment_distance_batch(
+                arrays[2],
+                arrays[3],
+                arrays[4],
+                arrays[5],
+                arrays[6],
+                arrays[7],
+            ),
+            point_segment_distance_batch(
+                arrays[4],
+                arrays[5],
+                arrays[0],
+                arrays[1],
+                arrays[2],
+                arrays[3],
+            ),
+            point_segment_distance_batch(
+                arrays[6],
+                arrays[7],
+                arrays[0],
+                arrays[1],
+                arrays[2],
+                arrays[3],
+            ),
+        ]
+    )
+    return float(np.min(distances))

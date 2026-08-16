@@ -18,8 +18,15 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Any, Iterable, Mapping, Sequence
 
+import numpy as np
+
 from fixed_visual_prior import canonical_digest, validate_fixed_visual_prior
 from composition_geometry import parallel_co_travel_score
+from geometry_batch import (
+    global_l1_polyline_distance_batch,
+    point_segment_distance_matrix_batch,
+    polyline_pair_intersects,
+)
 from prototype_strategy_v1 import (
     PROTOTYPE_IDS,
     validate_strategy_against_inputs,
@@ -1351,14 +1358,25 @@ def _maximum_backbone_excursion(
     backbone: Sequence[Point],
 ) -> float:
     maximum = 0.0
-    for point in points:
-        nearest = float("inf")
+    point_array = np.asarray(points, dtype=np.float64)
+    backbone_array = np.asarray(backbone, dtype=np.float64)
+    if point_array.shape[0] and backbone_array.shape[0] >= 2:
+        per_point_minimum = np.full(point_array.shape[0], np.inf)
         for offset in (-1.0, 0.0, 1.0):
-            for index in range(1, len(backbone)):
-                first = (backbone[index - 1][0] + offset, backbone[index - 1][1])
-                second = (backbone[index][0] + offset, backbone[index][1])
-                nearest = min(nearest, _point_segment_distance(point, first, second))
-        maximum = max(maximum, nearest)
+            shifted = backbone_array + np.asarray(
+                [offset, 0.0],
+                dtype=np.float64,
+            )
+            matrix = point_segment_distance_matrix_batch(
+                point_array,
+                shifted[:-1],
+                shifted[1:],
+            )
+            per_point_minimum = np.minimum(
+                per_point_minimum,
+                matrix.min(axis=1),
+            )
+        maximum = max(maximum, float(per_point_minimum.max()))
     return maximum
 
 
@@ -1384,18 +1402,10 @@ def _polylines_cross(
     b: Sequence[Point],
     offset_b: float = 0.0,
 ) -> bool:
-    for index in range(1, len(a)):
-        for other_index in range(1, len(b)):
-            b0 = b[other_index - 1][0] + offset_b, b[other_index - 1][1]
-            b1 = b[other_index][0] + offset_b, b[other_index][1]
-            if _segments_intersect(
-                a[index - 1],
-                a[index],
-                b0,
-                b1,
-            ):
-                return True
-    return False
+    a_array = np.asarray(a, dtype=np.float64)
+    b_array = np.asarray(b, dtype=np.float64)
+    b_array = b_array + np.asarray([offset_b, 0.0], dtype=np.float64)
+    return polyline_pair_intersects(a_array, b_array)
 
 
 def _feedback_ordinary_candidates(
@@ -2441,14 +2451,17 @@ def _backbone_non_root_clearance(
 ) -> float:
     start = max(4, int(len(centerline) * 0.16))
     minimum = float("inf")
-    for point in centerline[start:]:
-        for offset in (-1.0, 0.0, 1.0):
-            shifted = [(row[0] + offset, row[1]) for row in backbone]
-            for index in range(1, len(shifted)):
-                minimum = min(
-                    minimum,
-                    _point_segment_distance(point, shifted[index - 1], shifted[index]),
-                )
+    point_array = np.asarray(centerline[start:], dtype=np.float64)
+    backbone_array = np.asarray(backbone, dtype=np.float64)
+    for offset in (-1.0, 0.0, 1.0):
+        shifted = backbone_array + np.asarray([offset, 0.0], dtype=np.float64)
+        matrix = point_segment_distance_matrix_batch(
+            point_array,
+            shifted[:-1],
+            shifted[1:],
+        )
+        if matrix.size:
+            minimum = min(minimum, float(matrix.min()))
     return minimum
 
 
@@ -2483,7 +2496,11 @@ def _flower_mount_rejections(
             for point in mount["centerline"]
         ]
         minimum = min(
-            _polyline_distance(candidate_points, mount_points, offset)
+            global_l1_polyline_distance_batch(
+                candidate_points,
+                mount_points,
+                offset,
+            )
             for offset in (-1.0, 0.0, 1.0)
         )
         if minimum < lane_clearance:
@@ -2561,8 +2578,8 @@ def _candidate_rejections(
         reasons.append("continuous_editor_geometry_source_missing")
 
     self_clearance = min(
-        _polyline_distance(centerline, centerline, -1.0),
-        _polyline_distance(centerline, centerline, 1.0),
+        global_l1_polyline_distance_batch(centerline, centerline, -1.0),
+        global_l1_polyline_distance_batch(centerline, centerline, 1.0),
     )
     if self_clearance < 0.032:
         reasons.append("periodic_self_conflict")
@@ -2623,7 +2640,7 @@ def _pair_metrics(
         float(known_separated_clearance)
         if known_separated_clearance is not None
         else min(
-            _polyline_distance(points_a, points_b, offset)
+            global_l1_polyline_distance_batch(points_a, points_b, offset)
             for offset in (-1.0, 0.0, 1.0)
         )
     )
@@ -4481,7 +4498,11 @@ def validate_global_l1_flow_plan(plan: Mapping[str, Any]) -> None:
                     for value in mount["centerline"]
                 ]
                 if min(
-                    _polyline_distance(lane_points, mount_points, offset)
+                    global_l1_polyline_distance_batch(
+                        lane_points,
+                        mount_points,
+                        offset,
+                    )
                     for offset in (-1.0, 0.0, 1.0)
                 ) < lane_clearance - 1e-9:
                     raise GlobalL1FlowError(

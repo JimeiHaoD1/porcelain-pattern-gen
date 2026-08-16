@@ -720,6 +720,10 @@ v1 一致。实测剩余热点转移到 Stage4 候选内在诊断（同一批处
 `intrinsic_diagnostics`、inventory_id、冲突边集、配对惩罚与最终选择均与冻结
 产物一致，0 处不一致；最重案例的 Stage4 从 48.65 秒降到约 2.08 秒。整批 5F
 墙钟时间由约 20.0 分钟降到约 14.6 分钟（v3，与 v1 逐案例一致）。
+再进一步把批处理接入上游全局 L1 求解（`_pair_metrics`、
+`_candidate_rejections`、`_flower_mount_rejections`、骨干净空与骨架穿越等）：
+15/15 案例的 plan 与 inventory_id 与冻结产物一致；最重案例上游从 402.6 秒
+降到 32.25 秒；整批 5F 墙钟时间进一步降到约 5.1 分钟（v4，与 v1 逐案例一致）。
 
 用户确认后才允许：
 
@@ -874,3 +878,4 @@ VISUAL_REJECTED
 | 批处理几何原语 | `geometry_batch.py` |
 | 5F 重构对照产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v2` |
 | 5F Stage4 重构对照产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v3` |
+| 5F 上游 L1 重构对照产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v4` |

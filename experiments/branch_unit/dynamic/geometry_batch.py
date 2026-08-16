@@ -8,6 +8,7 @@ This module is additive; it does not change the formal chain by itself.
 
 from __future__ import annotations
 
+import math
 from typing import Literal
 
 import numpy as np
@@ -279,3 +280,30 @@ def polyline_pair_minimum_distance(pa, pb) -> float:
         ]
     )
     return float(np.min(distances))
+
+
+def global_l1_polyline_distance_batch(pa, pb, offset=0.0) -> float:
+    """Mirror `global_l1_flow._polyline_distance` including the box shortcut.
+
+    When the axis-aligned bounding boxes (with the x offset applied) are more
+    than 0.18 apart, the scalar function returns that box gap instead of the
+    true distance, so the batched path must preserve the same value.
+    """
+
+    a = np.asarray(pa, dtype=np.float64)
+    b = np.asarray(pb, dtype=np.float64)
+    a_min_x = float(a[:, 0].min())
+    a_max_x = float(a[:, 0].max())
+    a_min_y = float(a[:, 1].min())
+    a_max_y = float(a[:, 1].max())
+    b_min_x = float(b[:, 0].min()) + offset
+    b_max_x = float(b[:, 0].max()) + offset
+    b_min_y = float(b[:, 1].min())
+    b_max_y = float(b[:, 1].max())
+    gap_x = max(0.0, a_min_x - b_max_x, b_min_x - a_max_x)
+    gap_y = max(0.0, a_min_y - b_max_y, b_min_y - a_max_y)
+    box_gap = math.hypot(gap_x, gap_y)
+    if box_gap > 0.18:
+        return box_gap
+    shifted = b + np.asarray([offset, 0.0], dtype=np.float64)
+    return polyline_pair_minimum_distance(a, shifted)

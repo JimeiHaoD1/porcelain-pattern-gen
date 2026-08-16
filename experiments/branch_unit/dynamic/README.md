@@ -40,6 +40,15 @@
 
 ## Commands
 
+批量生成（500 案例示例，断点续跑：中断后重复同一命令即跳过已完成案例）：
+
+```powershell
+Set-Location 'D:\sdxl\chanzhi_sw_clean_oldmain_opt'
+D:\Anaconda3\python.exe .\experiments\branch_unit\dynamic\run_batch_generation.py `
+  --cases-per-prototype 100 --workers 8 --slim --render both `
+  --output-dir .\artifacts\runs\dynamic_branch_batch_v1
+```
+
 ```powershell
 Set-Location 'D:\sdxl\chanzhi_sw_clean'
 

@@ -879,3 +879,11 @@ VISUAL_REJECTED
 | 5F 重构对照产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v2` |
 | 5F Stage4 重构对照产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v3` |
 | 5F 上游 L1 重构对照产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v4` |
+| 批量生成入口 | `run_batch_generation.py` |
+| 批量中试产物 | `artifacts/runs/dynamic_branch_batch_pilot100` |
+
+批量生成（2026-08-16）：`run_batch_generation.py` 提供分层配比（原型 × 3 主干
+方向 × 3 密度档）、CPU 多进程（默认 8 worker）、断点续跑、精简保存（约 0.4
+MB/案例）与失败清单。100 案例中试（20/原型）98 成功、2 失败，失败均为
+`proto_sw_1_3` 的“稀疏 5E L1-only 基线无可行组合”，已如实记录；8 worker
+吞吐约 3.9 秒/案例墙钟，500 案例约 32 分钟。

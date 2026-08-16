@@ -12,10 +12,12 @@ from typing import Any, Mapping
 
 from backbone_variation_v1 import (
     generate_backbone_variant,
+    production_rho,
     split_generation_seeds,
     validate_seed,
 )
 from fixed_visual_prior import validate_fixed_visual_prior
+from flower_mounting_v1 import FlowerMountingError
 from flower_placement_v1 import generate_flower_layout_and_mount
 from global_l1_flow import (
     SEEDS,
@@ -65,6 +67,25 @@ DEFAULT_OUTPUT = (
     / "runs"
     / "dynamic_branch_stage3b_edit_feedback_l1_flow_v2"
 )
+
+
+def _downstream_mount_strength_ladder(base: float) -> tuple[float, ...]:
+    """Project one backbone intent down its strength axis for mount feasibility.
+
+    The ladder never changes the seed or the selected variant direction; it
+    only reduces the variant strength so the downstream flower-mount mechanism
+    can consume the same intent. Reaching zero keeps the baseline backbone and
+    is still the same deterministic intent projection.
+    """
+
+    if base <= 0.0:
+        return (0.0,)
+    values: list[float] = []
+    for fraction in (1.0, 0.75, 0.5, 0.25, 0.0):
+        value = max(0.0, base * fraction)
+        if not values or abs(value - values[-1]) > 1e-12:
+            values.append(value)
+    return tuple(values)
 CONTRACT_PATH = DYNAMIC_DIR / "STAGE3B_L1_FLOW_CONTRACT_V2.json"
 FEEDBACK_PRIOR_PATH = DYNAMIC_DIR / "EDIT_FEEDBACK_PRIOR_V1.json"
 CURVE_GEOMETRY_PRIOR_PATH = (
@@ -281,26 +302,58 @@ def generate_prototype_case(
         if unit_seed_override is None
         else validate_seed(unit_seed_override, "unit_seed")
     )
-    backbone_strict, variation = generate_backbone_variant(
-        baseline_strict,
-        backbone_seed,
-        backbone_rho,
-        prototype_strategy=prototype_strategy,
-        prototype_variant_id=prototype_variant_id,
+    strength_ladder = (
+        (float(backbone_rho),)
+        if backbone_rho is not None
+        else _downstream_mount_strength_ladder(
+            production_rho(backbone_seed)
+        )
     )
-    (
-        variant_strict,
-        variant_analysis,
-        flower_layout_plan,
-        flower_mount_plan,
-    ) = generate_flower_layout_and_mount(
-        backbone_strict,
-        payload["morphology"],
-        stage3_plan_contract,
-        flower_seed=flower_seed,
-        prototype_strategy=prototype_strategy,
-        rho=flower_rho,
-    )
+    mount_projection: dict[str, Any] = {
+        "attempted_strengths": [],
+        "selected_strength": None,
+        "retry_count": 0,
+        "used": False,
+    }
+    last_mount_error: FlowerMountingError | None = None
+    variant_strict = None
+    variant_analysis = None
+    flower_layout_plan = None
+    flower_mount_plan = None
+    for strength in strength_ladder:
+        backbone_strict, variation = generate_backbone_variant(
+            baseline_strict,
+            backbone_seed,
+            strength,
+            prototype_strategy=prototype_strategy,
+            prototype_variant_id=prototype_variant_id,
+        )
+        mount_projection["attempted_strengths"].append(round(strength, 9))
+        try:
+            (
+                variant_strict,
+                variant_analysis,
+                flower_layout_plan,
+                flower_mount_plan,
+            ) = generate_flower_layout_and_mount(
+                backbone_strict,
+                payload["morphology"],
+                stage3_plan_contract,
+                flower_seed=flower_seed,
+                prototype_strategy=prototype_strategy,
+                rho=flower_rho,
+            )
+            mount_projection["selected_strength"] = round(strength, 9)
+            last_mount_error = None
+            break
+        except FlowerMountingError as exc:
+            mount_projection["retry_count"] += 1
+            last_mount_error = exc
+    if last_mount_error is not None:
+        raise last_mount_error
+    mount_projection["used"] = mount_projection["retry_count"] > 0
+    variation = dict(variation)
+    variation["downstream_mount_projection"] = mount_projection
     validate_strategy_against_inputs(
         prototype_strategy,
         variant_strict,
@@ -336,6 +389,7 @@ def generate_prototype_case(
         "variation": variation,
         "flower_layout_plan": flower_layout_plan,
         "flower_mount_plan": flower_mount_plan,
+        "downstream_mount_projection": mount_projection,
         "plan": plan,
         "inventory": inventory,
     }

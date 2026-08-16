@@ -2,7 +2,7 @@
 
 状态快照：2026-08-16  
 适用目录：`D:\sdxl\chanzhi_sw_clean_oldmain_opt\experiments\branch_unit\dynamic`  
-当前视觉关口：5D、5E 已确认；5F 实施中
+当前视觉关口：5D、5E 已确认；5F 已实现并提交正式图，`VISUAL_REVIEW_PENDING`
 
 ## 1. 文档用途与事实优先级
 
@@ -247,7 +247,9 @@ source input
 - 禁止对采样点独立加噪；
 - 每个原型提供 `expanded / compact / swept` 三种组合变体方向；
 - seed 从已确认变体方向中选择，不把四个控制量任意取满；
-- 若完整意图不满足画布和自交约束，只沿同一意图方向投影，不换随机样本。
+- 若完整意图不满足画布和自交约束，只沿同一意图方向投影，不换随机样本；
+- 5F 集成后，若承花挂接无法消费该变体，同样沿同一意图方向按强度阶梯投影
+  （见 §13.4），不换 seed、不降净空。
 
 5B 期间：
 
@@ -635,7 +637,7 @@ OPPOSED_L2_PAIR
 
 ## 13. 5F：全原型完整集成与发布候选
 
-状态：尚未实施。依赖用户确认 5E。
+状态：已实现并提交正式图；视觉状态 `VISUAL_REVIEW_PENDING`。
 
 5F 不再发明新结构机制，只完成集成、跨 seed 泛化和正式发布候选。
 
@@ -686,6 +688,26 @@ OPPOSED_L2_PAIR
 - 疏密、长短、左右和留白节奏自然；
 - 没有案例套用痕迹、鸡爪集中、毛刺填充或拥挤杂乱。
 
+### 13.4 5F 已实现与当前真实产物（2026-08-16）
+
+5F 已按本节语义实现并运行：
+
+- 审查入口：`run_stage5f_full_integration.py`，五个原型 × 三个
+  `production_seed`（4101/5321/7777），全程不使用任何 5B/5C/5D override，
+  四个 seed 域均由 `production_seed` 派生；每案例同时输出单周期和三周期
+  正式图，并保存实际策略、四个 seed、花位、承花枝、L1 集合与最终 Unit
+  selection；
+- 新增下游挂接投影：`generate_prototype_case` 在承花挂接无法消费当前主干
+  变体时，沿同一意图方向按强度阶梯（1.0/0.75/0.5/0.25/0.0）投影并记录
+  `downstream_mount_projection`；本轮仅 `proto_sw_1_3` 的 seed 5321 触发
+  （swept 变体强度 0.914→0.229），其余案例未触发，5C/5D/5E 已确认产物
+  的 plan_id 不变；
+- 机械事实（独立重算）：主干周期接缝连续、自交 0；选中曲线交叉 0、净空
+  违规 0、L2 真实挂接违规 0、L3 选中 0；五个原型各自 3 个 seed 的
+  主干变体/花位/L1 根位结构签名互不相同；
+- 真实产物：`artifacts/runs/dynamic_branch_stage5f_full_integration_v1`；
+- 视觉状态：`VISUAL_REVIEW_PENDING`，由用户按 §13.3 的机械项和视觉项确认。
+
 用户确认后才允许：
 
 - 标记整套结构生成机制通过；
@@ -704,7 +726,7 @@ OPPOSED_L2_PAIR
 | 5C / R6 | SW3 花位与正式 L1 响应 | 已实现 | 已确认 |
 | 5D | 普通 L1 simple/medium/rich | 已实现、全原型图已生成 | 已确认（2026-08-16） |
 | 5E | 少量局部 L2 分叉与繁简重点 | 已实现、正式图已生成 | 已确认（2026-08-16） |
-| 5F | 全原型跨 seed 完整集成 | 未实施 | 不适用 |
+| 5F | 全原型跨 seed 完整集成 | 已实现、正式图已生成 | 待确认 |
 
 ## 15. 统一验收原则
 
@@ -803,8 +825,8 @@ VISUAL_REJECTED
 2. 若否定，只返工普通 L1 疏密机制并重新提交真实图；—— 跳过：5D 已确认
 3. 用户确认 5D 后实施 5E；—— 已完成：已实现并提交正式图
 4. 提交 5E 正式图并等待用户确认；—— 已完成：2026-08-16 用户确认
-5. 用户确认 5E 后实施 5F；—— 当前步骤：实施中
-6. 5F 全原型跨 seed 正式图通过后，更新 README、流程图与最终冻结合同。
+5. 用户确认 5E 后实施 5F；—— 已完成：已实现并提交正式图
+6. 5F 全原型跨 seed 正式图通过后，更新 README、流程图与最终冻结合同；—— 当前步骤：等待视觉确认
 
 在此之前，不提前实现 5F，不把已有 L2 候选当成 5E 完成，也不扩大到叶片和渲染模型。
 
@@ -831,3 +853,6 @@ VISUAL_REJECTED
 | 5E 正式审查 | `run_stage5e_l2_sparse_review.py` |
 | 5E 正式产物 | `artifacts/runs/dynamic_branch_stage5e_l2_sparse_review_v1` |
 | 5E 视觉确认 | `STAGE5E_VISUAL_APPROVAL_V1.json` |
+| 5F 正式审查 | `run_stage5f_full_integration.py` |
+| 5F 正式产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v1` |
+| 下游挂接投影 | `run_stage3b_l1_flow.py` |

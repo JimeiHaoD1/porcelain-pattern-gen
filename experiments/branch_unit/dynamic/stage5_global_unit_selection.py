@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import random
 from collections import defaultdict
 from functools import lru_cache
 from typing import Any, Mapping, Sequence
@@ -23,6 +24,7 @@ CONTRACT_SCHEMA_V2 = "dynamic_branch_stage5_global_selection_contract_v2"
 EDITOR_L2_PRIOR_SCHEMA = "dynamic_branch_editor_l2_placement_prior_v1"
 FIXED_L1_ONLY_POLICY = "fixed_l1_only_for_5c_r6"
 FIXED_L1_ONLY_5D_POLICY = "fixed_l1_only_for_5d_density_review"
+SPARSE_L2_5E_POLICY = "sparse_local_l2_for_5e"
 FIXED_L1_ONLY_POLICIES = {
     FIXED_L1_ONLY_POLICY,
     FIXED_L1_ONLY_5D_POLICY,
@@ -50,6 +52,259 @@ def _candidate_is_actual_l1_only(candidate: Mapping[str, Any]) -> bool:
             for curve in curves
         )
     )
+
+
+def _candidate_5e_state(candidate: Mapping[str, Any]) -> str | None:
+    """Derive the allowed 5E Unit state from actual geometry.
+
+    Allowed states are L1_ONLY, SINGLE_L2_LEFT, SINGLE_L2_RIGHT, and
+    OPPOSED_L2_PAIR. The state is recomputed from hierarchy counts and the
+    real L2 turn signs instead of reading a self-reported class label.
+    Returns None when the Unit must not be selectable under 5E: any L3,
+    paired children with identical turn signs (same-side barbs), or an
+    unexpected L2 count.
+    """
+
+    hierarchy = candidate.get("hierarchy")
+    curves = candidate.get("curves")
+    if not (isinstance(hierarchy, Mapping) and isinstance(curves, Sequence)):
+        return None
+    if hierarchy.get("l3_count") != 0:
+        return None
+    l2_curves = [
+        curve
+        for curve in curves
+        if isinstance(curve, Mapping) and curve.get("level") == "L2"
+    ]
+    l2_count = len(l2_curves)
+    if l2_count == 0:
+        return "L1_ONLY"
+    if l2_count == 1:
+        sign = int(l2_curves[0].get("turn_sign", 0))
+        if sign > 0:
+            return "SINGLE_L2_RIGHT"
+        if sign < 0:
+            return "SINGLE_L2_LEFT"
+        return None
+    if l2_count == 2:
+        signs = [int(curve.get("turn_sign", 0)) for curve in l2_curves]
+        if signs[0] and signs[1] and signs[0] != signs[1]:
+            return "OPPOSED_L2_PAIR"
+        return None
+    return None
+
+
+def _select_sparse_l2(
+    *,
+    inventory: Mapping[str, Any],
+    conflict_graph: Mapping[str, Any],
+    contract: Mapping[str, Any],
+    lane_ids: Sequence[str],
+    lane_order: Sequence[str],
+    eligible_by_lane: Mapping[str, Sequence[Mapping[str, Any]]],
+    conflict_ids: Mapping[str, set[str]],
+    pair_penalties: Mapping[str, Mapping[str, float]],
+    prototype_strategy: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Select a sparse 5E composition: L1-only baseline plus seeded upgrades.
+
+    Phase A re-solves the deterministic best all-L1-only composition with the
+    same lexicographic parallel-co-travel objective as 5C/5D. Phase B derives
+    an upgrade priority, state phase, and intent budget from unit_seed, then
+    upgrades lanes one by one only when the hard conflict graph allows it.
+    Landing zero L2 units is a legal result; no fixed class fractions are
+    consumed.
+    """
+
+    by_state: dict[
+        str, dict[str, list[Mapping[str, Any]]]
+    ] = defaultdict(lambda: defaultdict(list))
+    for lane_id in lane_ids:
+        for candidate in eligible_by_lane[lane_id]:
+            state = _candidate_5e_state(candidate)
+            by_state[state][lane_id].append(candidate)
+
+    baseline_eligible: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    for lane_id in lane_order:
+        baseline_eligible[lane_id] = sorted(
+            by_state["L1_ONLY"][lane_id],
+            key=lambda candidate: (
+                len(conflict_ids[str(candidate["candidate_id"])]),
+                str(candidate["candidate_id"]),
+            ),
+        )
+
+    best_baseline: list[Mapping[str, Any]] = []
+    best_peak = float("inf")
+    best_total = float("inf")
+    selected: list[Mapping[str, Any]] = []
+    selected_ids: set[str] = set()
+    phase_a_node_count = 0
+    phase_a_backtrack_count = 0
+
+    def search(index: int, total: float, peak: float) -> None:
+        nonlocal best_baseline, best_peak, best_total
+        nonlocal phase_a_node_count, phase_a_backtrack_count
+        if index == len(lane_order):
+            if (peak, total) < (best_peak, best_total):
+                best_peak = peak
+                best_total = total
+                best_baseline = list(selected)
+            return
+        lane_id = lane_order[index]
+        for candidate in baseline_eligible[lane_id]:
+            phase_a_node_count += 1
+            candidate_id = str(candidate["candidate_id"])
+            if selected_ids & conflict_ids[candidate_id]:
+                continue
+            added = [
+                pair_penalties[candidate_id].get(existing_id, 0.0)
+                for existing_id in selected_ids
+            ]
+            next_total = total + sum(added)
+            next_peak = max(peak, max(added, default=0.0))
+            if next_peak > best_peak + 1e-12 or (
+                abs(next_peak - best_peak) <= 1e-12
+                and next_total >= best_total - 1e-12
+            ):
+                continue
+            selected.append(candidate)
+            selected_ids.add(candidate_id)
+            search(index + 1, next_total, next_peak)
+            selected.pop()
+            selected_ids.remove(candidate_id)
+            phase_a_backtrack_count += 1
+
+    search(0, 0.0, 0.0)
+    if not best_baseline:
+        raise Stage5SelectionError(
+            "sparse 5E baseline has no feasible all-L1-only composition"
+        )
+
+    unit_seed = int(inventory["unit_seed"])
+    upgrade_priority = list(lane_order)
+    random.Random(unit_seed).shuffle(upgrade_priority)
+    intent_budget = min(
+        1 + (unit_seed % 3),
+        max(1, (len(lane_ids) - 1) // 2),
+    )
+    state_cycle = [
+        "SINGLE_L2_LEFT",
+        "SINGLE_L2_RIGHT",
+        "OPPOSED_L2_PAIR",
+    ]
+    final_by_lane = {
+        str(candidate["source_lane_id"]): candidate
+        for candidate in best_baseline
+    }
+    final_ids = {str(candidate["candidate_id"]) for candidate in best_baseline}
+    upgrade_lane_ids: list[str] = []
+    for priority_index, lane_id in enumerate(upgrade_priority):
+        if len(upgrade_lane_ids) >= intent_budget:
+            break
+        phase = (unit_seed + priority_index) % len(state_cycle)
+        preferred = state_cycle[phase:] + state_cycle[:phase]
+        candidates: list[Mapping[str, Any]] = []
+        for state in preferred:
+            candidates.extend(by_state[state][lane_id])
+        candidates.sort(
+            key=lambda candidate: (
+                len(conflict_ids[str(candidate["candidate_id"])]),
+                str(candidate["candidate_id"]),
+            )
+        )
+        for candidate in candidates:
+            candidate_id = str(candidate["candidate_id"])
+            if final_ids & conflict_ids[candidate_id]:
+                continue
+            replaced = final_by_lane[lane_id]
+            final_ids.remove(str(replaced["candidate_id"]))
+            final_by_lane[lane_id] = candidate
+            final_ids.add(candidate_id)
+            upgrade_lane_ids.append(lane_id)
+            break
+
+    selected_candidates = [
+        final_by_lane[str(lane_id)] for lane_id in lane_order
+    ]
+    selected_l2_count = sum(
+        int(candidate["hierarchy"]["l2_count"])
+        for candidate in selected_candidates
+    )
+    selected_l3_count = sum(
+        int(candidate["hierarchy"]["l3_count"])
+        for candidate in selected_candidates
+    )
+    result: dict[str, Any] = {
+        "schema": SCHEMA_V2,
+        "contract_id": contract["contract_id"],
+        "selection_id": (
+            f"{inventory['inventory_id']}__global_unit_selection_sparse5e"
+        ),
+        "prototype_id": inventory["prototype_id"],
+        "family_id": inventory["family_id"],
+        "prototype_strategy": (
+            dict(prototype_strategy)
+            if isinstance(prototype_strategy, Mapping)
+            else None
+        ),
+        "seed": inventory["seed"],
+        "source_inventory_id": inventory["inventory_id"],
+        "source_inventory_digest": inventory["inventory_digest"],
+        "source_conflict_graph_digest": conflict_graph[
+            "conflict_graph_digest"
+        ],
+        "status": contract["output"]["review_state"],
+        "feasible": True,
+        "lane_count": len(lane_ids),
+        "selected_candidate_count": len(selected_candidates),
+        "selected_candidate_ids": [
+            candidate["candidate_id"] for candidate in selected_candidates
+        ],
+        "selected_candidates": selected_candidates,
+        "blocking_lane_pairs": [],
+        "solver_trace": {
+            "method": contract["selection"]["solver"],
+            "hierarchy_policy": SPARSE_L2_5E_POLICY,
+            "lane_order": list(lane_order),
+            "upgrade_priority": upgrade_priority,
+            "candidate_order": contract["deterministic_order"][
+                "candidate_order"
+            ],
+            "phase_a_search_node_count": phase_a_node_count,
+            "phase_a_backtrack_count": phase_a_backtrack_count,
+            "intent_upgrade_budget": intent_budget,
+            "achieved_upgrade_count": len(upgrade_lane_ids),
+            "upgrade_lane_ids": upgrade_lane_ids,
+            "selected_l1_only_count": sum(
+                1
+                for candidate in selected_candidates
+                if _candidate_5e_state(candidate) == "L1_ONLY"
+            ),
+            "selected_l2_count": selected_l2_count,
+            "selected_l3_count": selected_l3_count,
+            "zero_l2_landed_is_legal": True,
+            "best_of_n_visual_ranking_used": False,
+            "composite_visual_score_used": False,
+            "validation_guided_retry_used": False,
+            "validation_guided_resample_used": False,
+            "automatic_repair_used": False,
+            "automatic_deletion_used": False,
+            "silent_fallback_used": False,
+        },
+        "review": {
+            "numeric_checks_cannot_auto_approve_visual_gate": True,
+            "criteria": [
+                "l2_forks_are_sparse",
+                "forks_are_readable_not_same_side_barbs",
+                "local_complexity_emphasis_formed",
+                "backbone_flower_l1_rhythm_preserved",
+            ],
+        },
+    }
+    result["selection_digest"] = canonical_digest(result)
+    validate_global_selection(result, conflict_graph)
+    return result
 
 
 def _editor_l2_profile(
@@ -241,15 +496,20 @@ def build_conflict_graph(
         and contract.get("selection", {}).get("hierarchy_policy")
         in FIXED_L1_ONLY_POLICIES
     )
+    sparse_l2 = (
+        contract_schema == CONTRACT_SCHEMA_V2
+        and contract.get("selection", {}).get("hierarchy_policy")
+        == SPARSE_L2_5E_POLICY
+    )
 
     def graph_eligible(candidate: Mapping[str, Any]) -> bool:
-        return bool(
-            candidate["intrinsic_diagnostics"]["valid"]
-            and (
-                not fixed_l1_only
-                or _candidate_is_actual_l1_only(candidate)
-            )
-        )
+        if not candidate["intrinsic_diagnostics"]["valid"]:
+            return False
+        if fixed_l1_only and not _candidate_is_actual_l1_only(candidate):
+            return False
+        if sparse_l2 and _candidate_5e_state(candidate) is None:
+            return False
+        return True
 
     prototype_strategy = inventory.get("prototype_strategy")
     if contract_schema == CONTRACT_SCHEMA_V2 and not isinstance(
@@ -569,12 +829,13 @@ def select_global_units(
     fixed_l1_only = (
         is_v2 and fixed_l1_only_policy in FIXED_L1_ONLY_POLICIES
     )
+    sparse_l2 = is_v2 and fixed_l1_only_policy == SPARSE_L2_5E_POLICY
 
     eligible_by_lane: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for candidate in inventory["candidates"]:
         if candidate["intrinsic_diagnostics"]["valid"] and (
             not fixed_l1_only or _candidate_is_actual_l1_only(candidate)
-        ):
+        ) and (not sparse_l2 or _candidate_5e_state(candidate) is not None):
             eligible_by_lane[str(candidate["source_lane_id"])].append(candidate)
 
     lane_ids = [str(row["source_lane_id"]) for row in inventory["lanes"]]
@@ -602,6 +863,19 @@ def select_global_units(
 
     if contract_schema not in {CONTRACT_SCHEMA_V1, CONTRACT_SCHEMA_V2}:
         raise Stage5SelectionError("stage-5 contract schema mismatch")
+
+    if sparse_l2:
+        return _select_sparse_l2(
+            inventory=inventory,
+            conflict_graph=conflict_graph,
+            contract=contract,
+            lane_ids=lane_ids,
+            lane_order=lane_order,
+            eligible_by_lane=eligible_by_lane,
+            conflict_ids=conflict_ids,
+            pair_penalties=pair_penalties,
+            prototype_strategy=prototype_strategy,
+        )
 
     hierarchy_targets: dict[str, int] | None = None
     seed_class_offset: int | None = None
@@ -1009,6 +1283,23 @@ def validate_global_selection(
                     raise Stage5SelectionError(
                         "fixed L1-only selection contains non-L1 hierarchy geometry"
                     )
+        elif selection.get("schema") == SCHEMA_V2 and selection.get(
+            "solver_trace", {}
+        ).get("hierarchy_policy") == SPARSE_L2_5E_POLICY:
+            for candidate in selected:
+                if _candidate_5e_state(candidate) is None:
+                    raise Stage5SelectionError(
+                        "sparse 5E selection contains a non-eligible Unit"
+                    )
+                if candidate.get("hierarchy", {}).get("l3_count") != 0:
+                    raise Stage5SelectionError(
+                        "sparse 5E selection contains an L3 hierarchy"
+                    )
+            trace = selection.get("solver_trace", {})
+            if int(trace.get("selected_l3_count", -1)) != 0:
+                raise Stage5SelectionError(
+                    "sparse 5E solver trace reports a non-zero L3 count"
+                )
         elif selection.get("schema") == SCHEMA_V2:
             target_counts = selection.get("solver_trace", {}).get(
                 "hierarchy_mix_target_counts"

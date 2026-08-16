@@ -2,7 +2,7 @@
 
 状态快照：2026-08-16  
 适用目录：`D:\sdxl\chanzhi_sw_clean_oldmain_opt\experiments\branch_unit\dynamic`  
-当前视觉关口：5D 已获用户视觉确认（2026-08-16）；下一步实施 5E
+当前视觉关口：5D 已确认；5E 已实现并提交正式图，`VISUAL_REVIEW_PENDING`
 
 ## 1. 文档用途与事实优先级
 
@@ -527,7 +527,7 @@ simple / medium / rich
 
 ## 12. 5E：少量局部繁简与真实二级分叉
 
-状态：尚未实施。只有用户确认 5D 后才能开始。
+状态：已实现并提交正式图；视觉状态 `VISUAL_REVIEW_PENDING`。
 
 ### 12.1 5E 的修订目标
 
@@ -613,6 +613,26 @@ OPPOSED_L2_PAIR
 - 是否形成局部繁简重点；
 - 是否破坏主干、花枝和 L1 的整体节奏。
 
+### 12.7 5E 已实现与当前真实产物（2026-08-16）
+
+5E 已按本节语义实现并进入正式链：
+
+- 选择合同：`STAGE5E_L2_SPARSE_SELECTION_CONTRACT_V1.json`，新策略
+  `sparse_local_l2_for_5e`；不允许同侧双 L2（editor_same_sign）、不允许 L3；
+  不消费旧的固定配比 `class_fraction_targets`；
+- 求解：先在 L1-only 候选上求最优基线，再按 `unit_seed` 派生的优先级、
+  状态相位和预算做有界升级；预算被限制为多数 lane 保持 L1-only；零升级是
+  合法结果；
+- 审查入口：`run_stage5e_l2_sparse_review.py`，冻结 5D 生产默认密度案例
+  （plan_id、根位、主干花结构、承花枝、花位布局与 5D 正式产物逐一一致），
+  只改变 `unit_seed`；
+- 真实产物：`artifacts/runs/dynamic_branch_stage5e_l2_sparse_review_v1`，
+  5 原型 × 3 unit_seed 共 15 个正式案例；
+- 机械事实（独立重算）：选中曲线交叉 0、净空违规 0、L2 真实挂接违规 0、
+  L3 选中 0；五个原型的 3 个 unit_seed 正式选择互不相同；
+- 视觉状态：`VISUAL_REVIEW_PENDING`，由用户判断 L2 是否稀少、分叉是否清晰、
+  是否形成繁简重点、是否保持主干/花枝/L1 节奏。
+
 ## 13. 5F：全原型完整集成与发布候选
 
 状态：尚未实施。依赖用户确认 5E。
@@ -683,7 +703,7 @@ OPPOSED_L2_PAIR
 | R0-R5 | 公共 L1 候选池与整体选择 | 已实现并接入 Stage3-5 | 按计划无需单独验收；被 5C 正式结果消费 |
 | 5C / R6 | SW3 花位与正式 L1 响应 | 已实现 | 已确认 |
 | 5D | 普通 L1 simple/medium/rich | 已实现、全原型图已生成 | 已确认（2026-08-16） |
-| 5E | 少量局部 L2 分叉与繁简重点 | 未实施 | 不适用 |
+| 5E | 少量局部 L2 分叉与繁简重点 | 已实现、正式图已生成 | 待确认 |
 | 5F | 全原型跨 seed 完整集成 | 未实施 | 不适用 |
 
 ## 15. 统一验收原则
@@ -768,7 +788,8 @@ VISUAL_REJECTED
 
 现有候选池仍包含历史 L1-only / single-L2 / double-L2 / L3 结构。5C 和 5D 的正式合同明确只选择实际 L1-only Unit。
 
-5E 必须按“多数 L1-only、少量真实分叉、无 L3”的新语义重新约束正式选择，不能直接打开旧候选配比。
+5E 已按“多数 L1-only、少量真实分叉、无 L3”的新语义实现，重新约束了正式
+选择（见 §12.7），没有直接打开旧候选配比。
 
 ### 17.3 5C 的投影机制需要继续记录保留率
 
@@ -780,8 +801,8 @@ VISUAL_REJECTED
 
 1. 用户查看并确认或否定当前 5D；—— 已完成：2026-08-16 用户确认
 2. 若否定，只返工普通 L1 疏密机制并重新提交真实图；—— 跳过：5D 已确认
-3. 用户确认 5D 后实施 5E；—— 当前步骤：实施中
-4. 提交 5E 正式图并等待用户确认；
+3. 用户确认 5D 后实施 5E；—— 已完成：已实现并提交正式图
+4. 提交 5E 正式图并等待用户确认；—— 当前步骤：等待视觉确认
 5. 用户确认 5E 后实施 5F；
 6. 5F 全原型跨 seed 正式图通过后，更新 README、流程图与最终冻结合同。
 
@@ -806,3 +827,6 @@ VISUAL_REJECTED
 | 5D 正式审查 | `run_stage5d_density_review.py` |
 | 5D 正式产物 | `artifacts/runs/dynamic_branch_stage5d_density_review_v1` |
 | 5D 视觉确认 | `STAGE5D_VISUAL_APPROVAL_V1.json` |
+| 5E 选择合同 | `STAGE5E_L2_SPARSE_SELECTION_CONTRACT_V1.json` |
+| 5E 正式审查 | `run_stage5e_l2_sparse_review.py` |
+| 5E 正式产物 | `artifacts/runs/dynamic_branch_stage5e_l2_sparse_review_v1` |

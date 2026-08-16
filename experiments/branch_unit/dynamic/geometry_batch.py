@@ -144,29 +144,79 @@ def _segment_pair_arrays(pa, pb):
     )
 
 
-def polyline_pair_intersects(pa, pb) -> bool:
+def polyline_pair_intersects(pa, pb, junction=None) -> bool:
     """Return True when any segment pair between two polylines intersects.
 
-    Mirrors `branch_unit_grammar_v1._curve_crosses` with no allowed junction.
+    Mirrors `branch_unit_grammar_v1._curve_crosses`: an optional junction
+    point within 1e-7 of both segments is excluded from the crossing test.
     """
 
     if pa.shape[0] < 2 or pb.shape[0] < 2:
         return False
     arrays = _segment_pair_arrays(pa, pb)
-    return bool(
-        np.any(
-            segments_intersect_batch(
-                arrays[0],
-                arrays[1],
-                arrays[2],
-                arrays[3],
-                arrays[4],
-                arrays[5],
-                arrays[6],
-                arrays[7],
-            )
-        )
+    intersects = segments_intersect_batch(
+        arrays[0],
+        arrays[1],
+        arrays[2],
+        arrays[3],
+        arrays[4],
+        arrays[5],
+        arrays[6],
+        arrays[7],
     )
+    if junction is None:
+        return bool(np.any(intersects))
+    junction_x = float(junction[0])
+    junction_y = float(junction[1])
+    junction_on_a = (
+        point_segment_distance_batch(
+            junction_x,
+            junction_y,
+            arrays[0],
+            arrays[1],
+            arrays[2],
+            arrays[3],
+        )
+        <= 1e-7
+    )
+    junction_on_b = (
+        point_segment_distance_batch(
+            junction_x,
+            junction_y,
+            arrays[4],
+            arrays[5],
+            arrays[6],
+            arrays[7],
+        )
+        <= 1e-7
+    )
+    excluded = junction_on_a & junction_on_b
+    return bool(np.any(intersects & ~excluded))
+
+
+def point_segment_distance_matrix_batch(
+    points,
+    segment_starts,
+    segment_ends,
+):
+    """Distances from each point to every segment, shaped (points, segments)."""
+
+    point_count = points.shape[0]
+    segment_count = segment_starts.shape[0]
+    px = np.repeat(points[:, 0], segment_count)
+    py = np.repeat(points[:, 1], segment_count)
+    sx = np.tile(segment_starts[:, 0], point_count)
+    sy = np.tile(segment_starts[:, 1], point_count)
+    ex = np.tile(segment_ends[:, 0], point_count)
+    ey = np.tile(segment_ends[:, 1], point_count)
+    return point_segment_distance_batch(
+        px,
+        py,
+        sx,
+        sy,
+        ex,
+        ey,
+    ).reshape(point_count, segment_count)
 
 
 def polyline_pair_minimum_distance(pa, pb) -> float:

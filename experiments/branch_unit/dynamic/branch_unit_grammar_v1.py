@@ -15,6 +15,14 @@ import math
 from collections import Counter
 from typing import Any, Mapping, Sequence
 
+import numpy as np
+
+from geometry_batch import (
+    point_segment_distance_matrix_batch,
+    polyline_pair_intersects,
+    polyline_pair_minimum_distance,
+    segments_intersect_batch,
+)
 from prototype_strategy_v1 import validate_strategy_projection
 
 
@@ -1221,16 +1229,13 @@ def _diagnose_candidate(
             )
         child_points = [_point(value) for value in curve["centerline"]]
         probe_index = max(2, int(len(child_points) * 0.30))
+        parent_matrix = point_segment_distance_matrix_batch(
+            np.asarray(child_points, dtype=np.float64),
+            np.asarray(parent_points[:-1], dtype=np.float64),
+            np.asarray(parent_points[1:], dtype=np.float64),
+        )
         parent_distances = [
-            min(
-                _point_segment_distance(
-                    child_point,
-                    parent_points[index - 1],
-                    parent_points[index],
-                )
-                for index in range(1, len(parent_points))
-            )
-            for child_point in child_points
+            float(value) for value in parent_matrix.min(axis=1)
         ]
         departure = parent_distances[probe_index]
         departure_distances.append(departure)
@@ -1344,9 +1349,21 @@ def _diagnose_candidate(
     l2_curves = [curve for curve in curves if curve["level"] == "L2"]
     sibling_curve_clearance = min(
         (
-            _polyline_distance(
-                [_point(value) for value in first["centerline"]],
-                [_point(value) for value in second["centerline"]],
+            polyline_pair_minimum_distance(
+                np.asarray(
+                    [
+                        [float(point[0]), float(point[1])]
+                        for point in first["centerline"]
+                    ],
+                    dtype=np.float64,
+                ),
+                np.asarray(
+                    [
+                        [float(point[0]), float(point[1])]
+                        for point in second["centerline"]
+                    ],
+                    dtype=np.float64,
+                ),
             )
             for index, first in enumerate(l2_curves)
             for second in l2_curves[index + 1 :]
@@ -1377,25 +1394,70 @@ def _diagnose_candidate(
     crossing_count = 0
     for index, curve in enumerate(curves):
         points = [_point(value) for value in curve["centerline"]]
-        for first in range(1, len(points)):
-            for second in range(first + 2, len(points)):
-                if second == first + 1:
-                    continue
-                if _segments_intersect(
-                    points[first - 1],
-                    points[first],
-                    points[second - 1],
-                    points[second],
+        if len(points) >= 3:
+            first_indexes: list[int] = []
+            second_indexes: list[int] = []
+            for first in range(1, len(points)):
+                for second in range(first + 2, len(points)):
+                    first_indexes.append(first)
+                    second_indexes.append(second)
+            if first_indexes:
+                self_a0 = np.asarray(
+                    [points[first - 1] for first in first_indexes],
+                    dtype=np.float64,
+                )
+                self_a1 = np.asarray(
+                    [points[first] for first in first_indexes],
+                    dtype=np.float64,
+                )
+                self_b0 = np.asarray(
+                    [points[second - 1] for second in second_indexes],
+                    dtype=np.float64,
+                )
+                self_b1 = np.asarray(
+                    [points[second] for second in second_indexes],
+                    dtype=np.float64,
+                )
+                if bool(
+                    np.any(
+                        segments_intersect_batch(
+                            self_a0[:, 0],
+                            self_a0[:, 1],
+                            self_a1[:, 0],
+                            self_a1[:, 1],
+                            self_b0[:, 0],
+                            self_b0[:, 1],
+                            self_b1[:, 0],
+                            self_b1[:, 1],
+                        )
+                    )
                 ):
                     crossing_count += 1
-                    break
         for other in curves[index + 1 :]:
             allowed: Point | None = None
             if other["parent_curve_id"] == curve["curve_id"]:
                 allowed = _point(other["cubic_segments"][0]["p0"])
             elif curve["parent_curve_id"] == other["curve_id"]:
                 allowed = _point(curve["cubic_segments"][0]["p0"])
-            if _curve_crosses(curve, other, allowed):
+            curve_points = np.asarray(
+                [
+                    [float(point[0]), float(point[1])]
+                    for point in curve["centerline"]
+                ],
+                dtype=np.float64,
+            )
+            other_points = np.asarray(
+                [
+                    [float(point[0]), float(point[1])]
+                    for point in other["centerline"]
+                ],
+                dtype=np.float64,
+            )
+            if polyline_pair_intersects(
+                curve_points,
+                other_points,
+                junction=allowed,
+            ):
                 crossing_count += 1
     if crossing_count:
         issues.append({"code": "unit_self_crossing", "count": crossing_count})
@@ -1409,7 +1471,13 @@ def _diagnose_candidate(
         if curve["level"] == "L1":
             continue
         points = [_point(value) for value in curve["centerline"]]
-        if _polyline_distance(points, backbone) <= 0.001:
+        if (
+            polyline_pair_minimum_distance(
+                np.asarray(points, dtype=np.float64),
+                np.asarray(backbone, dtype=np.float64),
+            )
+            <= 0.001
+        ):
             backbone_crossing_count += 1
     if backbone_crossing_count:
         issues.append(
@@ -1488,7 +1556,23 @@ def _diagnose_candidate(
                 [_round(float(point[0]) + 1.0), _round(float(point[1]))]
                 for point in other["centerline"]
             ]
-            if _curve_crosses(curve, shifted, None):
+            shifted_points = np.asarray(
+                [
+                    [float(point[0]), float(point[1])]
+                    for point in shifted["centerline"]
+                ],
+                dtype=np.float64,
+            )
+            if polyline_pair_intersects(
+                np.asarray(
+                    [
+                        [float(point[0]), float(point[1])]
+                        for point in curve["centerline"]
+                    ],
+                    dtype=np.float64,
+                ),
+                shifted_points,
+            ):
                 periodic_crossing_count += 1
     if periodic_crossing_count:
         issues.append(
@@ -1510,13 +1594,19 @@ def _diagnose_candidate(
                 mount_points = [
                     _point(value) for value in mount["centerline"]
                 ]
+                curve_array = np.asarray(
+                    curve_points,
+                    dtype=np.float64,
+                )
+                mount_array = np.asarray(
+                    mount_points,
+                    dtype=np.float64,
+                )
                 minimum = min(
-                    _polyline_distance(
-                        curve_points,
-                        [
-                            (point[0] + offset, point[1])
-                            for point in mount_points
-                        ],
+                    polyline_pair_minimum_distance(
+                        curve_array,
+                        mount_array
+                        + np.asarray([offset, 0.0], dtype=np.float64),
                     )
                     for offset in (-1.0, 0.0, 1.0)
                 )

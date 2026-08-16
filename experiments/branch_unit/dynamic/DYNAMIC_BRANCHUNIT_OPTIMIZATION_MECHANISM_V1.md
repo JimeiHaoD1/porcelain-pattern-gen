@@ -716,6 +716,10 @@ OPPOSED_L2_PAIR
 `dynamic_branch_stage5f_full_integration_v2`，与 v1 的 plan_id、最终选择、
 selection_digest 和机械事实全部一致；用户已于 2026-08-16 视觉确认 v2 与
 v1 一致。实测剩余热点转移到 Stage4 候选内在诊断（同一批处理原语可继续复用）。
+随后把同一批处理接入 Stage4 内在诊断：15/15 案例的候选集合、
+`intrinsic_diagnostics`、inventory_id、冲突边集、配对惩罚与最终选择均与冻结
+产物一致，0 处不一致；最重案例的 Stage4 从 48.65 秒降到约 2.08 秒。整批 5F
+墙钟时间由约 20.0 分钟降到约 14.6 分钟（v3，与 v1 逐案例一致）。
 
 用户确认后才允许：
 
@@ -869,3 +873,4 @@ VISUAL_REJECTED
 | 最终冻结合同 | `FINAL_FROZEN_CONTRACT_V1.json` |
 | 批处理几何原语 | `geometry_batch.py` |
 | 5F 重构对照产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v2` |
+| 5F Stage4 重构对照产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v3` |

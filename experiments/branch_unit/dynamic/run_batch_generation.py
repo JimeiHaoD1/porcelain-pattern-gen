@@ -84,6 +84,24 @@ def _read_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def _downstream_unit_clearance(
+    strategy: Mapping[str, Any],
+    editor_l2_prior: Mapping[str, Any],
+    stage4_contract: Mapping[str, Any],
+) -> float:
+    """The full-Unit clearance Stage5 will require for this prototype."""
+
+    profile_key = str(strategy["branchunit_profile"]["editor_l2_profile_key"])
+    profile = editor_l2_prior["profiles"][profile_key]
+    editor_q10 = float(
+        profile["nonparent_curve_clearance_unit_ratio"]["q10"]
+    )
+    occupancy_diameter = 2.0 * float(
+        stage4_contract["geometry"]["occupancy_radius"]
+    )
+    return max(occupancy_diameter, editor_q10)
+
+
 def production_cell(prototype_id: str, production_seed: int) -> tuple[str, str]:
     """Resolve the discrete backbone-variant and density cell without geometry."""
 
@@ -178,6 +196,11 @@ def _generate_case(
 
     strategy_registry = _load_registry()
     strategy = strategy_registry[prototype_id]
+    downstream_clearance = _downstream_unit_clearance(
+        strategy,
+        _G["editor_l2_prior"],
+        _G["stage4_contract"],
+    )
     result = generate_prototype_case(
         payload=_G["inputs"][prototype_id],
         prototype_strategy=strategy,
@@ -194,6 +217,7 @@ def _generate_case(
         backbone_rho=None,
         flower_rho=None,
         ordinary_density_level_override=None,
+        downstream_unit_clearance=downstream_clearance,
     )
     analysis = result["variant_analysis"]
     plan = result["plan"]
@@ -345,6 +369,7 @@ def _generate_case(
         "downstream_mount_projection_used": bool(
             result["downstream_mount_projection"]["used"]
         ),
+        "downstream_unit_clearance": round(downstream_clearance, 9),
         "mechanical_checks": mechanics,
         "slim": slim,
         "render_mode": render_mode,

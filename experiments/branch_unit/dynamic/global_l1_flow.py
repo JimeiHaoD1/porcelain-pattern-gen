@@ -3271,7 +3271,7 @@ def _solve(
                     **{name: round(value, 9) for name, value in metrics.items()},
                 }
             )
-    return selected, {
+    solver: dict[str, Any] = {
         "solver": "deterministic_seeded_global_beam_set_solver",
         "beam_capacity": beam_capacity,
         "expansion_cap_per_slot": expansion_cap,
@@ -3407,6 +3407,7 @@ def _build_common_conflict_graph(
     candidates: Sequence[Mapping[str, Any]],
     prior: Mapping[str, Any],
     curve_geometry_profile: Mapping[str, Any],
+    lane_clearance_override: float | None = None,
 ) -> tuple[
     dict[str, set[str]],
     dict[tuple[str, str], tuple[bool, float, dict[str, float]]],
@@ -3419,7 +3420,11 @@ def _build_common_conflict_graph(
     if len(candidate_ids) != len(set(candidate_ids)):
         raise GlobalL1FlowError("common L1 pool contains duplicate candidate ids")
     root_spacing = _minimum_root_spacing(prior)
-    lane_clearance = _minimum_lane_clearance(prior, curve_geometry_profile)
+    lane_clearance = (
+        float(lane_clearance_override)
+        if lane_clearance_override is not None
+        else _minimum_lane_clearance(prior, curve_geometry_profile)
+    )
     adjacency = {candidate_id: set() for candidate_id in candidate_ids}
     pair_cache: dict[
         tuple[str, str], tuple[bool, float, dict[str, float]]
@@ -3524,6 +3529,41 @@ def _build_common_conflict_graph(
     return adjacency, pair_cache, root_spacing, lane_clearance
 
 
+def _seeded_rescue_witness(
+    rows_by_id: Mapping[str, Mapping[str, Any]],
+    ordered_ids: Sequence[str],
+    adjacency: Mapping[str, set[str]],
+    target_count: int,
+    rescue_seed: int | None,
+    add_terminal,
+) -> bool:
+    """Deterministic seeded greedy fallback for the common-set search.
+
+    The ranked greedy can miss an existing independent set on dense graphs.
+    This fallback only runs after the greedy found no witness for one target
+    cardinality, uses the case branch seed for its shuffle order, and never
+    re-rolls the generation seed.
+    """
+
+    base = 0 if rescue_seed is None else int(rescue_seed)
+    sequence = (base * 1103515245 + target_count * 12345 + 12345) % (2**32)
+    rng = random.Random(sequence)
+    for _ in range(4000):
+        nodes = list(ordered_ids)
+        rng.shuffle(nodes)
+        chosen: list[str] = []
+        banned: set[str] = set()
+        for node in nodes:
+            if node in banned:
+                continue
+            chosen.append(node)
+            banned.update(adjacency[node])
+            if len(chosen) >= target_count:
+                add_terminal(chosen)
+                return True
+    return False
+
+
 def _solve_common_set(
     candidates: Sequence[Mapping[str, Any]],
     count_derivation: Mapping[str, Any],
@@ -3531,6 +3571,8 @@ def _solve_common_set(
     prior: Mapping[str, Any],
     curve_geometry_profile: Mapping[str, Any],
     prototype_strategy: Mapping[str, Any] | None = None,
+    rescue_seed: int | None = None,
+    lane_clearance_override: float | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Select one compatible variable-cardinality set from a shared pool."""
 
@@ -3541,7 +3583,12 @@ def _solve_common_set(
         pair_cache,
         root_spacing,
         lane_clearance,
-    ) = _build_common_conflict_graph(candidates, prior, curve_geometry_profile)
+    ) = _build_common_conflict_graph(
+        candidates,
+        prior,
+        curve_geometry_profile,
+        lane_clearance_override,
+    )
     graph_stats = pair_cache.pop(("__graph_stats__", "__graph_stats__"))[2]
     rows_by_id = {str(row["candidate_id"]): row for row in candidates}
     ordered_ids = sorted(
@@ -3635,6 +3682,17 @@ def _solve_common_set(
             cardinality_status[str(target_count)] = "greedy_witness_found"
             continue
 
+        if _seeded_rescue_witness(
+            rows_by_id,
+            ordered_ids,
+            adjacency,
+            target_count,
+            rescue_seed,
+            add_terminal,
+        ):
+            cardinality_status[str(target_count)] = "seeded_rescue_witness_found"
+            continue
+
         exhausted = False
         witness: list[str] | None = None
 
@@ -3666,7 +3724,10 @@ def _solve_common_set(
 
         exact_search(0, [])
         if exhausted:
-            raise GlobalL1FlowError("l1_set_search_exhausted")
+            cardinality_status[str(target_count)] = (
+                "exact_search_exhausted_no_witness"
+            )
+            continue
         if witness is None:
             cardinality_status[str(target_count)] = "geometrically_infeasible"
         else:
@@ -3798,6 +3859,14 @@ def _solve_common_set(
         "selected_pair_metrics": pair_rows,
         "exact_editor_geometry_exemplar_reuse": False,
     }
+    if lane_clearance_override is not None:
+        solver["lane_clearance_override_applied"] = True
+    if any(
+        status == "seeded_rescue_witness_found"
+        for status in cardinality_status.values()
+    ):
+        solver["seeded_rescue_used"] = True
+    return selected, solver
 
 
 def _validate_inputs(
@@ -3859,6 +3928,7 @@ def generate_global_l1_flow_plan(
     backbone_variation: Mapping[str, Any] | None = None,
     flower_layout_plan: Mapping[str, Any] | None = None,
     ordinary_density_level_override: str | None = None,
+    downstream_unit_clearance: float | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Generate one formal L1-only layout and its complete candidate inventory."""
 
@@ -3999,7 +4069,78 @@ def generate_global_l1_flow_plan(
             prior,
             curve_geometry_profile,
             prototype_strategy,
+            rescue_seed=seed,
         )
+        if downstream_unit_clearance is not None:
+            required_clearance = float(downstream_unit_clearance)
+            selected_centerlines = [
+                [_point(point, "lane.centerline") for point in row["centerline"]]
+                for row in selected
+            ]
+            minimum_pair_clearance = min(
+                (
+                    global_l1_polyline_distance_batch(first, second, offset)
+                    for index, first in enumerate(selected_centerlines)
+                    for second in selected_centerlines[index + 1 :]
+                    for offset in (-1.0, 0.0, 1.0)
+                ),
+                default=float("inf"),
+            )
+            if minimum_pair_clearance < required_clearance - 1e-9:
+                rescue_feasible: list[dict[str, Any]] = []
+                mount_point_lists = [
+                    [
+                        _point(point, "flower_mount.centerline")
+                        for point in mount["centerline"]
+                    ]
+                    for mount in flower_mount_plan.get("mounts", [])
+                ]
+                for candidate in feasible:
+                    candidate_points = [
+                        _point(point, "candidate.centerline")
+                        for point in candidate["centerline"]
+                    ]
+                    minimum_mount_clearance = min(
+                        (
+                            global_l1_polyline_distance_batch(
+                                candidate_points,
+                                mount_points,
+                                offset,
+                            )
+                            for mount_points in mount_point_lists
+                            for offset in (-1.0, 0.0, 1.0)
+                        ),
+                        default=float("inf"),
+                    )
+                    if minimum_mount_clearance >= required_clearance - 1e-9:
+                        rescue_feasible.append(candidate)
+                selected, solver = _solve_common_set(
+                    rescue_feasible,
+                    count_derivation,
+                    analysis,
+                    prior,
+                    curve_geometry_profile,
+                    prototype_strategy,
+                    rescue_seed=seed,
+                    lane_clearance_override=required_clearance,
+                )
+                solver["downstream_clearance_resolve"] = {
+                    "initial_min_pair_clearance": round(
+                        minimum_pair_clearance,
+                        9,
+                    ),
+                    "required": round(required_clearance, 9),
+                    "re_solved": True,
+                }
+            else:
+                solver["downstream_clearance_resolve"] = {
+                    "initial_min_pair_clearance": round(
+                        minimum_pair_clearance,
+                        9,
+                    ),
+                    "required": round(required_clearance, 9),
+                    "re_solved": False,
+                }
         selected_ordinary_count = len(selected)
         selected_total_count = selected_ordinary_count + int(
             count_derivation["required_support_count"]

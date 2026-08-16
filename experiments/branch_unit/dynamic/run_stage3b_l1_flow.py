@@ -271,6 +271,7 @@ def generate_prototype_case(
     unit_seed_override: int | None = None,
     flower_rho: float | None = None,
     ordinary_density_level_override: str | None = None,
+    downstream_unit_clearance: float | None = None,
 ) -> dict[str, Any]:
     """Run the one active per-case production chain under one frozen strategy."""
 
@@ -377,6 +378,7 @@ def generate_prototype_case(
         backbone_variation=variation,
         flower_layout_plan=flower_layout_plan,
         ordinary_density_level_override=ordinary_density_level_override,
+        downstream_unit_clearance=downstream_unit_clearance,
     )
     validate_global_l1_flow_plan(plan)
     return {

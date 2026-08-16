@@ -1,40 +1,42 @@
-# Dynamic BranchUnit stages 0-4
+# Dynamic BranchUnit 动态生成主链（已冻结，2026-08-16）
 
-This directory is an independent entry point for the dynamic BranchUnit work.
-The fixed `7/12/2` generator is consumed only through the explicit stage-3A
-visual prior. Stage 3B does not consume selected layouts from the old
-stage-3/stage-4 chain.
+本目录是动态 BranchUnit 的独立入口。当前唯一权威机制文档是
+`DYNAMIC_BRANCHUNIT_OPTIMIZATION_MECHANISM_V1.md`；本 README 只提供链路由、
+状态与入口速查。
 
-Current scope:
+## 当前状态
 
-- stage 0: freeze and verify the fixed `proto_sw_1_3` baseline;
-- stage 1: load the five SW profiles through the `StrictP0 v2` whitelist and
-  convert geometry to an isotropic repeat-local frame;
-- stage 2: derive one planner-free `PrototypeAnalysis` per SW prototype and
-  render SVG/PNG overlays for visual review;
-- stage 2.5: bind the five prototypes to three flower/branch morphology
-  families, preserve per-prototype density/rhythm evidence as non-binding
-  priors, and render source-backed morphology instruction plates;
-- stage 3A: verify the immutable fixed baseline and extract role-conditioned
-  visual distributions. The strict paired baseline remains `proto_sw_1_3`
-  only; cross-prototype fixed-baseline quality is not claimed;
-- stage 3B: derive an evidence-driven L1 count and execute one seeded forward
-  global flow-lane set solve per task. It controls root position, target zone,
-  direction, distance, flower contact, whitespace, and periodic clearance;
-- stage 4: freeze the explicitly approved stage-3B launch matrix, enumerate
-  the declared complete Unit grammar/role/parameter strata exactly once, and
-  materialize L2/L3 cubic Bezier candidates with intrinsic diagnostics;
-- former stage-3 v3 and stage-4 v1/v2/v3 outputs remain historical evidence
-  and are not planning inputs for stage 3B or its successors;
-- editor integration and manual curve editing are not started.
+5A、5B、5C/R6、5D、5E、5F 已全部实现，并于 2026-08-16 获得用户视觉确认。
+确认记录：`STAGE5D_VISUAL_APPROVAL_V1.json`、`STAGE5E_VISUAL_APPROVAL_V1.json`、
+`STAGE5F_VISUAL_APPROVAL_V1.json`；最终冻结合同为
+`FINAL_FROZEN_CONTRACT_V1.json`。
 
-The complete project scope is branch skeleton generation only. Leaves, buds,
-and curl heads are not deferred future work; they are outside the current and
-later scope. A stage-3 `terminal_intent` records only the intended direction
-and ending behavior of a branch tip.
+## 唯一正式生产链
 
-The four implementation decisions are machine-readable in
-`IMPLEMENTATION_CONTRACT.json`.
+```text
+输入 → 5A 原型路由
+     → production_seed 四域拆分
+     → 5B 主干波形变体（必要时沿同一意图方向做下游挂接强度投影）
+     → 5C SW3 花位 / SW1/SW2 固定花位
+     → 花朵挂接并冻结
+     → R0-R5 公共普通 L1 候选池与整体选择
+     → 5D seed 驱动疏密档位
+     → 5E 稀疏局部 L2 分叉
+     → Stage4 Unit 候选
+     → Stage5 全局选择
+     → 单/三周期正式渲染
+     → 人工视觉门
+```
+
+程序化系统只负责结构骨架。叶片、膨大根茎、纹理与器物渲染交给后续渲染大模型；
+已确认的 5F 输出将作为该模型的结构输入与正样本（尚未开始）。
+
+## 历史说明
+
+- 早期 stage 0-4 产物保留为历史证据，其中 stage 3B 仍是普通 L1 上游链的一部分；
+- 旧的固定槽位 L1、二维根位密度场、旧 L1-only/single/double 固定配比与直接搬运
+  编辑器案例均已废弃，禁止重新启用；
+- 本 README 早前只覆盖 stage 0-4，现按冻结后的 5A-5F 链更新。
 
 ## Commands
 

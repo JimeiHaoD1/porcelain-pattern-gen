@@ -136,19 +136,19 @@
         <mxCell id="seed_split" value="seed域拆分&#xa;主干 / 花位（仅SW-3）/ 分支 / BranchUnit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#7F7F7F;fontSize=13;" vertex="1" parent="1">
           <mxGeometry x="45" y="1340" width="245" height="85" as="geometry"/>
         </mxCell>
-        <mxCell id="instantiate" value="实例化主干与花位&#xa;按策略执行固定/变化边界" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2F8;strokeColor=#5B9BD5;fontSize=13;" vertex="1" parent="1">
+        <mxCell id="instantiate" value="5B 主干波形变体 + 5C 花位状态&#xa;承花挂接优先并冻结（仅 SW3 花位可变；必要时沿同一意图做强度投影）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2F8;strokeColor=#5B9BD5;fontSize=13;" vertex="1" parent="1">
           <mxGeometry x="330" y="1340" width="245" height="85" as="geometry"/>
         </mxCell>
         <mxCell id="mount_first" value="花朵关系优先&#xa;SW-1谷位承托 / SW-2轴线融合 / SW-3远端枝端" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=13;" vertex="1" parent="1">
           <mxGeometry x="615" y="1340" width="280" height="85" as="geometry"/>
         </mxCell>
-        <mxCell id="l1_plan" value="L1全局规划&#xa;数量、根位密度场、留白、长度层级" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E2F0D9;strokeColor=#70AD47;fontSize=13;" vertex="1" parent="1">
+        <mxCell id="l1_plan" value="R0-R5 普通 L1 公共候选池&#xa;数量与根位由整体集合选择决定；5D 疏密档位由 seed 驱动" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E2F0D9;strokeColor=#70AD47;fontSize=13;" vertex="1" parent="1">
           <mxGeometry x="935" y="1340" width="245" height="85" as="geometry"/>
         </mxCell>
-        <mxCell id="unit_candidates" value="完整 BranchUnit 候选&#xa;局部繁简预算 + 编辑器先验" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4D6;strokeColor=#ED7D31;fontSize=13;" vertex="1" parent="1">
+        <mxCell id="unit_candidates" value="5E 稀疏局部繁简&#xa;多数 L1-only，少数单侧/对向 L2 分叉，无 L3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4D6;strokeColor=#ED7D31;fontSize=13;" vertex="1" parent="1">
           <mxGeometry x="1220" y="1340" width="245" height="85" as="geometry"/>
         </mxCell>
-        <mxCell id="global_select" value="Stage5全局选择&#xa;精确结构预算；先压最坏重合，再压总重合" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E4DFEC;strokeColor=#8064A2;fontSize=13;" vertex="1" parent="1">
+        <mxCell id="global_select" value="Stage5 全局选择&#xa;先压最坏重合，再压总重合；正式渲染消费同一 selection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E4DFEC;strokeColor=#8064A2;fontSize=13;" vertex="1" parent="1">
           <mxGeometry x="1505" y="1340" width="270" height="85" as="geometry"/>
         </mxCell>
         <mxCell id="mechanical" value="结构验证&#xa;周期连续、真实挂接、无相交、保护区、领域规则" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2F2F2;strokeColor=#7F7F7F;fontSize=13;" vertex="1" parent="1">

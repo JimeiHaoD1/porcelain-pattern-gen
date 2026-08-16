@@ -2,7 +2,7 @@
 
 状态快照：2026-08-16  
 适用目录：`D:\sdxl\chanzhi_sw_clean_oldmain_opt\experiments\branch_unit\dynamic`  
-当前视觉关口：5D、5E 已确认；5F 已实现并提交正式图，`VISUAL_REVIEW_PENDING`
+当前视觉关口：5B、5C、5D、5E、5F 已全部获用户视觉确认（2026-08-16），机制已冻结
 
 ## 1. 文档用途与事实优先级
 
@@ -706,7 +706,8 @@ OPPOSED_L2_PAIR
   违规 0、L2 真实挂接违规 0、L3 选中 0；五个原型各自 3 个 seed 的
   主干变体/花位/L1 根位结构签名互不相同；
 - 真实产物：`artifacts/runs/dynamic_branch_stage5f_full_integration_v1`；
-- 视觉状态：`VISUAL_REVIEW_PENDING`，由用户按 §13.3 的机械项和视觉项确认。
+- 视觉状态：用户已于 2026-08-16 按 §13.3 的机械项和视觉项确认；确认记录见
+  `STAGE5F_VISUAL_APPROVAL_V1.json`。
 
 用户确认后才允许：
 
@@ -726,7 +727,7 @@ OPPOSED_L2_PAIR
 | 5C / R6 | SW3 花位与正式 L1 响应 | 已实现 | 已确认 |
 | 5D | 普通 L1 simple/medium/rich | 已实现、全原型图已生成 | 已确认（2026-08-16） |
 | 5E | 少量局部 L2 分叉与繁简重点 | 已实现、正式图已生成 | 已确认（2026-08-16） |
-| 5F | 全原型跨 seed 完整集成 | 已实现、正式图已生成 | 待确认 |
+| 5F | 全原型跨 seed 完整集成 | 已实现、正式图已生成 | 已确认（2026-08-16） |
 
 ## 15. 统一验收原则
 
@@ -826,7 +827,7 @@ VISUAL_REJECTED
 3. 用户确认 5D 后实施 5E；—— 已完成：已实现并提交正式图
 4. 提交 5E 正式图并等待用户确认；—— 已完成：2026-08-16 用户确认
 5. 用户确认 5E 后实施 5F；—— 已完成：已实现并提交正式图
-6. 5F 全原型跨 seed 正式图通过后，更新 README、流程图与最终冻结合同；—— 当前步骤：等待视觉确认
+6. 5F 全原型跨 seed 正式图通过后，更新 README、流程图与最终冻结合同；—— 已完成：2026-08-16 用户确认并收尾
 
 在此之前，不提前实现 5F，不把已有 L2 候选当成 5E 完成，也不扩大到叶片和渲染模型。
 
@@ -855,4 +856,6 @@ VISUAL_REJECTED
 | 5E 视觉确认 | `STAGE5E_VISUAL_APPROVAL_V1.json` |
 | 5F 正式审查 | `run_stage5f_full_integration.py` |
 | 5F 正式产物 | `artifacts/runs/dynamic_branch_stage5f_full_integration_v1` |
+| 5F 视觉确认 | `STAGE5F_VISUAL_APPROVAL_V1.json` |
 | 下游挂接投影 | `run_stage3b_l1_flow.py` |
+| 最终冻结合同 | `FINAL_FROZEN_CONTRACT_V1.json` |

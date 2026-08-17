@@ -20,7 +20,7 @@ DEFAULT_OUTPUT_DIR = REPO_ROOT / "artifacts" / "dynamic_branch_batch_500_svg"
 ROLE_COLORS = {
     "backbone": "#0000ff",
     "primary_branch": "#ff9900",
-    "secondary_branch": "#00ff00",
+    "secondary_branch": "#00ffff",
     "flower_support": "#007800",
     "flower_anchor": "#ff0000",
     "unit_boundary": "#000000",
@@ -29,7 +29,7 @@ ROLE_COLORS = {
 ROLE_METADATA = (
     "role_color_identity_v2: "
     "backbone=#0000ff; primary_branch=#ff9900; "
-    "secondary_branch=#00ff00; flower_support=#007800; "
+    "secondary_branch=#00ffff; flower_support=#007800; "
     "flower_anchor=#ff0000; unit_boundary=#000000(dashed). "
     "data-role is authoritative; stroke color is a visual fallback."
 )

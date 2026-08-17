@@ -17,6 +17,23 @@ DEFAULT_SOURCE_DIR = (
 )
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "artifacts" / "dynamic_branch_batch_500_svg"
 
+ROLE_COLORS = {
+    "backbone": "#0000ff",
+    "primary_branch": "#ff9900",
+    "secondary_branch": "#00ff00",
+    "flower_support": "#007800",
+    "flower_anchor": "#ff0000",
+    "unit_boundary": "#000000",
+}
+
+ROLE_METADATA = (
+    "role_color_identity_v2: "
+    "backbone=#0000ff; primary_branch=#ff9900; "
+    "secondary_branch=#00ff00; flower_support=#007800; "
+    "flower_anchor=#ff0000; unit_boundary=#000000(dashed). "
+    "data-role is authoritative; stroke color is a visual fallback."
+)
+
 
 def _round(value: float) -> str:
     return f"{float(value):.4f}".rstrip("0").rstrip(".")
@@ -57,6 +74,7 @@ def render_case_svg(
     selection: Mapping[str, Any],
     *,
     repeat: str,
+    palette: str,
 ) -> str:
     canvas_height = float(analysis["coordinate_system"]["canvas_bounds"][3])
     shifts = (-1.0, 0.0, 1.0) if repeat == "triple" else (0.0,)
@@ -76,37 +94,68 @@ def render_case_svg(
             f'<rect x="{_round(x_min)}" y="0" width="{_round(view_width)}" '
             f'height="{_round(canvas_height)}" fill="{COLORS["background"]}"/>'
         ),
+        f"<metadata>{ROLE_METADATA}</metadata>",
     ]
 
+    def stroke_style(role: str, dashed: bool = False) -> str:
+        color = (
+            ROLE_COLORS[role]
+            if palette == "role"
+            else {
+                "backbone": COLORS["ink"],
+                "primary_branch": COLORS["l1"],
+                "secondary_branch": COLORS["l2"],
+                "flower_support": COLORS["flower_support"],
+                "flower_anchor": COLORS["flower"],
+                "unit_boundary": COLORS["grid"],
+            }[role]
+        )
+        dash = ' stroke-dasharray="0.012 0.008"' if dashed else ""
+        return f'stroke="{color}"{dash}'
+
+    parts.append('<g data-role="unit_boundary">')
     for boundary_x in range(int(min(shifts)), int(max(shifts)) + 2):
         parts.append(
             '<line '
             f'x1="{_round(boundary_x)}" y1="0" '
             f'x2="{_round(boundary_x)}" y2="{_round(canvas_height)}" '
-            f'stroke="{COLORS["grid"]}" stroke-width="0.003"/>'
+            + stroke_style("unit_boundary", dashed=True)
+            + ' stroke-width="0.004"/>'
         )
+    parts.append("</g>")
 
+    parts.append('<g data-role="backbone">')
     backbone = [row["point"] for row in analysis["backbone"]["samples"]]
     for shift_x in structure_shifts:
-        color = COLORS["ink"] if shift_x == 0.0 else COLORS["ghost"]
-        width = 0.012 if shift_x == 0.0 else 0.006
+        color = (
+            ROLE_COLORS["backbone"]
+            if palette == "role"
+            else (COLORS["ink"] if shift_x == 0.0 else COLORS["ghost"])
+        )
+        width = 0.014 if shift_x == 0.0 else 0.007
         polyline = _polyline(backbone, shift_x)
         parts.append(
             polyline
             + f'stroke="{color}" stroke-width="{_round(width)}" '
             'stroke-linejoin="round" stroke-linecap="round"/>'
         )
+    parts.append("</g>")
 
+    parts.append('<g data-role="flower_support">')
     for shift_x in shifts:
         for mount in flower_mount_plan.get("mounts", []):
             polyline = _polyline(mount["centerline"], shift_x)
             parts.append(
                 polyline
-                + f'stroke="{COLORS["flower_support"]}" '
+                + stroke_style("flower_support")
+                + ' '
                 'stroke-width="0.010" stroke-linejoin="round" '
-                'stroke-linecap="round"/>'
+                'stroke-linecap="round" '
+                f'data-flower-id="{mount.get("flower_id", "")}"/>'
             )
+    parts.append("</g>")
 
+    parts.append('<g data-role="flower_anchor">')
     for shift_x in shifts:
         for flower in analysis["flowers"]:
             center_x = float(flower["center"][0]) + shift_x
@@ -118,36 +167,58 @@ def render_case_svg(
                 f'cx="{_round(center_x)}" cy="{_round(center_y)}" '
                 f'rx="{_round(rx)}" ry="{_round(ry)}" '
                 f'fill="{COLORS["flower_fill"]}" '
-                f'stroke="{COLORS["flower"]}" stroke-width="0.005"/>'
+                + stroke_style("flower_anchor")
+                + ' stroke-width="0.006" '
+                f'data-flower-id="{flower.get("flower_id", "")}"/>'
             )
+    parts.append("</g>")
 
     if selection["feasible"]:
+        parts.append('<g data-role="branches">')
         for shift_x in shifts:
             for candidate in selection["selected_candidates"]:
                 for curve in candidate["curves"]:
-                    color = COLORS[str(curve["level"]).lower()]
-                    width = 0.018 if curve["level"] == "L1" else 0.014
-                    inner_width = 0.010 if curve["level"] == "L1" else 0.007
+                    role = (
+                        "primary_branch"
+                        if curve["level"] == "L1"
+                        else "secondary_branch"
+                    )
+                    color = (
+                        ROLE_COLORS[role]
+                        if palette == "role"
+                        else COLORS[str(curve["level"]).lower()]
+                    )
+                    width = 0.010 if curve["level"] == "L1" else 0.007
                     path = _curve_path(curve, shift_x)
+                    if palette == "presentation":
+                        parts.append(
+                            f'<path d="{path}" fill="none" '
+                            'stroke="#ffffff" '
+                            f'stroke-width="{_round(width + 0.007)}" '
+                            'stroke-linejoin="round" stroke-linecap="round"/>'
+                        )
                     parts.append(
                         f'<path d="{path}" fill="none" '
-                        'stroke="#ffffff" '
-                        f'stroke-width="{_round(width)}" '
-                        'stroke-linejoin="round" stroke-linecap="round"/>'
+                        + f'stroke="{color}" '
+                        + f'stroke-width="{_round(width)}" '
+                        'stroke-linejoin="round" stroke-linecap="round" '
+                        f'data-role="{role}" '
+                        f'data-level="{curve.get("level", "")}" '
+                        f'data-curve-id="{curve.get("curve_id", "")}" '
+                        f'data-parent-curve-id="{curve.get("parent_curve_id", "")}" '
+                        f'data-lane-id="{candidate.get("source_lane_id", "")}" '
+                        f'data-unit-id="{candidate.get("candidate_id", "")}"/>'
                     )
-                    parts.append(
-                        f'<path d="{path}" fill="none" '
-                        f'stroke="{color}" '
-                        f'stroke-width="{_round(inner_width)}" '
-                        'stroke-linejoin="round" stroke-linecap="round"/>'
-                    )
+        parts.append("</g>")
     parts.append("</svg>")
     return "".join(parts)
 
 
-def run(source_dir: Path, output_dir: Path, repeat: str) -> int:
+def run(source_dir: Path, output_dir: Path, repeat: str, palette: str) -> int:
     if repeat not in {"single", "triple"}:
         raise SystemExit("--repeat must be single or triple")
+    if palette not in {"role", "presentation"}:
+        raise SystemExit("--palette must be role or presentation")
     output_dir.mkdir(parents=True, exist_ok=True)
     exported = 0
     skipped = 0
@@ -168,7 +239,13 @@ def run(source_dir: Path, output_dir: Path, repeat: str) -> int:
         selection = json.loads(selection_path.read_text(encoding="utf-8"))
         prototype_id = str(selection["prototype_id"])
         seed = str(case_manifest.parent.name).replace("seed_", "")
-        svg = render_case_svg(analysis, mounts, selection, repeat=repeat)
+        svg = render_case_svg(
+            analysis,
+            mounts,
+            selection,
+            repeat=repeat,
+            palette=palette,
+        )
         (output_dir / f"{prototype_id}__seed_{seed}.svg").write_text(
             svg,
             encoding="utf-8",
@@ -186,8 +263,13 @@ def main() -> int:
     parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--repeat", choices=("single", "triple"), default="triple")
+    parser.add_argument(
+        "--palette",
+        choices=("role", "presentation"),
+        default="role",
+    )
     args = parser.parse_args()
-    return run(args.source_dir, args.output_dir, args.repeat)
+    return run(args.source_dir, args.output_dir, args.repeat, args.palette)
 
 
 if __name__ == "__main__":

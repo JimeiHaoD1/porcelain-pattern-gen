@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the production Stage3B V2 L1 flow for five prototypes and three seeds."""
+"""Run the production Stage3B V3 soft-density L1 flow."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from fixed_visual_prior import validate_fixed_visual_prior
 from flower_mounting_v1 import FlowerMountingError
 from flower_placement_v1 import generate_flower_layout_and_mount
 from global_l1_flow import (
-    CONTRACT_SCHEMA_V2,
+    CONTRACT_SCHEMA_V3,
     SEEDS,
     generate_global_l1_flow_plan,
     validate_global_l1_flow_plan,
@@ -66,7 +66,7 @@ DEFAULT_OUTPUT = (
     REPO_ROOT
     / "artifacts"
     / "runs"
-    / "dynamic_branch_stage3b_edit_feedback_l1_flow_v2"
+    / "dynamic_branch_stage3b_soft_density_l1_flow_v3"
 )
 
 
@@ -87,7 +87,7 @@ def _downstream_mount_strength_ladder(base: float) -> tuple[float, ...]:
         if not values or abs(value - values[-1]) > 1e-12:
             values.append(value)
     return tuple(values)
-CONTRACT_PATH = DYNAMIC_DIR / "STAGE3B_L1_FLOW_CONTRACT_V2.json"
+CONTRACT_PATH = DYNAMIC_DIR / "STAGE3B_L1_FLOW_CONTRACT_V3.json"
 FEEDBACK_PRIOR_PATH = DYNAMIC_DIR / "EDIT_FEEDBACK_PRIOR_V1.json"
 CURVE_GEOMETRY_PRIOR_PATH = (
     DYNAMIC_DIR / "EDITOR_CURVE_GEOMETRY_PRIOR_V4.json"
@@ -173,9 +173,9 @@ def _load_inputs() -> tuple[
         raise Stage3BRunError("stage-2.5 manifest schema mismatch")
     if stage3a.get("schema") != "dynamic_branch_stage3a_manifest_v1":
         raise Stage3BRunError("stage-3A manifest schema mismatch")
-    if contract.get("schema") != CONTRACT_SCHEMA_V2:
+    if contract.get("schema") != CONTRACT_SCHEMA_V3:
         raise Stage3BRunError(
-            "the production Stage3B route requires the V2 L1 flow contract"
+            "the production Stage3B route requires the V3 soft-density L1 flow contract"
         )
     if stage2.get("review_gate", {}).get("status") != "analysis_approved":
         raise Stage3BRunError("stage-2 analysis gate is not approved")
@@ -403,12 +403,13 @@ def generate_prototype_case(
 
 
 def _write_readme(output: Path) -> None:
-    text = """# 阶段3B全局L1流线
+    text = """# Stage3B V3 全局 L1 流线
 
 - 范围：五个SW原型 × seeds 4101/4102/4103。
-- 内容：先按形态家族生成并冻结花朵挂接L1，再规划剩余普通L1的根位、方向、距离和目标区。
+- 顺序：先生成并冻结主干、花位和承花枝，再从同一普通L1候选池选择兼容集合。
+- 密度：simple/medium/rich 是跨全部几何可行基数的软资源偏好；普通L1数量是整组选择的结果，不是预设槽位。
 - 不包含：L2、L3、叶片、芽头、卷头和最终枝条曲线编译。
-- 求解：花朵挂接枝不等待普通枝；普通枝在剩余容量中执行一次前向全局集合求解。
+- 硬约束：候选池、相交、净空、根位间距和花枝冻结规则保持不变。
 - 禁止：自动修复、自动删枝、验证引导重试、验证引导重采样和静默回退。
 - 状态：全部结果均为 `l1_flow_pending_visual_review`，数值诊断不能替代人工验收。
 """
@@ -552,7 +553,7 @@ def run(
                     {
                         "task_id": (
                             f"{prototype_id}__seed_{production_seed}__"
-                            "dynamic_global_l1_flow_v2"
+                            "dynamic_global_l1_flow_v3"
                         ),
                         "prototype_id": prototype_id,
                         "family_id": plan["family_id"],
@@ -568,6 +569,18 @@ def run(
                         ],
                         "ordinary_density_source": plan["count_derivation"][
                             "ordinary_density_source"
+                        ],
+                        "geometry_witnessed_ordinary_l1_counts": plan[
+                            "count_derivation"
+                        ]["geometry_witnessed_ordinary_l1_counts"],
+                        "selected_count_as_result": plan["count_derivation"][
+                            "selected_count_as_result"
+                        ],
+                        "selected_set_and_count_jointly_ranked": plan[
+                            "count_derivation"
+                        ]["selected_set_and_count_jointly_ranked"],
+                        "density_objective": plan["count_derivation"][
+                            "density_objective"
                         ],
                         "backbone_variation": variation,
                         "flower_layout": flower_layout_plan,
@@ -627,7 +640,7 @@ def run(
         _write_readme(temporary / "README.md")
 
         manifest = {
-            "schema": "dynamic_branch_stage3b_l1_flow_manifest_v2",
+            "schema": "dynamic_branch_stage3b_l1_flow_manifest_v3",
             "stage": "3B",
             "contract_id": contract["contract_id"],
             "prototype_ids": list(prototype_ids),
@@ -660,7 +673,10 @@ def run(
                 "dynamic_l1_count_enabled": True,
                 "ordinary_l1_density_level_enabled": True,
                 "ordinary_l1_density_level_uses_branch_seed_by_default": True,
-                "flower_support_excluded_from_ordinary_density_count": True,
+                "flower_support_excluded_from_ordinary_density_resource": True,
+                "ordinary_l1_density_is_soft_resource_preference": True,
+                "ordinary_l1_count_preselected_by_density": False,
+                "selected_set_and_count_jointly_ranked": True,
                 "dynamic_non_equidistant_root_rhythm_enabled": True,
                 "flower_mounting_generated_before_ordinary_l1": True,
                 "ordinary_l1_candidates_constrained_by_flower_mounting": True,

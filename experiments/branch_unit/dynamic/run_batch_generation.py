@@ -17,11 +17,14 @@ from typing import Any, Mapping, Sequence
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DYNAMIC_DIR = Path(__file__).resolve().parent
 DEFAULT_OUTPUT_DIR = (
-    REPO_ROOT / "artifacts" / "runs" / "dynamic_branch_batch_v1"
+    REPO_ROOT / "artifacts" / "runs" / "dynamic_branch_batch_v3"
 )
+EXPECTED_STAGE3B_PLAN_SCHEMA = "dynamic_branch_global_l1_flow_plan_v3"
+EXPECTED_STAGE3B_CONTRACT_ID = "soft_density_global_l1_flow_v3"
+EXPECTED_STAGE5_CONTRACT_ID = "stage5e_joint_sparse_local_l2_selection_v2"
 STAGE4_CONTRACT_PATH = DYNAMIC_DIR / "STAGE4_UNIT_GRAMMAR_CONTRACT_V2.json"
 STAGE5E_CONTRACT_PATH = (
-    DYNAMIC_DIR / "STAGE5E_L2_SPARSE_SELECTION_CONTRACT_V1.json"
+    DYNAMIC_DIR / "STAGE5E_L2_JOINT_SELECTION_CONTRACT_V2.json"
 )
 EDITOR_L2_PRIOR_PATH = DYNAMIC_DIR / "EDITOR_L2_PLACEMENT_PRIOR_V1.json"
 
@@ -356,6 +359,12 @@ def _generate_case(
 
     cell = production_cell(prototype_id, production_seed)
     summary = {
+        "stage3b_plan_schema": str(plan["schema"]),
+        "stage3b_contract_id": str(_G["contract"]["contract_id"]),
+        "stage5_contract_id": str(stage5e_contract["contract_id"]),
+        "density_objective_version": str(
+            plan["solver"]["density_objective"]["version"]
+        ),
         "prototype_id": prototype_id,
         "production_seed": production_seed,
         "backbone_variant_id": cell[0],
@@ -452,8 +461,22 @@ def main() -> int:
             seeds = seed_candidates[: args.cases_per_prototype]
         for seed in seeds:
             case_dir = output_dir / prototype_id / f"seed_{seed}"
-            if (case_dir / "case_manifest.json").is_file():
-                continue
+            case_manifest_path = case_dir / "case_manifest.json"
+            if case_manifest_path.is_file():
+                existing_case = _read_json(case_manifest_path)
+                if (
+                    existing_case.get("stage3b_plan_schema")
+                    == EXPECTED_STAGE3B_PLAN_SCHEMA
+                    and existing_case.get("stage3b_contract_id")
+                    == EXPECTED_STAGE3B_CONTRACT_ID
+                    and existing_case.get("stage5_contract_id")
+                    == EXPECTED_STAGE5_CONTRACT_ID
+                ):
+                    continue
+                raise SystemExit(
+                    "existing batch case belongs to an incompatible Stage3B "
+                    f"chain: {case_manifest_path}"
+                )
             tasks.append(
                 (
                     prototype_id,
@@ -515,7 +538,10 @@ def main() -> int:
             coverage[row["prototype_id"]].get(key, 0) + 1
         )
     manifest = {
-        "schema": "dynamic_branch_batch_generation_manifest_v1",
+        "schema": "dynamic_branch_batch_generation_manifest_v3",
+        "stage3b_plan_schema": EXPECTED_STAGE3B_PLAN_SCHEMA,
+        "stage3b_contract_id": EXPECTED_STAGE3B_CONTRACT_ID,
+        "stage5_contract_id": EXPECTED_STAGE5_CONTRACT_ID,
         "output_dir": str(output_dir),
         "cases_per_prototype_requested": args.cases_per_prototype,
         "allocation": args.allocation,

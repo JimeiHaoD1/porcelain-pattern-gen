@@ -30,6 +30,11 @@ EDITOR_L2_PRIOR_SCHEMA = "dynamic_branch_editor_l2_placement_prior_v1"
 FIXED_L1_ONLY_POLICY = "fixed_l1_only_for_5c_r6"
 FIXED_L1_ONLY_5D_POLICY = "fixed_l1_only_for_5d_density_review"
 SPARSE_L2_5E_POLICY = "sparse_local_l2_for_5e"
+JOINT_SPARSE_L2_H2B_POLICY = "joint_sparse_local_l2_for_h2b"
+SPARSE_L2_POLICIES = {
+    SPARSE_L2_5E_POLICY,
+    JOINT_SPARSE_L2_H2B_POLICY,
+}
 FIXED_L1_ONLY_POLICIES = {
     FIXED_L1_ONLY_POLICY,
     FIXED_L1_ONLY_5D_POLICY,
@@ -312,6 +317,484 @@ def _select_sparse_l2(
     return result
 
 
+def _candidate_l2_count(candidate: Mapping[str, Any]) -> int:
+    return sum(
+        1
+        for curve in candidate.get("curves", [])
+        if isinstance(curve, Mapping) and curve.get("level") == "L2"
+    )
+
+
+def _joint_local_quality_by_candidate(
+    eligible_by_lane: Mapping[str, Sequence[Mapping[str, Any]]],
+) -> dict[str, dict[str, float]]:
+    """Score local L2 geometry against the active Stage4 inventory.
+
+    Stage4 has already enforced the hard local geometry constraints.  H2-B
+    therefore uses only continuous margins here.  Length and entry opening
+    are compared with the median of candidates in the same real Unit state,
+    so the selector does not introduce a new fixed L2 template.
+    """
+
+    raw: dict[str, dict[str, float | str]] = {}
+    by_state: dict[str, list[dict[str, float | str]]] = defaultdict(list)
+    for candidates in eligible_by_lane.values():
+        for candidate in candidates:
+            candidate_id = str(candidate["candidate_id"])
+            state = _candidate_5e_state(candidate)
+            if state in {None, "L1_ONLY"}:
+                raw[candidate_id] = {
+                    "state": "L1_ONLY",
+                    "clearance_margin": 0.0,
+                    "child_parent_length_ratio": 0.0,
+                    "entry_opening_degrees": 0.0,
+                }
+                continue
+            curves = list(candidate.get("curves", []))
+            l1_length = sum(
+                float(curve.get("actual_length", 0.0))
+                for curve in curves
+                if isinstance(curve, Mapping) and curve.get("level") == "L1"
+            )
+            l2_length = sum(
+                float(curve.get("actual_length", 0.0))
+                for curve in curves
+                if isinstance(curve, Mapping) and curve.get("level") == "L2"
+            )
+            metrics = candidate["intrinsic_diagnostics"]["metrics"]
+            parent_required = max(
+                float(metrics.get("parent_occupancy_clearance", 0.0)),
+                1e-9,
+            )
+            clearance_ratios = [
+                float(
+                    metrics.get(
+                        "minimum_post_departure_parent_clearance",
+                        parent_required,
+                    )
+                )
+                / parent_required
+            ]
+            sibling_required = float(
+                metrics.get("required_sibling_curve_clearance", 0.0)
+            )
+            if sibling_required > 1e-9:
+                clearance_ratios.append(
+                    float(
+                        metrics.get(
+                            "minimum_sibling_curve_clearance",
+                            sibling_required,
+                        )
+                    )
+                    / sibling_required
+                )
+            row: dict[str, float | str] = {
+                "state": state,
+                "clearance_margin": min(clearance_ratios),
+                "child_parent_length_ratio": (
+                    l2_length / max(l1_length, 1e-9)
+                ),
+                "entry_opening_degrees": float(
+                    metrics.get("minimum_entry_opening_degrees", 0.0)
+                ),
+            }
+            raw[candidate_id] = row
+            by_state[state].append(row)
+
+    state_reference: dict[str, dict[str, float]] = {}
+    for state, rows in by_state.items():
+        state_reference[state] = {
+            "length_median": float(
+                np.median(
+                    [float(row["child_parent_length_ratio"]) for row in rows]
+                )
+            ),
+            "opening_median": float(
+                np.median(
+                    [float(row["entry_opening_degrees"]) for row in rows]
+                )
+            ),
+        }
+
+    result: dict[str, dict[str, float]] = {}
+    for candidate_id, row in raw.items():
+        state = str(row["state"])
+        if state == "L1_ONLY":
+            result[candidate_id] = {
+                "score": 0.0,
+                "clearance_quality": 0.0,
+                "length_typicality": 0.0,
+                "opening_typicality": 0.0,
+            }
+            continue
+        reference = state_reference[state]
+        clearance_margin = max(0.0, float(row["clearance_margin"]))
+        clearance_quality = clearance_margin / (1.0 + clearance_margin)
+        length_median = max(reference["length_median"], 1e-9)
+        length_typicality = 1.0 / (
+            1.0
+            + abs(
+                np.log(
+                    max(
+                        float(row["child_parent_length_ratio"]),
+                        1e-9,
+                    )
+                    / length_median
+                )
+            )
+        )
+        opening_scale = max(reference["opening_median"], 1.0)
+        opening_typicality = 1.0 / (
+            1.0
+            + abs(
+                float(row["entry_opening_degrees"])
+                - reference["opening_median"]
+            )
+            / opening_scale
+        )
+        score = (
+            0.55 * clearance_quality
+            + 0.25 * length_typicality
+            + 0.20 * opening_typicality
+        )
+        result[candidate_id] = {
+            "score": float(score),
+            "clearance_quality": float(clearance_quality),
+            "length_typicality": float(length_typicality),
+            "opening_typicality": float(opening_typicality),
+        }
+    return result
+
+
+def _seeded_tie_value(unit_seed: int, value: str) -> str:
+    return hashlib.sha256(f"{unit_seed}:{value}".encode("utf-8")).hexdigest()
+
+
+def _select_joint_sparse_l2(
+    *,
+    inventory: Mapping[str, Any],
+    conflict_graph: Mapping[str, Any],
+    contract: Mapping[str, Any],
+    lane_ids: Sequence[str],
+    lane_order: Sequence[str],
+    eligible_by_lane: Mapping[str, Sequence[Mapping[str, Any]]],
+    conflict_ids: Mapping[str, set[str]],
+    pair_penalties: Mapping[str, Mapping[str, float]],
+    prototype_strategy: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Jointly choose one complete Unit per lane under a sparse L2 budget."""
+
+    unit_seed = int(inventory["unit_seed"])
+    intent_budget = min(
+        1 + (unit_seed % 3),
+        max(1, (len(lane_ids) - 1) // 2),
+    )
+    objective_contract = contract["joint_objective"]
+    weights = objective_contract["weights"]
+    local_weight = float(weights["local_quality"])
+    upgrade_reward = float(weights["upgraded_lane_reward"])
+    total_pair_weight = float(weights["total_parallel_penalty"])
+    peak_pair_weight = float(weights["peak_parallel_penalty"])
+    extra_child_weight = float(weights["extra_l2_child_penalty"])
+    node_limit = int(contract["bounded_search"]["node_limit"])
+    local_quality = _joint_local_quality_by_candidate(eligible_by_lane)
+
+    ordered_by_lane: dict[str, list[Mapping[str, Any]]] = {}
+    best_gain_by_lane: dict[str, float] = {}
+    for lane_id in lane_order:
+        def candidate_gain(candidate: Mapping[str, Any]) -> float:
+            candidate_id = str(candidate["candidate_id"])
+            l2_count = _candidate_l2_count(candidate)
+            if l2_count == 0:
+                return 0.0
+            return (
+                local_weight * local_quality[candidate_id]["score"]
+                + upgrade_reward
+                - extra_child_weight * max(0, l2_count - 1)
+            )
+
+        ordered = sorted(
+            eligible_by_lane[lane_id],
+            key=lambda candidate: (
+                -candidate_gain(candidate),
+                len(conflict_ids[str(candidate["candidate_id"])]),
+                _seeded_tie_value(unit_seed, str(candidate["candidate_id"])),
+            ),
+        )
+        ordered_by_lane[lane_id] = ordered
+        best_gain_by_lane[lane_id] = max(
+            (candidate_gain(candidate) for candidate in ordered),
+            default=0.0,
+        )
+
+    selected: list[Mapping[str, Any]] = []
+    selected_ids: set[str] = set()
+    best_selected: list[Mapping[str, Any]] = []
+    best_components: dict[str, float | int] | None = None
+    best_score = float("-inf")
+    best_tie_value: str | None = None
+    search_node_count = 0
+    feasible_composition_count = 0
+    backtrack_count = 0
+    conflict_prune_count = 0
+    budget_prune_count = 0
+    bound_prune_count = 0
+    node_limit_reached = False
+
+    def score_components(
+        *,
+        local_sum: float,
+        upgraded_count: int,
+        total_l2_count: int,
+        pair_total: float,
+        pair_peak: float,
+    ) -> dict[str, float | int]:
+        extra_l2_children = max(0, total_l2_count - upgraded_count)
+        score = (
+            local_weight * local_sum
+            + upgrade_reward * upgraded_count
+            - total_pair_weight * pair_total
+            - peak_pair_weight * pair_peak
+            - extra_child_weight * extra_l2_children
+        )
+        return {
+            "score": float(score),
+            "local_quality_sum": float(local_sum),
+            "upgraded_lane_count": int(upgraded_count),
+            "total_l2_count": int(total_l2_count),
+            "extra_l2_child_count": int(extra_l2_children),
+            "total_parallel_penalty": float(pair_total),
+            "peak_parallel_penalty": float(pair_peak),
+        }
+
+    def search(
+        lane_index: int,
+        *,
+        local_sum: float,
+        upgraded_count: int,
+        total_l2_count: int,
+        pair_total: float,
+        pair_peak: float,
+    ) -> None:
+        nonlocal best_selected, best_components, best_score, best_tie_value
+        nonlocal search_node_count, feasible_composition_count
+        nonlocal backtrack_count, conflict_prune_count, budget_prune_count
+        nonlocal bound_prune_count, node_limit_reached
+        if search_node_count >= node_limit:
+            node_limit_reached = True
+            return
+        if lane_index == len(lane_order):
+            feasible_composition_count += 1
+            components = score_components(
+                local_sum=local_sum,
+                upgraded_count=upgraded_count,
+                total_l2_count=total_l2_count,
+                pair_total=pair_total,
+                pair_peak=pair_peak,
+            )
+            score = float(components["score"])
+            tie_value = _seeded_tie_value(
+                unit_seed,
+                "|".join(
+                    sorted(str(candidate["candidate_id"]) for candidate in selected)
+                ),
+            )
+            if (
+                score > best_score + 1e-12
+                or (
+                    abs(score - best_score) <= 1e-12
+                    and (best_tie_value is None or tie_value < best_tie_value)
+                )
+            ):
+                best_score = score
+                best_tie_value = tie_value
+                best_selected = list(selected)
+                best_components = components
+            return
+
+        current_components = score_components(
+            local_sum=local_sum,
+            upgraded_count=upgraded_count,
+            total_l2_count=total_l2_count,
+            pair_total=pair_total,
+            pair_peak=pair_peak,
+        )
+        remaining_budget = max(0, intent_budget - upgraded_count)
+        remaining_gains = sorted(
+            (
+                max(0.0, best_gain_by_lane[lane_id])
+                for lane_id in lane_order[lane_index:]
+            ),
+            reverse=True,
+        )[:remaining_budget]
+        optimistic_score = float(current_components["score"]) + sum(
+            remaining_gains
+        )
+        if optimistic_score < best_score - 1e-12:
+            bound_prune_count += 1
+            return
+
+        lane_id = lane_order[lane_index]
+        for candidate in ordered_by_lane[lane_id]:
+            if search_node_count >= node_limit:
+                node_limit_reached = True
+                return
+            search_node_count += 1
+            candidate_id = str(candidate["candidate_id"])
+            if selected_ids & conflict_ids[candidate_id]:
+                conflict_prune_count += 1
+                continue
+            l2_count = _candidate_l2_count(candidate)
+            is_upgrade = int(l2_count > 0)
+            next_upgraded_count = upgraded_count + is_upgrade
+            if next_upgraded_count > intent_budget:
+                budget_prune_count += 1
+                continue
+            added_pair_penalties = [
+                pair_penalties[candidate_id].get(existing_id, 0.0)
+                for existing_id in selected_ids
+            ]
+            selected.append(candidate)
+            selected_ids.add(candidate_id)
+            search(
+                lane_index + 1,
+                local_sum=(
+                    local_sum
+                    + local_quality[candidate_id]["score"] * is_upgrade
+                ),
+                upgraded_count=next_upgraded_count,
+                total_l2_count=total_l2_count + l2_count,
+                pair_total=pair_total + sum(added_pair_penalties),
+                pair_peak=max(
+                    pair_peak,
+                    max(added_pair_penalties, default=0.0),
+                ),
+            )
+            selected.pop()
+            selected_ids.remove(candidate_id)
+            backtrack_count += 1
+
+    search(
+        0,
+        local_sum=0.0,
+        upgraded_count=0,
+        total_l2_count=0,
+        pair_total=0.0,
+        pair_peak=0.0,
+    )
+    if not best_selected or best_components is None:
+        raise Stage5SelectionError(
+            "joint H2-B search found no complete legal composition"
+        )
+
+    selected_candidates = list(best_selected)
+    selected_l2_count = sum(
+        _candidate_l2_count(candidate) for candidate in selected_candidates
+    )
+    upgrade_lane_ids = [
+        str(candidate["source_lane_id"])
+        for candidate in selected_candidates
+        if _candidate_l2_count(candidate) > 0
+    ]
+    result: dict[str, Any] = {
+        "schema": SCHEMA_V2,
+        "contract_id": contract["contract_id"],
+        "selection_id": (
+            f"{inventory['inventory_id']}__global_unit_selection_joint_h2b"
+        ),
+        "prototype_id": inventory["prototype_id"],
+        "family_id": inventory["family_id"],
+        "prototype_strategy": (
+            dict(prototype_strategy)
+            if isinstance(prototype_strategy, Mapping)
+            else None
+        ),
+        "seed": inventory["seed"],
+        "source_inventory_id": inventory["inventory_id"],
+        "source_inventory_digest": inventory["inventory_digest"],
+        "source_conflict_graph_digest": conflict_graph[
+            "conflict_graph_digest"
+        ],
+        "status": contract["output"]["review_state"],
+        "feasible": True,
+        "lane_count": len(lane_ids),
+        "selected_candidate_count": len(selected_candidates),
+        "selected_candidate_ids": [
+            candidate["candidate_id"] for candidate in selected_candidates
+        ],
+        "selected_candidates": selected_candidates,
+        "blocking_lane_pairs": [],
+        "solver_trace": {
+            "method": contract["selection"]["solver"],
+            "hierarchy_policy": JOINT_SPARSE_L2_H2B_POLICY,
+            "lane_order": list(lane_order),
+            "candidate_order": contract["deterministic_order"][
+                "candidate_order"
+            ],
+            "intent_upgrade_budget": intent_budget,
+            "maximum_upgrade_lane_count": intent_budget,
+            "achieved_upgrade_count": len(upgrade_lane_ids),
+            "upgrade_lane_ids": upgrade_lane_ids,
+            "selected_l1_only_count": sum(
+                1
+                for candidate in selected_candidates
+                if _candidate_5e_state(candidate) == "L1_ONLY"
+            ),
+            "selected_l2_count": selected_l2_count,
+            "selected_l3_count": 0,
+            "search_node_limit": node_limit,
+            "search_node_count": search_node_count,
+            "backtrack_count": backtrack_count,
+            "feasible_composition_count": feasible_composition_count,
+            "hard_conflict_prune_count": conflict_prune_count,
+            "sparse_budget_prune_count": budget_prune_count,
+            "objective_bound_prune_count": bound_prune_count,
+            "search_node_limit_reached": node_limit_reached,
+            "bounded_space_exhausted": not node_limit_reached,
+            "global_optimum_claimed": False,
+            "selection_basis": "best_feasible_composition_seen",
+            "objective_weights": dict(weights),
+            "selected_objective": {
+                key: round(float(value), 9)
+                if isinstance(value, float)
+                else value
+                for key, value in best_components.items()
+            },
+            "selected_local_quality": {
+                str(candidate["candidate_id"]): {
+                    key: round(float(value), 9)
+                    for key, value in local_quality[
+                        str(candidate["candidate_id"])
+                    ].items()
+                }
+                for candidate in selected_candidates
+                if _candidate_l2_count(candidate) > 0
+            },
+            "zero_l2_landed_is_legal": True,
+            "irreversible_lane_upgrade_order_used": False,
+            "best_of_n_visual_ranking_used": False,
+            "composite_visual_score_used": False,
+            "validation_guided_retry_used": False,
+            "validation_guided_resample_used": False,
+            "automatic_repair_used": False,
+            "automatic_deletion_used": False,
+            "silent_fallback_used": False,
+        },
+        "review": {
+            "numeric_checks_cannot_auto_approve_visual_gate": True,
+            "criteria": [
+                "l2_forks_are_sparse",
+                "joint_selection_avoids_cross_unit_crowding",
+                "local_forks_remain_readable",
+                "backbone_flower_l1_rhythm_preserved",
+            ],
+        },
+    }
+    result["selection_digest"] = canonical_digest(result)
+    validate_global_selection(result, conflict_graph)
+    return result
+
+
 def _editor_l2_profile(
     editor_l2_prior: Mapping[str, Any],
     prototype_id: str,
@@ -507,7 +990,7 @@ def build_conflict_graph(
     sparse_l2 = (
         contract_schema == CONTRACT_SCHEMA_V2
         and contract.get("selection", {}).get("hierarchy_policy")
-        == SPARSE_L2_5E_POLICY
+        in SPARSE_L2_POLICIES
     )
 
     def graph_eligible(candidate: Mapping[str, Any]) -> bool:
@@ -837,7 +1320,10 @@ def select_global_units(
     fixed_l1_only = (
         is_v2 and fixed_l1_only_policy in FIXED_L1_ONLY_POLICIES
     )
-    sparse_l2 = is_v2 and fixed_l1_only_policy == SPARSE_L2_5E_POLICY
+    sparse_l2 = is_v2 and fixed_l1_only_policy in SPARSE_L2_POLICIES
+    joint_sparse_l2 = (
+        is_v2 and fixed_l1_only_policy == JOINT_SPARSE_L2_H2B_POLICY
+    )
 
     eligible_by_lane: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for candidate in inventory["candidates"]:
@@ -871,6 +1357,19 @@ def select_global_units(
 
     if contract_schema not in {CONTRACT_SCHEMA_V1, CONTRACT_SCHEMA_V2}:
         raise Stage5SelectionError("stage-5 contract schema mismatch")
+
+    if joint_sparse_l2:
+        return _select_joint_sparse_l2(
+            inventory=inventory,
+            conflict_graph=conflict_graph,
+            contract=contract,
+            lane_ids=lane_ids,
+            lane_order=lane_order,
+            eligible_by_lane=eligible_by_lane,
+            conflict_ids=conflict_ids,
+            pair_penalties=pair_penalties,
+            prototype_strategy=prototype_strategy,
+        )
 
     if sparse_l2:
         return _select_sparse_l2(
@@ -1293,7 +1792,7 @@ def validate_global_selection(
                     )
         elif selection.get("schema") == SCHEMA_V2 and selection.get(
             "solver_trace", {}
-        ).get("hierarchy_policy") == SPARSE_L2_5E_POLICY:
+        ).get("hierarchy_policy") in SPARSE_L2_POLICIES:
             for candidate in selected:
                 if _candidate_5e_state(candidate) is None:
                     raise Stage5SelectionError(
@@ -1308,6 +1807,17 @@ def validate_global_selection(
                 raise Stage5SelectionError(
                     "sparse 5E solver trace reports a non-zero L3 count"
                 )
+            if trace.get("hierarchy_policy") == JOINT_SPARSE_L2_H2B_POLICY:
+                if int(trace.get("achieved_upgrade_count", -1)) > int(
+                    trace.get("maximum_upgrade_lane_count", -1)
+                ):
+                    raise Stage5SelectionError(
+                        "joint H2-B selection exceeds its sparse L2 budget"
+                    )
+                if trace.get("irreversible_lane_upgrade_order_used") is not False:
+                    raise Stage5SelectionError(
+                        "joint H2-B selection reports an irreversible upgrade order"
+                    )
         elif selection.get("schema") == SCHEMA_V2:
             target_counts = selection.get("solver_trace", {}).get(
                 "hierarchy_mix_target_counts"

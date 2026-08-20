@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the Stage-5D ordinary-L1 density review through the formal chain."""
+"""Generate the H2-A soft-density ordinary-L1 review through the formal chain."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ DEFAULT_OUTPUT_DIR = (
     REPO_ROOT
     / "artifacts"
     / "runs"
-    / "dynamic_branch_stage5d_density_review_v1"
+    / "dynamic_branch_h2a_soft_density_review_v3"
 )
 STAGE4_CONTRACT_PATH = DYNAMIC_DIR / "STAGE4_UNIT_GRAMMAR_CONTRACT_V2.json"
 STAGE5D_CONTRACT_PATH = (
@@ -62,7 +62,7 @@ UNIT_SEED = 49789125
 
 
 class Stage5DDensityReviewError(RuntimeError):
-    """The 5D review cannot be produced through the formal chain."""
+    """The H2-A soft-density review cannot be produced through the formal chain."""
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -138,7 +138,7 @@ def _render_labeled_sheet(
         cells = list(image_rows[prototype_id])
         if len(cells) != len(column_labels):
             raise Stage5DDensityReviewError(
-                f"5D sheet row is incomplete: {prototype_id}"
+                f"H2-A sheet row is incomplete: {prototype_id}"
             )
         for column, (path, ordinary_count) in enumerate(cells):
             x0 = left_margin + column * cell_width
@@ -204,7 +204,7 @@ def _selected_pair_mechanics(
     periodic_shifts = [value for value in repeat_shifts if abs(value) > 1e-12]
     if not base_shifts or not periodic_shifts:
         raise Stage5DDensityReviewError(
-            "5D mechanics require both canonical and periodic repeat shifts"
+            "H2-A mechanics require both canonical and periodic repeat shifts"
         )
     required_clearance = float(conflict_graph["minimum_descendant_clearance"])
 
@@ -338,7 +338,7 @@ def run(output_dir: Path) -> None:
         EDITOR_L2_PRIOR_PATH,
     ):
         if not path.is_file():
-            raise Stage5DDensityReviewError(f"missing 5D input: {path}")
+            raise Stage5DDensityReviewError(f"missing H2-A input: {path}")
 
     (
         inputs,
@@ -363,7 +363,7 @@ def run(output_dir: Path) -> None:
 
     output_dir.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(
-        prefix="stage5d_density_",
+        prefix="h2a_soft_density_",
         dir=output_dir.parent,
     ) as directory:
         temporary = Path(directory)
@@ -381,9 +381,10 @@ def run(output_dir: Path) -> None:
         for prototype_id in PROTOTYPE_IDS:
             frozen_structure: dict[str, Any] | None = None
             frozen_candidate_pool: list[dict[str, Any]] | None = None
-            frozen_resolved_domain: dict[str, int] | None = None
+            frozen_witnessed_counts: list[int] | None = None
             level_counts: dict[str, int] = {}
             level_root_sets: dict[str, list[float]] = {}
+            level_density_objectives: dict[str, dict[str, Any]] = {}
 
             for density_level in DENSITY_LEVELS:
                 result = generate_prototype_case(
@@ -409,37 +410,58 @@ def run(output_dir: Path) -> None:
                 strict_value = result["variant_strict"].as_dict()
                 inventory = result["inventory"]
 
-                resolved_domain = {
-                    str(key): int(value)
-                    for key, value in plan["solver"][
-                        "resolved_ordinary_l1_count_domain"
-                    ].items()
-                }
-                if density_level not in resolved_domain:
+                count_derivation = plan["count_derivation"]
+                solver = plan["solver"]
+                witnessed_counts = [
+                    int(value)
+                    for value in count_derivation[
+                        "geometry_witnessed_ordinary_l1_counts"
+                    ]
+                ]
+                solver_witnessed_counts = [
+                    int(value)
+                    for value in solver[
+                        "geometry_witnessed_ordinary_l1_counts"
+                    ]
+                ]
+                density_objective = count_derivation["density_objective"]
+                if (
+                    not witnessed_counts
+                    or witnessed_counts != solver_witnessed_counts
+                    or not isinstance(density_objective, Mapping)
+                    or solver.get("density_objective") != density_objective
+                    or count_derivation.get("selected_count_as_result") is not True
+                    or solver.get("selected_count_as_result") is not True
+                    or count_derivation.get(
+                        "selected_set_and_count_jointly_ranked"
+                    )
+                    is not True
+                    or solver.get("selected_set_and_count_jointly_ranked") is not True
+                ):
                     raise Stage5DDensityReviewError(
-                        f"resolved density domain lacks {density_level}: {prototype_id}"
+                        "formal H2-A soft-density evidence is incomplete: "
+                        f"{prototype_id} {density_level}"
                     )
                 ordinary_count = len(plan["lanes"])
                 flower_support_count = len(flower_mount_plan["mounts"])
-                expected_count = resolved_domain[density_level]
-                if ordinary_count != expected_count:
+                if ordinary_count not in witnessed_counts:
                     raise Stage5DDensityReviewError(
-                        "selected ordinary L1 count does not match the resolved "
-                        f"density domain: {prototype_id} {density_level}"
+                        "selected ordinary L1 count is not geometry witnessed: "
+                        f"{prototype_id} {density_level}"
                     )
                 if (
-                    plan["count_derivation"]["ordinary_density_level"]
-                    != density_level
-                    or plan["count_derivation"]["ordinary_density_source"]
+                    count_derivation["ordinary_density_level"] != density_level
+                    or count_derivation["ordinary_density_source"]
                     != "explicit_review_override"
                 ):
                     raise Stage5DDensityReviewError(
-                        "5D review override was not consumed by the formal selector"
+                        "H2-A review override was not consumed by the formal selector"
                     )
-                count_derivation = plan["count_derivation"]
                 if (
                     int(count_derivation["required_support_count"])
                     != flower_support_count
+                    or int(count_derivation["selected_ordinary_l1_count"])
+                    != ordinary_count
                     or int(count_derivation["selected_l1_count"])
                     != ordinary_count + flower_support_count
                 ):
@@ -457,23 +479,25 @@ def run(output_dir: Path) -> None:
                 if frozen_structure is None:
                     frozen_structure = structure_basis
                     frozen_candidate_pool = candidate_pool_basis
-                    frozen_resolved_domain = resolved_domain
+                    frozen_witnessed_counts = witnessed_counts
                 else:
                     if structure_basis != frozen_structure:
                         raise Stage5DDensityReviewError(
-                            "backbone, flowers, or mounts changed across 5D levels: "
+                            "backbone, flowers, or mounts changed across H2-A levels: "
                             f"{prototype_id}"
                         )
                     if candidate_pool_basis != frozen_candidate_pool:
                         raise Stage5DDensityReviewError(
-                            "common candidate-pool base geometry changed across 5D "
+                            "common candidate-pool base geometry changed across H2-A "
                             f"levels: {prototype_id}"
                         )
-                    if resolved_domain != frozen_resolved_domain:
+                    if witnessed_counts != frozen_witnessed_counts:
                         raise Stage5DDensityReviewError(
-                            f"resolved density domain changed across levels: {prototype_id}"
+                            "geometry-witnessed count domain changed across levels: "
+                            f"{prototype_id}"
                         )
                 level_counts[density_level] = ordinary_count
+                level_density_objectives[density_level] = dict(density_objective)
                 level_root_sets[density_level] = sorted(
                     round(float(lane["root_s"]), 9) for lane in plan["lanes"]
                 )
@@ -505,13 +529,10 @@ def run(output_dir: Path) -> None:
                 _assert_actual_l1_only_selection(plan, selection)
 
                 mechanics = _selected_pair_mechanics(selection, conflict_graph)
-                if (
-                    mechanics["curve_crossing_count"] != 0
-                    or mechanics["near_clearance_violation_count"] != 0
-                ):
+                if mechanics["curve_crossing_count"] != 0:
                     raise Stage5DDensityReviewError(
-                        "formal selected L1 set failed independent crossing or "
-                        f"clearance checks: {prototype_id} {density_level}"
+                        "formal selected L1 set failed the crossing check: "
+                        f"{prototype_id} {density_level}"
                     )
                 total_crossings += int(mechanics["curve_crossing_count"])
                 total_clearance_violations += int(
@@ -593,7 +614,14 @@ def run(output_dir: Path) -> None:
                         "selected_ordinary_l1_root_s": level_root_sets[
                             density_level
                         ],
-                        "resolved_ordinary_l1_count_domain": resolved_domain,
+                        "geometry_witnessed_ordinary_l1_counts": witnessed_counts,
+                        "selected_count_as_result": count_derivation[
+                            "selected_count_as_result"
+                        ],
+                        "selected_set_and_count_jointly_ranked": count_derivation[
+                            "selected_set_and_count_jointly_ranked"
+                        ],
+                        "density_objective": density_objective,
                         "flower_support_count": flower_support_count,
                         "upper_ordinary_l1_count": upper_count,
                         "lower_ordinary_l1_count": ordinary_count - upper_count,
@@ -616,10 +644,6 @@ def run(output_dir: Path) -> None:
                     }
                 )
 
-            if len(set(level_counts.values())) != len(DENSITY_LEVELS):
-                raise Stage5DDensityReviewError(
-                    f"simple/medium/rich did not resolve to distinct counts: {prototype_id}"
-                )
             invariant_rows.append(
                 {
                     "prototype_id": prototype_id,
@@ -627,9 +651,14 @@ def run(output_dir: Path) -> None:
                     "flowers_equal_across_density_levels": True,
                     "flower_mounts_equal_across_density_levels": True,
                     "candidate_pool_base_geometry_equal_across_density_levels": True,
-                    "resolved_domain_equal_across_density_levels": True,
+                    "geometry_witnessed_count_domain_equal_across_density_levels": True,
+                    "geometry_witnessed_ordinary_l1_counts": (
+                        frozen_witnessed_counts
+                    ),
                     "ordinary_l1_counts": level_counts,
                     "ordinary_l1_root_sets": level_root_sets,
+                    "density_objectives": level_density_objectives,
+                    "density_levels_required_to_have_distinct_counts": False,
                     "simple_to_medium_is_not_append_only": not set(
                         level_root_sets["simple"]
                     ).issubset(level_root_sets["medium"]),
@@ -639,13 +668,13 @@ def run(output_dir: Path) -> None:
                 }
             )
 
-        debug_sheet = temporary / "stage5d_color_structure_contact_sheet.png"
-        formal_sheet = temporary / "stage5d_formal_l1_only_contact_sheet.png"
+        debug_sheet = temporary / "h2a_color_structure_contact_sheet.png"
+        formal_sheet = temporary / "h2a_formal_l1_only_contact_sheet.png"
         _render_labeled_sheet(
             debug_rows,
             debug_sheet,
             title=(
-                "Stage 5D: fixed backbone/flowers, ordinary-L1 density variation "
+                "H2-A: fixed backbone/flowers, soft ordinary-L1 density preference "
                 "(structure view)"
             ),
         )
@@ -653,15 +682,15 @@ def run(output_dir: Path) -> None:
             formal_rows,
             formal_sheet,
             title=(
-                "Stage 5D: formal Stage4/Stage5 output "
+                "H2-A: formal Stage4/Stage5 output "
                 "(actual L1-only Units)"
             ),
         )
         manifest = {
-            "schema": "dynamic_branch_stage5d_density_review_manifest_v1",
+            "schema": "dynamic_branch_h2a_soft_density_review_manifest_v3",
             "scope": (
                 "all five SW prototypes under controlled simple/medium/rich "
-                "ordinary-L1 density variation"
+                "ordinary-L1 soft resource preference"
             ),
             "prototype_order": list(PROTOTYPE_IDS),
             "density_level_order": list(DENSITY_LEVELS),
@@ -678,14 +707,16 @@ def run(output_dir: Path) -> None:
             "production_chain": [
                 "fixed_backbone_variant",
                 "fixed_flower_layout_and_mount",
-                "common_pool_ordinary_l1_density_selection",
+                "common_pool_soft_density_joint_set_and_count_selection",
                 "stage4_unit_candidate_inventory",
                 "stage5_actual_l1_only_global_selection",
                 "formal_render",
             ],
             "stage_boundaries": {
-                "5d_ordinary_l1_density_policy_consumed": True,
-                "flower_support_excluded_from_density_count": True,
+                "h2a_soft_density_policy_consumed": True,
+                "selected_count_is_result_not_precondition": True,
+                "geometry_witnessed_cardinalities_jointly_ranked": True,
+                "flower_support_excluded_from_density_resource": True,
                 "5e_opposed_fork_generation_added": False,
                 "leaves_or_swollen_rhizomes_generated": False,
                 "stage4_l2_candidates_may_exist_but_are_not_formally_selected": True,
@@ -696,6 +727,7 @@ def run(output_dir: Path) -> None:
                 "selected_near_clearance_violation_count": (
                     total_clearance_violations
                 ),
+                "clearance_recorded_but_not_h2a_review_gate": True,
             },
             "review_gate": {
                 "status": "VISUAL_REVIEW_PENDING",

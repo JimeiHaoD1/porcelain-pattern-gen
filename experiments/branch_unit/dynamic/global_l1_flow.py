@@ -35,8 +35,10 @@ from prototype_strategy_v1 import (
 
 SCHEMA = "dynamic_branch_global_l1_flow_plan_v1"
 SCHEMA_V2 = "dynamic_branch_global_l1_flow_plan_v2"
+SCHEMA_V3 = "dynamic_branch_global_l1_flow_plan_v3"
 CONTRACT_SCHEMA = "dynamic_branch_stage3b_l1_flow_contract_v1"
 CONTRACT_SCHEMA_V2 = "dynamic_branch_stage3b_l1_flow_contract_v2"
+CONTRACT_SCHEMA_V3 = "dynamic_branch_stage3b_l1_flow_contract_v3"
 FEEDBACK_SCHEMA = "dynamic_branch_edit_feedback_prior_v1"
 CURVE_GEOMETRY_PRIOR_SCHEMA = "dynamic_branch_editor_curve_geometry_prior_v4"
 SEEDS = (4101, 4102, 4103)
@@ -65,7 +67,11 @@ class BeamState:
 
 
 def _feedback_mode(contract: Mapping[str, Any]) -> bool:
-    return contract.get("schema") == CONTRACT_SCHEMA_V2
+    return contract.get("schema") in {CONTRACT_SCHEMA_V2, CONTRACT_SCHEMA_V3}
+
+
+def _soft_density_mode(contract: Mapping[str, Any]) -> bool:
+    return contract.get("schema") == CONTRACT_SCHEMA_V3
 
 
 def _feedback_profile(
@@ -653,8 +659,9 @@ def _derive_common_count_domain(
     branch_seed: int,
     prototype_strategy: Mapping[str, Any] | None = None,
     ordinary_density_level_override: str | None = None,
+    soft_density_mode: bool = False,
 ) -> dict[str, Any]:
-    """Derive the V2 cardinality domain without choosing N in advance."""
+    """Derive the admissible ordinary-L1 count band before set search."""
 
     family_id = (
         str(prototype_strategy["family_id"])
@@ -726,21 +733,11 @@ def _derive_common_count_domain(
             )
         ]
     )
-    capacity_density_domain = {
-        "simple": min(allowed_ordinary_counts),
-        "medium": min(
-            allowed_ordinary_counts,
-            key=lambda value: (abs(value - ordinary_center), value),
-        ),
-        "rich": max(allowed_ordinary_counts),
-    }
-    return {
+    result = {
         "preferred_l1_count": preferred,
         "raw_total_l1_count_candidates": raw_total_counts,
         "allowed_total_l1_counts": allowed_total_counts,
         "allowed_ordinary_l1_counts": allowed_ordinary_counts,
-        "ordinary_l1_count_center": ordinary_center,
-        "ordinary_l1_count_capacity_domain": capacity_density_domain,
         "ordinary_density_level": density_level,
         "ordinary_density_source": (
             "explicit_review_override"
@@ -759,10 +756,18 @@ def _derive_common_count_domain(
         "minimum_root_spacing": round(root_spacing, 9),
         "count_selected_before_candidate_search": False,
         "count_semantics": (
-            "preferred total count is converted once to an ordinary-L1 center; "
-            "the requested simple/medium/rich level selects among geometry-"
-            "feasible ordinary cardinalities inside the common-pool solver; "
-            "frozen flower supports do not participate in the density level"
+            "preferred total count defines only the admissible search band; "
+            "all geometry-witnessed ordinary-L1 cardinalities compete in one "
+            "soft resource ranking; simple/medium/rich does not preselect N; "
+            "frozen flower supports do not participate in the density resource"
+            if soft_density_mode
+            else (
+                "preferred total count is converted once to an ordinary-L1 "
+                "center; the requested simple/medium/rich level selects among "
+                "geometry-feasible ordinary cardinalities inside the common-"
+                "pool solver; frozen flower supports do not participate in the "
+                "density level"
+            )
         ),
         "primary_branch_evidence": int(
             morphology["instance_priors"]["source_observation_counts"][
@@ -775,6 +780,28 @@ def _derive_common_count_domain(
         "fixed_count_copied": False,
         "mandatory_flower_service_count": required_support_count,
     }
+    if soft_density_mode:
+        result.update(
+            {
+                "density_count_mapping_used": False,
+                "selected_set_and_count_jointly_ranked": True,
+            }
+        )
+    else:
+        result.update(
+            {
+                "ordinary_l1_count_center": ordinary_center,
+                "ordinary_l1_count_capacity_domain": {
+                    "simple": min(allowed_ordinary_counts),
+                    "medium": min(
+                        allowed_ordinary_counts,
+                        key=lambda value: (abs(value - ordinary_center), value),
+                    ),
+                    "rich": max(allowed_ordinary_counts),
+                },
+            }
+        )
+    return result
 
 
 def _vertical_preferences(
@@ -3298,8 +3325,8 @@ def _common_set_score(
     lanes: Sequence[Mapping[str, Any]],
     *,
     analysis: Mapping[str, Any],
-    preferred_total_count: int,
-    support_count: int,
+    preferred_total_count: int | None,
+    support_count: int | None,
     support_roots: Sequence[float],
     root_spacing: float,
     prototype_strategy: Mapping[str, Any] | None = None,
@@ -3374,19 +3401,23 @@ def _common_set_score(
     candidate_quality = sum(
         float(lane["individual_score"]) for lane in lanes
     ) / len(lanes)
-    selected_total_count = len(lanes) + support_count
-    count_closeness = 1.0 / (
-        1.0 + abs(selected_total_count - preferred_total_count)
-    )
+    total_planning_length = sum(lengths)
+    mean_backbone_excursion = sum(
+        float(lane["features"]["maximum_backbone_excursion"])
+        for lane in lanes
+    ) / len(lanes)
+    mean_vertical_span = sum(
+        float(lane["features"]["vertical_span"])
+        for lane in lanes
+    ) / len(lanes)
     score = (
         0.34 * candidate_quality
         + 1.65 * root_coverage
         + 0.62 * cluster_relief
         + 0.58 * length_variation
         + 0.42 * vertical_rhythm_fit
-        + 0.55 * count_closeness
     )
-    return score, {
+    features = {
         "mean_candidate_quality": candidate_quality,
         "root_arc_coverage": root_coverage,
         "minimum_selected_root_gap": minimum_gap,
@@ -3398,10 +3429,242 @@ def _common_set_score(
         "vertical_side_balance": vertical_balance,
         "target_upper_lane_count": float(target_upper_count),
         "vertical_rhythm_fit": vertical_rhythm_fit,
-        "selected_total_l1_count": float(selected_total_count),
-        "preferred_total_l1_count": float(preferred_total_count),
-        "count_center_closeness": count_closeness,
+        "ordinary_l1_count": float(len(lanes)),
+        "total_planning_length": total_planning_length,
+        "mean_backbone_excursion": mean_backbone_excursion,
+        "mean_vertical_span": mean_vertical_span,
     }
+    if preferred_total_count is not None and support_count is not None:
+        selected_total_count = len(lanes) + support_count
+        count_closeness = 1.0 / (
+            1.0 + abs(selected_total_count - preferred_total_count)
+        )
+        score += 0.55 * count_closeness
+        features.update(
+            {
+                "selected_total_l1_count": float(selected_total_count),
+                "preferred_total_l1_count": float(preferred_total_count),
+                "count_center_closeness": count_closeness,
+            }
+        )
+    return score, features
+
+
+def _minmax_value(value: float, lower: float, upper: float) -> float:
+    if upper - lower < 1e-9:
+        return 0.5
+    return min(1.0, max(0.0, (value - lower) / (upper - lower)))
+
+
+def _linear_quantile(values: Sequence[float], quantile: float) -> float:
+    if not values:
+        raise GlobalL1FlowError("cannot derive a density target from no terminal sets")
+    if not 0.0 <= quantile <= 1.0:
+        raise GlobalL1FlowError("soft density target quantile must be in [0, 1]")
+    ordered = sorted(float(value) for value in values)
+    position = quantile * (len(ordered) - 1)
+    lower_index = int(math.floor(position))
+    upper_index = int(math.ceil(position))
+    if lower_index == upper_index:
+        return ordered[lower_index]
+    fraction = position - lower_index
+    return (
+        ordered[lower_index] * (1.0 - fraction)
+        + ordered[upper_index] * fraction
+    )
+
+
+def _rank_soft_density_sets(
+    terminal_sets: Mapping[
+        tuple[str, ...],
+        tuple[float, Mapping[str, float]],
+    ],
+    density_level: str,
+    policy: Mapping[str, Any],
+) -> tuple[
+    list[dict[str, Any]],
+    dict[str, Any],
+    dict[str, dict[str, Any]],
+]:
+    """Jointly rank every witnessed set and cardinality with one soft target."""
+
+    if density_level not in ORDINARY_DENSITY_LEVELS:
+        raise GlobalL1FlowError("soft density selector received an invalid level")
+    target_quantiles = policy.get("target_quantiles")
+    component_weights = policy.get("resource_component_weights")
+    if not isinstance(target_quantiles, Mapping) or not isinstance(
+        component_weights,
+        Mapping,
+    ):
+        raise GlobalL1FlowError("V3 contract lacks the soft density objective")
+    resource_names = (
+        "ordinary_l1_count",
+        "total_planning_length",
+        "mean_backbone_excursion",
+        "mean_vertical_span",
+    )
+    if set(component_weights) != set(resource_names):
+        raise GlobalL1FlowError("soft density resource components mismatch")
+    weights = {name: float(component_weights[name]) for name in resource_names}
+    structural_weight = float(policy.get("structural_weight", -1.0))
+    density_fit_weight = float(policy.get("density_fit_weight", -1.0))
+    if (
+        any(value < 0.0 for value in weights.values())
+        or abs(sum(weights.values()) - 1.0) > 1e-9
+        or structural_weight < 0.0
+        or density_fit_weight < 0.0
+        or abs(structural_weight + density_fit_weight - 1.0) > 1e-9
+    ):
+        raise GlobalL1FlowError("soft density objective weights are invalid")
+
+    structural_values = [float(value[0]) for value in terminal_sets.values()]
+    structural_bounds = (min(structural_values), max(structural_values))
+    resource_bounds = {
+        name: (
+            min(float(features[name]) for _, features in terminal_sets.values()),
+            max(float(features[name]) for _, features in terminal_sets.values()),
+        )
+        for name in resource_names
+    }
+    rows: list[dict[str, Any]] = []
+    for signature, (structural_raw, features) in terminal_sets.items():
+        resource_raw = {
+            name: float(features[name]) for name in resource_names
+        }
+        resource_normalized = {
+            name: _minmax_value(
+                resource_raw[name],
+                resource_bounds[name][0],
+                resource_bounds[name][1],
+            )
+            for name in resource_names
+        }
+        resource_score = sum(
+            weights[name] * resource_normalized[name]
+            for name in resource_names
+        )
+        rows.append(
+            {
+                "signature": signature,
+                "structural_raw": float(structural_raw),
+                "structural_normalized": _minmax_value(
+                    float(structural_raw),
+                    structural_bounds[0],
+                    structural_bounds[1],
+                ),
+                "features": dict(features),
+                "resource_raw": resource_raw,
+                "resource_normalized": resource_normalized,
+                "resource_score": resource_score,
+            }
+        )
+
+    resource_scores = [float(row["resource_score"]) for row in rows]
+    density_targets = {
+        level: _linear_quantile(
+            resource_scores,
+            float(target_quantiles[level]),
+        )
+        for level in ORDINARY_DENSITY_LEVELS
+    }
+    target_quantile = float(target_quantiles[density_level])
+    target_resource_score = density_targets[density_level]
+    bandwidth_fraction = float(policy.get("fit_bandwidth_fraction", -1.0))
+    minimum_bandwidth = float(policy.get("minimum_fit_bandwidth", -1.0))
+    if (
+        policy.get("fit_kernel") != "gaussian"
+        or bandwidth_fraction <= 0.0
+        or minimum_bandwidth <= 0.0
+    ):
+        raise GlobalL1FlowError("soft density fit bandwidth is invalid")
+    resource_bandwidth = max(
+        minimum_bandwidth,
+        bandwidth_fraction
+        * (density_targets["rich"] - density_targets["simple"]),
+    )
+    for row in rows:
+        target_distance = (
+            float(row["resource_score"]) - target_resource_score
+        )
+        density_fit = math.exp(
+            -0.5 * (target_distance / resource_bandwidth) ** 2
+        )
+        row["density_fit"] = density_fit
+        row["total_objective"] = (
+            structural_weight * float(row["structural_normalized"])
+            + density_fit_weight * density_fit
+        )
+    rows.sort(
+        key=lambda row: (
+            -float(row["total_objective"]),
+            -float(row["structural_raw"]),
+            abs(float(row["resource_score"]) - target_resource_score),
+            row["signature"],
+        )
+    )
+
+    best_by_cardinality: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        key = str(len(row["signature"]))
+        if key not in best_by_cardinality:
+            best_by_cardinality[key] = {
+                "structural_raw": round(float(row["structural_raw"]), 9),
+                "resource_score": round(float(row["resource_score"]), 9),
+                "density_fit": round(float(row["density_fit"]), 9),
+                "total_objective": round(float(row["total_objective"]), 9),
+            }
+
+    selected_row = rows[0]
+    density_objective = {
+        "version": str(policy.get("version", "soft_resource_v3")),
+        "density_level": density_level,
+        "target_quantile": round(target_quantile, 9),
+        "target_resource_score": round(target_resource_score, 9),
+        "target_resource_scores": {
+            level: round(density_targets[level], 9)
+            for level in ORDINARY_DENSITY_LEVELS
+        },
+        "fit_kernel": "gaussian",
+        "fit_bandwidth": round(resource_bandwidth, 9),
+        "structural_weight": round(structural_weight, 9),
+        "density_fit_weight": round(density_fit_weight, 9),
+        "component_weights": {
+            name: round(weights[name], 9) for name in resource_names
+        },
+        "normalization_bounds": {
+            "structural_raw": {
+                "minimum": round(structural_bounds[0], 9),
+                "maximum": round(structural_bounds[1], 9),
+            },
+            **{
+                name: {
+                    "minimum": round(resource_bounds[name][0], 9),
+                    "maximum": round(resource_bounds[name][1], 9),
+                }
+                for name in resource_names
+            },
+        },
+        "selected": {
+            "structural_raw": round(float(selected_row["structural_raw"]), 9),
+            "structural_normalized": round(
+                float(selected_row["structural_normalized"]), 9
+            ),
+            "resource_raw": {
+                name: round(float(selected_row["resource_raw"][name]), 9)
+                for name in resource_names
+            },
+            "resource_normalized": {
+                name: round(
+                    float(selected_row["resource_normalized"][name]), 9
+                )
+                for name in resource_names
+            },
+            "resource_score": round(float(selected_row["resource_score"]), 9),
+            "density_fit": round(float(selected_row["density_fit"]), 9),
+            "total_objective": round(float(selected_row["total_objective"]), 9),
+        },
+    }
+    return rows, density_objective, best_by_cardinality
 
 
 def _build_common_conflict_graph(
@@ -3574,6 +3837,7 @@ def _solve_common_set(
     prototype_strategy: Mapping[str, Any] | None = None,
     rescue_seed: int | None = None,
     lane_clearance_override: float | None = None,
+    soft_density_policy: Mapping[str, Any] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Select one compatible variable-cardinality set from a shared pool."""
 
@@ -3606,14 +3870,21 @@ def _solve_common_set(
         for value in count_derivation["flower_support_reserved_root_s"]
     ]
     preferred_total = int(count_derivation["preferred_l1_count"])
+    soft_density_enabled = soft_density_policy is not None
     allowed_counts = sorted(
         {
             int(value)
             for value in count_derivation["allowed_ordinary_l1_counts"]
         },
-        key=lambda value: (
-            abs(value + support_count - preferred_total),
-            value,
+        key=(
+            (lambda value: value)
+            if soft_density_enabled
+            else (
+                lambda value: (
+                    abs(value + support_count - preferred_total),
+                    value,
+                )
+            )
         ),
     )
     terminal_sets: dict[tuple[str, ...], tuple[float, dict[str, float]]] = {}
@@ -3626,8 +3897,10 @@ def _solve_common_set(
         return _common_set_score(
             [rows_by_id[candidate_id] for candidate_id in ids],
             analysis=analysis,
-            preferred_total_count=preferred_total,
-            support_count=support_count,
+            preferred_total_count=(
+                None if soft_density_enabled else preferred_total
+            ),
+            support_count=None if soft_density_enabled else support_count,
             support_roots=support_roots,
             root_spacing=root_spacing,
             prototype_strategy=prototype_strategy,
@@ -3739,35 +4012,53 @@ def _solve_common_set(
         raise GlobalL1FlowError(
             "dynamic_l1_layout_infeasible: no compatible cardinality"
         )
-    geometry_feasible_counts = sorted(
+    geometry_witnessed_counts = sorted(
         {len(signature) for signature in terminal_sets}
     )
-    ordinary_center = int(count_derivation["ordinary_l1_count_center"])
-    resolved_density_domain = {
-        "simple": min(geometry_feasible_counts),
-        "medium": min(
-            geometry_feasible_counts,
-            key=lambda value: (abs(value - ordinary_center), value),
-        ),
-        "rich": max(geometry_feasible_counts),
-    }
     density_level = str(count_derivation["ordinary_density_level"])
     if density_level not in ORDINARY_DENSITY_LEVELS:
         raise GlobalL1FlowError("common set selector received an invalid density level")
-    selected_ordinary_count = resolved_density_domain[density_level]
-    ranked_sets = sorted(
-        (
-            (score, signature, features)
-            for signature, (score, features) in terminal_sets.items()
-            if len(signature) == selected_ordinary_count
-        ),
-        key=lambda row: (-row[0], row[1]),
-    )
-    if not ranked_sets:
-        raise GlobalL1FlowError(
-            "dynamic_l1_layout_infeasible: density cardinality has no witness"
+    density_objective: dict[str, Any] | None = None
+    best_objective_by_cardinality: dict[str, dict[str, Any]] | None = None
+    resolved_density_domain: dict[str, int] | None = None
+    ordinary_center: int | None = None
+    if soft_density_enabled:
+        soft_ranked_sets, density_objective, best_objective_by_cardinality = (
+            _rank_soft_density_sets(
+                terminal_sets,
+                density_level,
+                soft_density_policy,
+            )
         )
-    selected_score, selected_signature, selected_features = ranked_sets[0]
+        selected_row = soft_ranked_sets[0]
+        selected_signature = tuple(selected_row["signature"])
+        selected_score = float(selected_row["total_objective"])
+        selected_features = dict(selected_row["features"])
+        selected_ordinary_count = len(selected_signature)
+    else:
+        ordinary_center = int(count_derivation["ordinary_l1_count_center"])
+        resolved_density_domain = {
+            "simple": min(geometry_witnessed_counts),
+            "medium": min(
+                geometry_witnessed_counts,
+                key=lambda value: (abs(value - ordinary_center), value),
+            ),
+            "rich": max(geometry_witnessed_counts),
+        }
+        selected_ordinary_count = resolved_density_domain[density_level]
+        ranked_sets = sorted(
+            (
+                (score, signature, features)
+                for signature, (score, features) in terminal_sets.items()
+                if len(signature) == selected_ordinary_count
+            ),
+            key=lambda row: (-row[0], row[1]),
+        )
+        if not ranked_sets:
+            raise GlobalL1FlowError(
+                "dynamic_l1_layout_infeasible: density cardinality has no witness"
+            )
+        selected_score, selected_signature, selected_features = ranked_sets[0]
     selected_pool_rows = sorted(
         (dict(rows_by_id[candidate_id]) for candidate_id in selected_signature),
         key=lambda row: (float(row["root_s"]), str(row["candidate_id"])),
@@ -3814,20 +4105,11 @@ def _solve_common_set(
         ),
         "global_optimality_claimed": False,
         "selection_slots_used": False,
-        "count_selected_during_set_search": True,
-        "count_selected_by_ordinary_density_policy": True,
         "ordinary_density_level": density_level,
         "ordinary_density_source": str(
             count_derivation["ordinary_density_source"]
         ),
-        "ordinary_l1_count_center": ordinary_center,
-        "geometry_feasible_ordinary_l1_counts": geometry_feasible_counts,
-        "resolved_ordinary_l1_count_domain": resolved_density_domain,
         "selected_ordinary_l1_count": selected_ordinary_count,
-        "density_levels_have_distinct_counts": (
-            len(set(resolved_density_domain.values()))
-            == len(ORDINARY_DENSITY_LEVELS)
-        ),
         "static_side_rhythm_policy": (
             str(prototype_strategy["l1_profile"]["side_rhythm"])
             if prototype_strategy is not None
@@ -3853,6 +4135,12 @@ def _solve_common_set(
         "exact_search_node_count": exact_search_node_count,
         "exact_search_node_limit": exact_search_node_limit,
         "terminal_compatible_set_count": len(terminal_sets),
+        "terminal_set_count_by_cardinality": {
+            str(count): sum(
+                len(signature) == count for signature in terminal_sets
+            )
+            for count in geometry_witnessed_counts
+        },
         "selected_total_score": round(selected_score, 9),
         "global_features": {
             key: round(value, 9) for key, value in selected_features.items()
@@ -3860,6 +4148,41 @@ def _solve_common_set(
         "selected_pair_metrics": pair_rows,
         "exact_editor_geometry_exemplar_reuse": False,
     }
+    if soft_density_enabled:
+        solver.update(
+            {
+                "count_selected_during_set_search": False,
+                "count_selected_after_terminal_search": True,
+                "density_count_mapping_used": False,
+                "selected_count_as_result": True,
+                "selected_set_and_count_jointly_ranked": True,
+                "geometry_witnessed_ordinary_l1_counts": (
+                    geometry_witnessed_counts
+                ),
+                "density_objective": density_objective,
+                "best_objective_by_cardinality": (
+                    best_objective_by_cardinality
+                ),
+            }
+        )
+    else:
+        if ordinary_center is None or resolved_density_domain is None:
+            raise GlobalL1FlowError("legacy density cardinality state is incomplete")
+        solver.update(
+            {
+                "count_selected_during_set_search": True,
+                "count_selected_by_ordinary_density_policy": True,
+                "ordinary_l1_count_center": ordinary_center,
+                "geometry_feasible_ordinary_l1_counts": (
+                    geometry_witnessed_counts
+                ),
+                "resolved_ordinary_l1_count_domain": resolved_density_domain,
+                "density_levels_have_distinct_counts": (
+                    len(set(resolved_density_domain.values()))
+                    == len(ORDINARY_DENSITY_LEVELS)
+                ),
+            }
+        )
     if lane_clearance_override is not None:
         solver["lane_clearance_override_applied"] = True
     if any(
@@ -3879,7 +4202,11 @@ def _validate_inputs(
     seed: int,
     prototype_strategy: Mapping[str, Any] | None = None,
 ) -> tuple[str, str]:
-    if contract.get("schema") not in {CONTRACT_SCHEMA, CONTRACT_SCHEMA_V2}:
+    if contract.get("schema") not in {
+        CONTRACT_SCHEMA,
+        CONTRACT_SCHEMA_V2,
+        CONTRACT_SCHEMA_V3,
+    }:
         raise GlobalL1FlowError("stage-3B contract schema mismatch")
     if isinstance(seed, bool) or not isinstance(seed, int) or not 0 <= seed <= 2**32 - 1:
         raise GlobalL1FlowError("branch_seed must be a non-negative 32-bit integer")
@@ -3982,7 +4309,7 @@ def generate_global_l1_flow_plan(
             or flower_mount_plan is None
         ):
             raise GlobalL1FlowError(
-                "stage-3B v2 requires both editor priors and flower mounting first"
+                "feedback Stage3B requires both editor priors and flower mounting first"
             )
         if flower_mount_plan.get("prototype_id") != prototype_id:
             raise GlobalL1FlowError("flower mount plan prototype mismatch")
@@ -4020,7 +4347,17 @@ def generate_global_l1_flow_plan(
     pool_sampling: dict[str, Any] | None = None
     if feedback_profile is not None:
         if curve_geometry_profile is None or flower_mount_plan is None:
-            raise GlobalL1FlowError("V2 common-pool inputs are incomplete")
+            raise GlobalL1FlowError("feedback common-pool inputs are incomplete")
+        soft_density_policy: Mapping[str, Any] | None = None
+        if _soft_density_mode(contract):
+            candidate_policy = contract.get("planning_policy", {}).get(
+                "soft_density_objective"
+            )
+            if not isinstance(candidate_policy, Mapping):
+                raise GlobalL1FlowError(
+                    "V3 contract lacks a soft density objective policy"
+                )
+            soft_density_policy = candidate_policy
         count_derivation = _derive_common_count_domain(
             analysis,
             morphology,
@@ -4030,6 +4367,7 @@ def generate_global_l1_flow_plan(
             seed,
             prototype_strategy,
             ordinary_density_level_override,
+            soft_density_mode=soft_density_policy is not None,
         )
         candidates, pool_sampling = _feedback_common_ordinary_candidates(
             analysis,
@@ -4071,6 +4409,7 @@ def generate_global_l1_flow_plan(
             curve_geometry_profile,
             prototype_strategy,
             rescue_seed=seed,
+            soft_density_policy=soft_density_policy,
         )
         if downstream_unit_clearance is not None:
             required_clearance = float(downstream_unit_clearance)
@@ -4124,6 +4463,7 @@ def generate_global_l1_flow_plan(
                     prototype_strategy,
                     rescue_seed=seed,
                     lane_clearance_override=required_clearance,
+                    soft_density_policy=soft_density_policy,
                 )
                 solver["downstream_clearance_resolve"] = {
                     "initial_min_pair_clearance": round(
@@ -4159,16 +4499,32 @@ def generate_global_l1_flow_plan(
             "selected_ordinary_l1_count": selected_ordinary_count,
             "selected_l1_count": selected_total_count,
             "total_l1_with_flower_support_count": selected_total_count,
-            "geometry_feasible_ordinary_l1_counts": solver[
-                "geometry_feasible_ordinary_l1_counts"
-            ],
-            "resolved_ordinary_l1_count_domain": solver[
-                "resolved_ordinary_l1_count_domain"
-            ],
-            "density_levels_have_distinct_counts": solver[
-                "density_levels_have_distinct_counts"
-            ],
         }
+        if soft_density_policy is not None:
+            count_derivation.update(
+                {
+                    "geometry_witnessed_ordinary_l1_counts": solver[
+                        "geometry_witnessed_ordinary_l1_counts"
+                    ],
+                    "selected_count_as_result": True,
+                    "selected_set_and_count_jointly_ranked": True,
+                    "density_objective": solver["density_objective"],
+                }
+            )
+        else:
+            count_derivation.update(
+                {
+                    "geometry_feasible_ordinary_l1_counts": solver[
+                        "geometry_feasible_ordinary_l1_counts"
+                    ],
+                    "resolved_ordinary_l1_count_domain": solver[
+                        "resolved_ordinary_l1_count_domain"
+                    ],
+                    "density_levels_have_distinct_counts": solver[
+                        "density_levels_have_distinct_counts"
+                    ],
+                }
+            )
         selected_roots = sorted(float(row["root_s"]) for row in selected)
         root_gaps = [
             selected_roots[index] - selected_roots[index - 1]
@@ -4305,8 +4661,15 @@ def generate_global_l1_flow_plan(
     ):
         raise GlobalL1FlowError("selected support count does not match morphology requirement")
 
-    plan_schema = SCHEMA_V2 if feedback_profile is not None else SCHEMA
-    plan_version = "v2" if feedback_profile is not None else "v1"
+    if _soft_density_mode(contract):
+        plan_schema = SCHEMA_V3
+        plan_version = "v3"
+    elif feedback_profile is not None:
+        plan_schema = SCHEMA_V2
+        plan_version = "v2"
+    else:
+        plan_schema = SCHEMA
+        plan_version = "v1"
     density_identity_suffix = (
         f"__density_{count_derivation['ordinary_density_level']}"
         if feedback_profile is not None
@@ -4373,8 +4736,16 @@ def generate_global_l1_flow_plan(
         **(
             {
                 "selection_semantics": (
-                    "common_pool_then_density_conditioned_feasible_cardinality_"
-                    "selection; lane identities are assigned only after selection"
+                    (
+                        "common_pool_then_soft_density_joint_set_and_count_"
+                        "ranking; lane identities are assigned only after selection"
+                    )
+                    if _soft_density_mode(contract)
+                    else (
+                        "common_pool_then_density_conditioned_feasible_"
+                        "cardinality_selection; lane identities are assigned "
+                        "only after selection"
+                    )
                 ),
                 "preassigned_selection_slots_used": False,
                 "common_pool_sampling": pool_sampling,
@@ -4451,9 +4822,13 @@ def generate_global_l1_flow_plan(
     plan["plan_digest"] = canonical_digest(plan)
     inventory: dict[str, Any] = {
         "schema": (
-            "dynamic_branch_global_l1_candidate_inventory_v2"
-            if feedback_profile is not None
-            else "dynamic_branch_global_l1_candidate_inventory_v1"
+            "dynamic_branch_global_l1_candidate_inventory_v3"
+            if _soft_density_mode(contract)
+            else (
+                "dynamic_branch_global_l1_candidate_inventory_v2"
+                if feedback_profile is not None
+                else "dynamic_branch_global_l1_candidate_inventory_v1"
+            )
         ),
         "prototype_id": prototype_id,
         "seed": seed,
@@ -4499,7 +4874,7 @@ def generate_global_l1_flow_plan(
 
 
 def validate_global_l1_flow_plan(plan: Mapping[str, Any]) -> None:
-    if plan.get("schema") not in {SCHEMA, SCHEMA_V2}:
+    if plan.get("schema") not in {SCHEMA, SCHEMA_V2, SCHEMA_V3}:
         raise GlobalL1FlowError("global L1 flow plan schema mismatch")
     digest = plan.get("plan_digest")
     if not isinstance(digest, str):
@@ -4521,7 +4896,7 @@ def validate_global_l1_flow_plan(plan: Mapping[str, Any]) -> None:
         raise GlobalL1FlowError("global L1 flow plan contains hard issues")
     if plan["review"]["status"] != "l1_flow_pending_visual_review":
         raise GlobalL1FlowError("global L1 flow plan has an invalid review state")
-    if plan.get("schema") == SCHEMA_V2:
+    if plan.get("schema") in {SCHEMA_V2, SCHEMA_V3}:
         policy = plan.get("edit_feedback_policy", {})
         if policy.get("curve_geometry_source") != (
             "continuous_editor_descriptor_distribution"
@@ -4569,35 +4944,96 @@ def validate_global_l1_flow_plan(plan: Mapping[str, Any]) -> None:
         )
         if density_level not in ORDINARY_DENSITY_LEVELS:
             raise GlobalL1FlowError("V2 ordinary density level is invalid")
-        if (
-            plan["count_derivation"].get("ordinary_density_source")
-            == "explicit_review_override"
-            and plan["count_derivation"].get(
-                "density_levels_have_distinct_counts"
-            )
-            is not True
-        ):
-            raise GlobalL1FlowError(
-                "V2 controlled density review domain collapsed"
-            )
-        resolved_density_domain = plan["count_derivation"].get(
-            "resolved_ordinary_l1_count_domain"
-        )
-        if (
-            not isinstance(resolved_density_domain, Mapping)
-            or set(resolved_density_domain) != set(ORDINARY_DENSITY_LEVELS)
-            or len(plan["lanes"])
-            != int(resolved_density_domain[density_level])
-        ):
-            raise GlobalL1FlowError(
-                "V2 density level did not determine the actual ordinary L1 count"
-            )
         if int(plan["solver"].get("selected_ordinary_l1_count", -1)) != len(
             plan["lanes"]
         ):
             raise GlobalL1FlowError(
-                "V2 solver density count does not match the actual lane set"
+                "solver selected count does not match the actual lane set"
             )
+        if plan.get("schema") == SCHEMA_V2:
+            if (
+                plan["count_derivation"].get("ordinary_density_source")
+                == "explicit_review_override"
+                and plan["count_derivation"].get(
+                    "density_levels_have_distinct_counts"
+                )
+                is not True
+            ):
+                raise GlobalL1FlowError(
+                    "V2 controlled density review domain collapsed"
+                )
+            resolved_density_domain = plan["count_derivation"].get(
+                "resolved_ordinary_l1_count_domain"
+            )
+            if (
+                not isinstance(resolved_density_domain, Mapping)
+                or set(resolved_density_domain) != set(ORDINARY_DENSITY_LEVELS)
+                or len(plan["lanes"])
+                != int(resolved_density_domain[density_level])
+            ):
+                raise GlobalL1FlowError(
+                    "V2 density level did not determine the actual ordinary L1 count"
+                )
+        else:
+            solver = plan["solver"]
+            count_derivation = plan["count_derivation"]
+            witnessed_counts = solver.get(
+                "geometry_witnessed_ordinary_l1_counts"
+            )
+            if (
+                not isinstance(witnessed_counts, Sequence)
+                or isinstance(witnessed_counts, (str, bytes))
+                or len(plan["lanes"])
+                not in {int(value) for value in witnessed_counts}
+            ):
+                raise GlobalL1FlowError(
+                    "V3 selected count is not geometry-witnessed"
+                )
+            if (
+                solver.get("selected_count_as_result") is not True
+                or count_derivation.get("selected_count_as_result") is not True
+                or solver.get("selected_set_and_count_jointly_ranked") is not True
+                or count_derivation.get(
+                    "selected_set_and_count_jointly_ranked"
+                )
+                is not True
+                or solver.get("density_count_mapping_used") is not False
+                or count_derivation.get("density_count_mapping_used") is not False
+            ):
+                raise GlobalL1FlowError(
+                    "V3 density did not jointly rank set and count as a result"
+                )
+            if any(
+                key in solver or key in count_derivation
+                for key in (
+                    "resolved_ordinary_l1_count_domain",
+                    "density_levels_have_distinct_counts",
+                    "count_selected_by_ordinary_density_policy",
+                )
+            ):
+                raise GlobalL1FlowError(
+                    "V3 plan reintroduced an exact density-count mapping"
+                )
+            density_objective = solver.get("density_objective")
+            if (
+                not isinstance(density_objective, Mapping)
+                or density_objective.get("density_level") != density_level
+                or not isinstance(density_objective.get("selected"), Mapping)
+                or count_derivation.get("density_objective")
+                != density_objective
+            ):
+                raise GlobalL1FlowError(
+                    "V3 plan lacks the consumed soft density objective"
+                )
+            best_by_cardinality = solver.get("best_objective_by_cardinality")
+            if (
+                not isinstance(best_by_cardinality, Mapping)
+                or set(best_by_cardinality)
+                != {str(int(value)) for value in witnessed_counts}
+            ):
+                raise GlobalL1FlowError(
+                    "V3 soft objective did not compare every witnessed cardinality"
+                )
         if plan.get("preassigned_selection_slots_used") is not False:
             raise GlobalL1FlowError(
                 "V2 plan reintroduced preassigned selection slots"

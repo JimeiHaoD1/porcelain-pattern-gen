@@ -1955,12 +1955,15 @@ def generate_unit_candidate_inventory(
     editor_l2_prior: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     contract_schema = contract.get("schema")
-    expected_plan_schema = (
-        "dynamic_branch_global_l1_flow_plan_v2"
+    expected_plan_schemas = (
+        {
+            "dynamic_branch_global_l1_flow_plan_v2",
+            "dynamic_branch_global_l1_flow_plan_v3",
+        }
         if contract_schema == CONTRACT_SCHEMA_V2
-        else "dynamic_branch_global_l1_flow_plan_v1"
+        else {"dynamic_branch_global_l1_flow_plan_v1"}
     )
-    if plan.get("schema") != expected_plan_schema:
+    if plan.get("schema") not in expected_plan_schemas:
         raise UnitGrammarError("stage-3B plan schema mismatch")
     if analysis.get("schema") != "dynamic_branch_prototype_analysis_v1":
         raise UnitGrammarError("stage-2 analysis schema mismatch")

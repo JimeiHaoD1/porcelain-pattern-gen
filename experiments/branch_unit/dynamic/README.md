@@ -1,8 +1,8 @@
-# Dynamic BranchUnit 动态生成主链（已冻结，2026-08-16）
+# Dynamic BranchUnit 动态生成主链（工程基线冻结于 2026-08-16）
 
-本目录是动态 BranchUnit 的独立入口。当前唯一权威机制文档是
-`DYNAMIC_BRANCHUNIT_OPTIMIZATION_MECHANISM_V1.md`；本 README 只提供链路由、
-状态与入口速查。
+本目录是动态 BranchUnit 的独立入口。本 README 与
+`PAPER_A_ENGINEERING_HANDOFF_V1.md` 记录当前生产路由和论文交接事实；
+`DYNAMIC_BRANCHUNIT_OPTIMIZATION_MECHANISM_V1.md` 保留完整阶段优化历史。
 
 ## 当前状态
 
@@ -11,7 +11,16 @@
 `STAGE5F_VISUAL_APPROVAL_V1.json`；最终冻结合同为
 `FINAL_FROZEN_CONTRACT_V1.json`。
 
+该冻结只说明 `ds@eb795b2` 的工程行为和对应视觉结果已确认。Paper A 的方法状态为
+`METHOD_AUDIT_MISMATCH_PENDING_DECISION`；两级选择和精确基数密度机制必须据实表述，
+不得用工程冻结记录替代论文方法审计。
+
 ## 唯一正式生产链
+
+正式入口是 `run_batch_generation.py`；单独执行 L1 阶段时使用
+`run_stage3b_l1_flow.py`。两者均强制加载 `STAGE3B_L1_FLOW_CONTRACT_V2.json`，
+产出 `dynamic_branch_global_l1_flow_plan_v2`。V1 合同、V1 求解分支和早期
+固定槽位脚本只保留作历史追溯，不属于正式生产入口。
 
 ```text
 输入 → 5A 原型路由
@@ -86,6 +95,9 @@ D:\Anaconda3\python.exe .\experiments\branch_unit\dynamic\record_stage3b_approva
 # Enumerate complete Unit candidates and render the stage-4 atlases.
 D:\Anaconda3\python.exe .\experiments\branch_unit\dynamic\run_stage4_unit_candidates.py
 ```
+
+以上从 `freeze_fixed_baseline.py` 到 `run_stage4_unit_candidates.py` 的命令块仅用于
+历史阶段复现，不是当前批量生产入口。
 
 `StrictP0 v2` consumes only prototype identity, canvas/repeat geometry,
 backbone arc samples, flowers, and the optional new

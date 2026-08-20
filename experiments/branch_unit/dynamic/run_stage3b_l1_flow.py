@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the formal five-prototype by three-seed stage-3B L1 global solve."""
+"""Run the production Stage3B V2 L1 flow for five prototypes and three seeds."""
 
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ from fixed_visual_prior import validate_fixed_visual_prior
 from flower_mounting_v1 import FlowerMountingError
 from flower_placement_v1 import generate_flower_layout_and_mount
 from global_l1_flow import (
+    CONTRACT_SCHEMA_V2,
     SEEDS,
     generate_global_l1_flow_plan,
     validate_global_l1_flow_plan,
@@ -172,6 +173,10 @@ def _load_inputs() -> tuple[
         raise Stage3BRunError("stage-2.5 manifest schema mismatch")
     if stage3a.get("schema") != "dynamic_branch_stage3a_manifest_v1":
         raise Stage3BRunError("stage-3A manifest schema mismatch")
+    if contract.get("schema") != CONTRACT_SCHEMA_V2:
+        raise Stage3BRunError(
+            "the production Stage3B route requires the V2 L1 flow contract"
+        )
     if stage2.get("review_gate", {}).get("status") != "analysis_approved":
         raise Stage3BRunError("stage-2 analysis gate is not approved")
     if stage25.get("review_gate", {}).get("status") != "morphology_approved":

@@ -3291,6 +3291,7 @@ def _solve(
         "selected_pair_metrics": pair_rows,
         "exact_editor_geometry_exemplar_reuse": False,
     }
+    return selected, solver
 
 
 def _common_set_score(
@@ -3807,7 +3808,7 @@ def _solve_common_set(
                 }
             )
     edge_count = sum(len(values) for values in adjacency.values()) // 2
-    return selected, {
+    solver: dict[str, Any] = {
         "solver": (
             "bounded_deterministic_common_pool_variable_cardinality_set_selector"
         ),

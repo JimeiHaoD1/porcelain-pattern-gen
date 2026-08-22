@@ -1,0 +1,1531 @@
+{
+  "blocking_lane_pairs": [],
+  "contract_id": "stage5e_joint_sparse_local_l2_selection_v2",
+  "family_id": "SW-1_valley_filling",
+  "feasible": true,
+  "lane_count": 4,
+  "prototype_id": "proto_sw_1_3",
+  "prototype_strategy": {
+    "backbone_domain": {
+      "family_guard": "sw1_fixed_flower_valley_relation",
+      "flower_transport_policy": "fixed_geometry_in_5b",
+      "generator": "global_periodic_wave_v4",
+      "independent_flower_variation": "disabled",
+      "topology_policy": "preserve_peak_trough_sequence",
+      "variant_library": "prototype_combined_wave_variants_v1",
+      "variation_contract": "prototype_domain_global_periodic_wave_v4"
+    },
+    "branchunit_profile": {
+      "candidate_coverage_policy": "contract_weak_role_grammar_strata",
+      "complexity_domain": "sparse_long",
+      "editor_l2_profile_key": "proto_sw_1_3"
+    },
+    "family_id": "SW-1_valley_filling",
+    "flower_layout": {
+      "mode": "fixed_prototype_relation",
+      "position_variation_enabled": false,
+      "seed_domain": "flower_seed"
+    },
+    "flower_mount": {
+      "binding": "trough_or_valley_flank_support",
+      "mechanism": "valley_flank_support",
+      "support_count_policy": "one_per_flower"
+    },
+    "global_selection_profile": {
+      "candidate_order_policy": "contract_class_cycle_seed_phase",
+      "class_cycle_phase_offset": 0,
+      "hierarchy_mix_policy": "contract_fraction_targets"
+    },
+    "invariants": {
+      "flower_count": 2,
+      "flower_position_policy": "fixed_prototype_relation",
+      "prototype_identity_locked": true,
+      "repeat_width": 1.0
+    },
+    "l1_profile": {
+      "curve_geometry_profile_key": "proto_sw_1_3",
+      "feedback_profile_key": "proto_sw_1_3",
+      "legacy_fixed_warp_visual_prior": true,
+      "ordinary_role_cycle": [
+        "frontier",
+        "primary_sweep",
+        "balance",
+        "primary_sweep"
+      ],
+      "random_namespace": "proto_sw_1_3",
+      "root_rhythm_profile_key": "proto_sw_1_3",
+      "side_rhythm": "sparse_asymmetric_alternation"
+    },
+    "prototype_id": "proto_sw_1_3",
+    "registry_id": "sw_prototype_domain_strategy_v1",
+    "route_signature": {
+      "flower_count": 2,
+      "flower_relation": "valley_support",
+      "style_intent": "sparse"
+    },
+    "schema": "dynamic_branch_prototype_strategy_projection_v1",
+    "strategy_id": "strategy_proto_sw_1_3_v1"
+  },
+  "review": {
+    "criteria": [
+      "l2_forks_are_sparse",
+      "joint_selection_avoids_cross_unit_crowding",
+      "local_forks_remain_readable",
+      "backbone_flower_l1_rhythm_preserved"
+    ],
+    "numeric_checks_cannot_auto_approve_visual_gate": true
+  },
+  "schema": "dynamic_branch_stage5_global_unit_selection_v2",
+  "seed": 2731574336,
+  "selected_candidate_count": 4,
+  "selected_candidate_ids": [
+    "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_001__L1-Only__independent_l1__context_preferred__sample_0000",
+    "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+    "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_003__L1-Only__independent_l1__context_preferred__sample_0050",
+    "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004__Y-C__open_c__context_opposed__sample_0081"
+  ],
+  "selected_candidates": [
+    {
+      "branch_unit_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_001",
+      "candidate_digest": "a90dd0c95a6f95bf4b56514e4bb39df2701b14f79ec8d06e096c67c5b6446aeb",
+      "candidate_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_001__L1-Only__independent_l1__context_preferred__sample_0000",
+      "curves": [
+        {
+          "actual_length": 0.122491527,
+          "branch_unit_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_001",
+          "centerline": [
+            [
+              0.047528763,
+              0.535986456
+            ],
+            [
+              0.051304769,
+              0.541453726
+            ],
+            [
+              0.054971111,
+              0.546322336
+            ],
+            [
+              0.05853304,
+              0.550623527
+            ],
+            [
+              0.06199581,
+              0.554388539
+            ],
+            [
+              0.065364673,
+              0.557648612
+            ],
+            [
+              0.068644882,
+              0.560434986
+            ],
+            [
+              0.07184169,
+              0.562778901
+            ],
+            [
+              0.074960349,
+              0.564711598
+            ],
+            [
+              0.078006112,
+              0.566264317
+            ],
+            [
+              0.080984231,
+              0.567468298
+            ],
+            [
+              0.08389996,
+              0.568354781
+            ],
+            [
+              0.086758551,
+              0.568955005
+            ],
+            [
+              0.089565256,
+              0.569300213
+            ],
+            [
+              0.092325329,
+              0.569421643
+            ],
+            [
+              0.095044022,
+              0.569350535
+            ],
+            [
+              0.097726588,
+              0.569118131
+            ],
+            [
+              0.100378279,
+              0.56875567
+            ],
+            [
+              0.103004348,
+              0.568294391
+            ],
+            [
+              0.105610048,
+              0.567765537
+            ],
+            [
+              0.108200631,
+              0.567200345
+            ],
+            [
+              0.110781351,
+              0.566630058
+            ],
+            [
+              0.113357459,
+              0.566085914
+            ],
+            [
+              0.115934209,
+              0.565599155
+            ],
+            [
+              0.118516853,
+              0.565201019
+            ],
+            [
+              0.121110644,
+              0.564922748
+            ],
+            [
+              0.123720834,
+              0.564795582
+            ],
+            [
+              0.126352677,
+              0.56485076
+            ],
+            [
+              0.129011425,
+              0.565119523
+            ],
+            [
+              0.13170233,
+              0.565633111
+            ],
+            [
+              0.134430646,
+              0.566422765
+            ],
+            [
+              0.137201624,
+              0.567519724
+            ],
+            [
+              0.140020518,
+              0.568955228
+            ],
+            [
+              0.142892581,
+              0.570760518
+            ],
+            [
+              0.145823064,
+              0.572966834
+            ],
+            [
+              0.148817221,
+              0.575605416
+            ],
+            [
+              0.151880305,
+              0.578707504
+            ]
+          ],
+          "cubic_segments": [
+            {
+              "p0": [
+                0.047528763,
+                0.535986456
+              ],
+              "p1": [
+                0.093519839,
+                0.605310609
+              ],
+              "p2": [
+                0.114688733,
+                0.538576448
+              ],
+              "p3": [
+                0.151880305,
+                0.578707504
+              ]
+            }
+          ],
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_001.L1",
+          "entry_opening_degrees": null,
+          "hierarchy_level": 1,
+          "intended_parent_length_ratio": null,
+          "level": "L1",
+          "mount_fraction": null,
+          "parent_curve_id": null,
+          "sampling_trace": {
+            "source": "approved_stage3b_immutable_l1",
+            "source_candidate_id": "l1_pool_r002_r_f_k0_q02"
+          },
+          "semantic_role": "primary_sweep",
+          "shape_signature": "learned_same_side_end",
+          "turn_sign": 0
+        }
+      ],
+      "flower_relation": {
+        "flower_id": null,
+        "l1_contact_point": null,
+        "policy": "soft_spatial_anchor_without_mandatory_service"
+      },
+      "grammar_id": "L1-Only",
+      "hierarchy": {
+        "l1_count": 1,
+        "l2_count": 0,
+        "l3_count": 0,
+        "maximum_level": 1
+      },
+      "intrinsic_diagnostics": {
+        "issue_count": 0,
+        "issues": [],
+        "metrics": {
+          "backbone_crossing_count": 0,
+          "flower_reserve_entry_count": 0,
+          "frozen_flower_support_conflict_count": 0,
+          "maximum_attachment_error": 0.0,
+          "maximum_parent_clearance_onset_fraction": 0.0,
+          "minimum_entry_opening_degrees": 0.0,
+          "minimum_frozen_flower_support_clearance": 0.335174049,
+          "minimum_immediate_departure": 0.0,
+          "minimum_post_departure_parent_clearance": 1.0,
+          "minimum_sibling_curve_clearance": 1.0,
+          "minimum_sibling_mount_separation": 1.0,
+          "parent_occupancy_clearance": 0.02,
+          "parent_occupancy_reentry_count": 0,
+          "periodic_self_crossing_count": 0,
+          "required_sibling_curve_clearance": 0.0,
+          "support_contact_error": 0.0,
+          "unit_self_crossing_count": 0
+        },
+        "valid": true
+      },
+      "occupancy_tubes": [
+        {
+          "bounds": [
+            0.037528763,
+            0.525986456,
+            0.161880305,
+            0.588707504
+          ],
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_001.L1",
+          "radius": 0.01
+        }
+      ],
+      "parameter_stratum": "independent_l1",
+      "parent_graph": [
+        {
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_001.L1",
+          "mount_fraction": null,
+          "parent_curve_id": null
+        }
+      ],
+      "prototype_id": "proto_sw_1_3",
+      "random_provenance": {
+        "automatic_deletion_count": 0,
+        "automatic_repair_count": 0,
+        "candidate_index": 0,
+        "halton_quantiles": [
+          0.0,
+          0.333333333,
+          0.2,
+          0.0,
+          0.0,
+          0.230769231,
+          0.352941176,
+          0.894736842
+        ],
+        "method": "seeded_scrambled_halton_quantile_mapping",
+        "seed": 2731574336,
+        "silent_fallback_count": 0,
+        "validation_guided_resample_count": 0,
+        "validation_guided_retry_count": 0
+      },
+      "role": "primary_sweep",
+      "schema": "dynamic_branch_unit_candidate_v2",
+      "seed": 2731574336,
+      "source_lane_candidate_id": "l1_pool_r002_r_f_k0_q02",
+      "source_lane_id": "selected_l1_001",
+      "source_plan_digest": "8f95c8ba7c90b939abfaa10b0a6f66f0a91292faa69c1cfcfe7c4fe5c709f48b",
+      "source_plan_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple",
+      "turn_sign_variant": "context_preferred",
+      "visual_features": {
+        "hierarchy_density_class": "l1_only",
+        "l1_signature": "learned_same_side_end",
+        "l2_shape_sequence": [],
+        "l2_sign_sequence": [],
+        "l2_turn_sign_candidate_coverage": "context_preferred",
+        "length_sequence": [
+          0.122491527
+        ],
+        "mount_sequence": []
+      }
+    },
+    {
+      "branch_unit_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_002",
+      "candidate_digest": "c89f7b896c011bd2c952a81e80141b0772cac6762e863cb1cc420a38b2f626e2",
+      "candidate_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "curves": [
+        {
+          "actual_length": 0.235968034,
+          "branch_unit_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_002",
+          "centerline": [
+            [
+              0.157056483,
+              0.857863529
+            ],
+            [
+              0.1583647,
+              0.868713896
+            ],
+            [
+              0.159214519,
+              0.878871089
+            ],
+            [
+              0.159636878,
+              0.888373302
+            ],
+            [
+              0.159662717,
+              0.897258731
+            ],
+            [
+              0.159322973,
+              0.905565574
+            ],
+            [
+              0.158648585,
+              0.913332026
+            ],
+            [
+              0.157670492,
+              0.920596283
+            ],
+            [
+              0.156419631,
+              0.92739654
+            ],
+            [
+              0.154926942,
+              0.933770995
+            ],
+            [
+              0.153223362,
+              0.939757843
+            ],
+            [
+              0.15133983,
+              0.94539528
+            ],
+            [
+              0.149307285,
+              0.950721502
+            ],
+            [
+              0.147156665,
+              0.955774706
+            ],
+            [
+              0.144918908,
+              0.960593087
+            ],
+            [
+              0.142624953,
+              0.965214841
+            ],
+            [
+              0.140305739,
+              0.969678164
+            ],
+            [
+              0.137992203,
+              0.974021253
+            ],
+            [
+              0.135715284,
+              0.978282303
+            ],
+            [
+              0.13350592,
+              0.982499511
+            ],
+            [
+              0.131395051,
+              0.986711072
+            ],
+            [
+              0.129413614,
+              0.990955183
+            ],
+            [
+              0.127592548,
+              0.995270039
+            ],
+            [
+              0.125962791,
+              0.999693837
+            ],
+            [
+              0.124555281,
+              1.004264772
+            ],
+            [
+              0.123400958,
+              1.009021042
+            ],
+            [
+              0.122530759,
+              1.014000841
+            ],
+            [
+              0.121975624,
+              1.019242365
+            ],
+            [
+              0.121766489,
+              1.024783812
+            ],
+            [
+              0.121934295,
+              1.030663376
+            ],
+            [
+              0.122509978,
+              1.036919255
+            ],
+            [
+              0.123524479,
+              1.043589643
+            ],
+            [
+              0.125008734,
+              1.050712737
+            ],
+            [
+              0.126993683,
+              1.058326734
+            ],
+            [
+              0.129510264,
+              1.066469828
+            ],
+            [
+              0.132589416,
+              1.075180216
+            ],
+            [
+              0.136262076,
+              1.084496095
+            ]
+          ],
+          "cubic_segments": [
+            {
+              "p0": [
+                0.157056483,
+                0.857863529
+              ],
+              "p1": [
+                0.175629223,
+                0.992379773
+              ],
+              "p2": [
+                0.088505347,
+                0.968919827
+              ],
+              "p3": [
+                0.136262076,
+                1.084496095
+              ]
+            }
+          ],
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+          "entry_opening_degrees": null,
+          "hierarchy_level": 1,
+          "intended_parent_length_ratio": null,
+          "level": "L1",
+          "mount_fraction": null,
+          "parent_curve_id": null,
+          "sampling_trace": {
+            "source": "approved_stage3b_immutable_l1",
+            "source_candidate_id": "l1_pool_r008_l_f_k1_q01"
+          },
+          "semantic_role": "primary_sweep",
+          "shape_signature": "learned_reverse_end",
+          "turn_sign": 0
+        }
+      ],
+      "flower_relation": {
+        "flower_id": null,
+        "l1_contact_point": null,
+        "policy": "soft_spatial_anchor_without_mandatory_service"
+      },
+      "grammar_id": "L1-Only",
+      "hierarchy": {
+        "l1_count": 1,
+        "l2_count": 0,
+        "l3_count": 0,
+        "maximum_level": 1
+      },
+      "intrinsic_diagnostics": {
+        "issue_count": 0,
+        "issues": [],
+        "metrics": {
+          "backbone_crossing_count": 0,
+          "flower_reserve_entry_count": 0,
+          "frozen_flower_support_conflict_count": 0,
+          "maximum_attachment_error": 0.0,
+          "maximum_parent_clearance_onset_fraction": 0.0,
+          "minimum_entry_opening_degrees": 0.0,
+          "minimum_frozen_flower_support_clearance": 0.191172479,
+          "minimum_immediate_departure": 0.0,
+          "minimum_post_departure_parent_clearance": 1.0,
+          "minimum_sibling_curve_clearance": 1.0,
+          "minimum_sibling_mount_separation": 1.0,
+          "parent_occupancy_clearance": 0.02,
+          "parent_occupancy_reentry_count": 0,
+          "periodic_self_crossing_count": 0,
+          "required_sibling_curve_clearance": 0.0,
+          "support_contact_error": 0.0,
+          "unit_self_crossing_count": 0
+        },
+        "valid": true
+      },
+      "occupancy_tubes": [
+        {
+          "bounds": [
+            0.111766489,
+            0.847863529,
+            0.169662717,
+            1.094496095
+          ],
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+          "radius": 0.01
+        }
+      ],
+      "parameter_stratum": "independent_l1",
+      "parent_graph": [
+        {
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+          "mount_fraction": null,
+          "parent_curve_id": null
+        }
+      ],
+      "prototype_id": "proto_sw_1_3",
+      "random_provenance": {
+        "automatic_deletion_count": 0,
+        "automatic_repair_count": 0,
+        "candidate_index": 25,
+        "halton_quantiles": [
+          0.625,
+          0.962962963,
+          0.456,
+          0.448979592,
+          0.876033058,
+          0.094674556,
+          0.155709343,
+          0.592797784
+        ],
+        "method": "seeded_scrambled_halton_quantile_mapping",
+        "seed": 2731574336,
+        "silent_fallback_count": 0,
+        "validation_guided_resample_count": 0,
+        "validation_guided_retry_count": 0
+      },
+      "role": "primary_sweep",
+      "schema": "dynamic_branch_unit_candidate_v2",
+      "seed": 2731574336,
+      "source_lane_candidate_id": "l1_pool_r008_l_f_k1_q01",
+      "source_lane_id": "selected_l1_002",
+      "source_plan_digest": "8f95c8ba7c90b939abfaa10b0a6f66f0a91292faa69c1cfcfe7c4fe5c709f48b",
+      "source_plan_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple",
+      "turn_sign_variant": "context_preferred",
+      "visual_features": {
+        "hierarchy_density_class": "l1_only",
+        "l1_signature": "learned_reverse_end",
+        "l2_shape_sequence": [],
+        "l2_sign_sequence": [],
+        "l2_turn_sign_candidate_coverage": "context_preferred",
+        "length_sequence": [
+          0.235968034
+        ],
+        "mount_sequence": []
+      }
+    },
+    {
+      "branch_unit_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_003",
+      "candidate_digest": "f9d753c80f81f97abbbecf95c4abee220a9991cba3207fe86265453e6feba201",
+      "candidate_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_003__L1-Only__independent_l1__context_preferred__sample_0050",
+      "curves": [
+        {
+          "actual_length": 0.234735771,
+          "branch_unit_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_003",
+          "centerline": [
+            [
+              0.609886408,
+              0.526898617
+            ],
+            [
+              0.610694765,
+              0.518452896
+            ],
+            [
+              0.611023111,
+              0.5104241
+            ],
+            [
+              0.610898198,
+              0.502788309
+            ],
+            [
+              0.610346777,
+              0.4955216
+            ],
+            [
+              0.609395597,
+              0.488600052
+            ],
+            [
+              0.60807141,
+              0.481999745
+            ],
+            [
+              0.606400967,
+              0.475696757
+            ],
+            [
+              0.604411019,
+              0.469667166
+            ],
+            [
+              0.602128316,
+              0.463887053
+            ],
+            [
+              0.599579609,
+              0.458332494
+            ],
+            [
+              0.596791649,
+              0.45297957
+            ],
+            [
+              0.593791187,
+              0.447804358
+            ],
+            [
+              0.590604974,
+              0.442782938
+            ],
+            [
+              0.58725976,
+              0.437891389
+            ],
+            [
+              0.583782296,
+              0.433105788
+            ],
+            [
+              0.580199334,
+              0.428402216
+            ],
+            [
+              0.576537624,
+              0.42375675
+            ],
+            [
+              0.572823916,
+              0.419145469
+            ],
+            [
+              0.569084963,
+              0.414544453
+            ],
+            [
+              0.565347514,
+              0.40992978
+            ],
+            [
+              0.56163832,
+              0.405277528
+            ],
+            [
+              0.557984132,
+              0.400563777
+            ],
+            [
+              0.554411701,
+              0.395764605
+            ],
+            [
+              0.550947778,
+              0.390856092
+            ],
+            [
+              0.547619113,
+              0.385814315
+            ],
+            [
+              0.544452458,
+              0.380615353
+            ],
+            [
+              0.541474564,
+              0.375235286
+            ],
+            [
+              0.53871218,
+              0.369650192
+            ],
+            [
+              0.536192058,
+              0.36383615
+            ],
+            [
+              0.533940949,
+              0.357769238
+            ],
+            [
+              0.531985604,
+              0.351425536
+            ],
+            [
+              0.530352773,
+              0.344781122
+            ],
+            [
+              0.529069207,
+              0.337812075
+            ],
+            [
+              0.528161658,
+              0.330494473
+            ],
+            [
+              0.527656875,
+              0.322804396
+            ],
+            [
+              0.52758161,
+              0.314717922
+            ]
+          ],
+          "cubic_segments": [
+            {
+              "p0": [
+                0.609886408,
+                0.526898617
+              ],
+              "p1": [
+                0.622573757,
+                0.42295273
+              ],
+              "p2": [
+                0.525800681,
+                0.414229675
+              ],
+              "p3": [
+                0.52758161,
+                0.314717922
+              ]
+            }
+          ],
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_003.L1",
+          "entry_opening_degrees": null,
+          "hierarchy_level": 1,
+          "intended_parent_length_ratio": null,
+          "level": "L1",
+          "mount_fraction": null,
+          "parent_curve_id": null,
+          "sampling_trace": {
+            "source": "approved_stage3b_immutable_l1",
+            "source_candidate_id": "l1_pool_r023_r_f_k1_q05"
+          },
+          "semantic_role": "primary_sweep",
+          "shape_signature": "learned_same_side_end",
+          "turn_sign": 0
+        }
+      ],
+      "flower_relation": {
+        "flower_id": null,
+        "l1_contact_point": null,
+        "policy": "soft_spatial_anchor_without_mandatory_service"
+      },
+      "grammar_id": "L1-Only",
+      "hierarchy": {
+        "l1_count": 1,
+        "l2_count": 0,
+        "l3_count": 0,
+        "maximum_level": 1
+      },
+      "intrinsic_diagnostics": {
+        "issue_count": 0,
+        "issues": [],
+        "metrics": {
+          "backbone_crossing_count": 0,
+          "flower_reserve_entry_count": 0,
+          "frozen_flower_support_conflict_count": 0,
+          "maximum_attachment_error": 0.0,
+          "maximum_parent_clearance_onset_fraction": 0.0,
+          "minimum_entry_opening_degrees": 0.0,
+          "minimum_frozen_flower_support_clearance": 0.415338578,
+          "minimum_immediate_departure": 0.0,
+          "minimum_post_departure_parent_clearance": 1.0,
+          "minimum_sibling_curve_clearance": 1.0,
+          "minimum_sibling_mount_separation": 1.0,
+          "parent_occupancy_clearance": 0.02,
+          "parent_occupancy_reentry_count": 0,
+          "periodic_self_crossing_count": 0,
+          "required_sibling_curve_clearance": 0.0,
+          "support_contact_error": 0.0,
+          "unit_self_crossing_count": 0
+        },
+        "valid": true
+      },
+      "occupancy_tubes": [
+        {
+          "bounds": [
+            0.51758161,
+            0.304717922,
+            0.621023111,
+            0.536898617
+          ],
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_003.L1",
+          "radius": 0.01
+        }
+      ],
+      "parameter_stratum": "independent_l1",
+      "parent_graph": [
+        {
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_003.L1",
+          "mount_fraction": null,
+          "parent_curve_id": null
+        }
+      ],
+      "prototype_id": "proto_sw_1_3",
+      "random_provenance": {
+        "automatic_deletion_count": 0,
+        "automatic_repair_count": 0,
+        "candidate_index": 50,
+        "halton_quantiles": [
+          0.1875,
+          0.358024691,
+          0.712,
+          0.265306122,
+          0.966942149,
+          0.603550296,
+          0.508650519,
+          0.911357341
+        ],
+        "method": "seeded_scrambled_halton_quantile_mapping",
+        "seed": 2731574336,
+        "silent_fallback_count": 0,
+        "validation_guided_resample_count": 0,
+        "validation_guided_retry_count": 0
+      },
+      "role": "primary_sweep",
+      "schema": "dynamic_branch_unit_candidate_v2",
+      "seed": 2731574336,
+      "source_lane_candidate_id": "l1_pool_r023_r_f_k1_q05",
+      "source_lane_id": "selected_l1_003",
+      "source_plan_digest": "8f95c8ba7c90b939abfaa10b0a6f66f0a91292faa69c1cfcfe7c4fe5c709f48b",
+      "source_plan_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple",
+      "turn_sign_variant": "context_preferred",
+      "visual_features": {
+        "hierarchy_density_class": "l1_only",
+        "l1_signature": "learned_same_side_end",
+        "l2_shape_sequence": [],
+        "l2_sign_sequence": [],
+        "l2_turn_sign_candidate_coverage": "context_preferred",
+        "length_sequence": [
+          0.234735771
+        ],
+        "mount_sequence": []
+      }
+    },
+    {
+      "branch_unit_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004",
+      "candidate_digest": "3f5bf816bafc210cc0869bc7570d1293843378f6855b641aa849033c12240f64",
+      "candidate_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004__Y-C__open_c__context_opposed__sample_0081",
+      "curves": [
+        {
+          "actual_length": 0.320416948,
+          "branch_unit_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004",
+          "centerline": [
+            [
+              0.828144803,
+              0.349817111
+            ],
+            [
+              0.835332298,
+              0.348098573
+            ],
+            [
+              0.842055048,
+              0.345880136
+            ],
+            [
+              0.848350969,
+              0.343186196
+            ],
+            [
+              0.854257979,
+              0.340041148
+            ],
+            [
+              0.859813995,
+              0.336469389
+            ],
+            [
+              0.865056934,
+              0.332495315
+            ],
+            [
+              0.870024713,
+              0.328143322
+            ],
+            [
+              0.874755249,
+              0.323437804
+            ],
+            [
+              0.879286459,
+              0.318403159
+            ],
+            [
+              0.883656261,
+              0.313063782
+            ],
+            [
+              0.88790257,
+              0.30744407
+            ],
+            [
+              0.892063305,
+              0.301568417
+            ],
+            [
+              0.896176382,
+              0.29546122
+            ],
+            [
+              0.900279719,
+              0.289146875
+            ],
+            [
+              0.904411232,
+              0.282649778
+            ],
+            [
+              0.908608838,
+              0.275994325
+            ],
+            [
+              0.912910455,
+              0.269204911
+            ],
+            [
+              0.917354,
+              0.262305933
+            ],
+            [
+              0.92197739,
+              0.255321786
+            ],
+            [
+              0.926818541,
+              0.248276866
+            ],
+            [
+              0.931915371,
+              0.24119557
+            ],
+            [
+              0.937305797,
+              0.234102292
+            ],
+            [
+              0.943027736,
+              0.22702143
+            ],
+            [
+              0.949119105,
+              0.219977379
+            ],
+            [
+              0.955617821,
+              0.212994534
+            ],
+            [
+              0.962561801,
+              0.206097293
+            ],
+            [
+              0.969988962,
+              0.19931005
+            ],
+            [
+              0.977937222,
+              0.192657201
+            ],
+            [
+              0.986444496,
+              0.186163143
+            ],
+            [
+              0.995548704,
+              0.179852272
+            ],
+            [
+              1.00528776,
+              0.173748982
+            ],
+            [
+              1.015699583,
+              0.167877671
+            ],
+            [
+              1.02682209,
+              0.162262735
+            ],
+            [
+              1.038693197,
+              0.156928568
+            ],
+            [
+              1.051350822,
+              0.151899567
+            ],
+            [
+              1.064832882,
+              0.147200128
+            ]
+          ],
+          "cubic_segments": [
+            {
+              "p0": [
+                0.828144803,
+                0.349817111
+              ],
+              "p1": [
+                0.917334883,
+                0.332291633
+              ],
+              "p2": [
+                0.897949889,
+                0.201518441
+              ],
+              "p3": [
+                1.064832882,
+                0.147200128
+              ]
+            }
+          ],
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004.L1",
+          "entry_opening_degrees": null,
+          "hierarchy_level": 1,
+          "intended_parent_length_ratio": null,
+          "level": "L1",
+          "mount_fraction": null,
+          "parent_curve_id": null,
+          "sampling_trace": {
+            "source": "approved_stage3b_immutable_l1",
+            "source_candidate_id": "l1_pool_r029_r_f_k2_q05"
+          },
+          "semantic_role": "primary_sweep",
+          "shape_signature": "learned_same_side_end",
+          "turn_sign": 0
+        },
+        {
+          "actual_length": 0.147855841,
+          "branch_unit_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004",
+          "centerline": [
+            [
+              0.911662722,
+              0.271174258
+            ],
+            [
+              0.917704538,
+              0.269649397
+            ],
+            [
+              0.923458491,
+              0.268210831
+            ],
+            [
+              0.928941206,
+              0.266847695
+            ],
+            [
+              0.934169309,
+              0.265549125
+            ],
+            [
+              0.939159425,
+              0.264304258
+            ],
+            [
+              0.943928181,
+              0.263102227
+            ],
+            [
+              0.948492202,
+              0.26193217
+            ],
+            [
+              0.952868112,
+              0.260783222
+            ],
+            [
+              0.957072539,
+              0.259644519
+            ],
+            [
+              0.961122107,
+              0.258505196
+            ],
+            [
+              0.965033442,
+              0.257354389
+            ],
+            [
+              0.968823169,
+              0.256181235
+            ],
+            [
+              0.972507915,
+              0.254974868
+            ],
+            [
+              0.976104304,
+              0.253724424
+            ],
+            [
+              0.979628962,
+              0.252419039
+            ],
+            [
+              0.983098516,
+              0.251047849
+            ],
+            [
+              0.98652959,
+              0.24959999
+            ],
+            [
+              0.98993881,
+              0.248064597
+            ],
+            [
+              0.993342801,
+              0.246430806
+            ],
+            [
+              0.99675819,
+              0.244687752
+            ],
+            [
+              1.000201601,
+              0.242824572
+            ],
+            [
+              1.00368966,
+              0.240830401
+            ],
+            [
+              1.007238994,
+              0.238694375
+            ],
+            [
+              1.010866227,
+              0.23640563
+            ],
+            [
+              1.014587985,
+              0.233953301
+            ],
+            [
+              1.018420893,
+              0.231326524
+            ],
+            [
+              1.022381578,
+              0.228514435
+            ],
+            [
+              1.026486664,
+              0.225506169
+            ],
+            [
+              1.030752778,
+              0.222290863
+            ],
+            [
+              1.035196545,
+              0.218857651
+            ],
+            [
+              1.03983459,
+              0.21519567
+            ],
+            [
+              1.044683539,
+              0.211294056
+            ]
+          ],
+          "cubic_segments": [
+            {
+              "p0": [
+                0.911662722,
+                0.271174258
+              ],
+              "p1": [
+                0.977703142,
+                0.254410209
+              ],
+              "p2": [
+                0.99177748,
+                0.254227951
+              ],
+              "p3": [
+                1.044683539,
+                0.211294056
+              ]
+            }
+          ],
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004.L2.1",
+          "entry_opening_degrees": 43.399176955,
+          "hierarchy_level": 2,
+          "intended_parent_length_ratio": 0.5,
+          "level": "L2",
+          "mount_fraction": 0.37,
+          "parent_curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004.L1",
+          "sampling_trace": {
+            "density_scale": 0.992727273,
+            "empirical_entry_opening_degrees": 54.404098536,
+            "empirical_exit_release_degrees": 26.006537508,
+            "generated_once": true,
+            "quantiles": [
+              0.33744856,
+              0.95,
+              0.486880466,
+              0.710743802,
+              0.177514793
+            ],
+            "role_condition": "secondary_lateral"
+          },
+          "semantic_role": "lateral_subordinate",
+          "shape_signature": "C",
+          "turn_sign": 1
+        }
+      ],
+      "flower_relation": {
+        "flower_id": null,
+        "l1_contact_point": null,
+        "policy": "soft_spatial_anchor_without_mandatory_service"
+      },
+      "grammar_id": "Y-C",
+      "hierarchy": {
+        "l1_count": 1,
+        "l2_count": 1,
+        "l3_count": 0,
+        "maximum_level": 2
+      },
+      "intrinsic_diagnostics": {
+        "issue_count": 0,
+        "issues": [],
+        "metrics": {
+          "backbone_crossing_count": 0,
+          "flower_reserve_entry_count": 0,
+          "frozen_flower_support_conflict_count": 0,
+          "maximum_attachment_error": 0.0,
+          "maximum_parent_clearance_onset_fraction": 0.224948061,
+          "minimum_entry_opening_degrees": 43.399177013,
+          "minimum_frozen_flower_support_clearance": 0.571094231,
+          "minimum_immediate_departure": 0.031192359,
+          "minimum_post_departure_parent_clearance": 0.022497512,
+          "minimum_sibling_curve_clearance": 1.0,
+          "minimum_sibling_mount_separation": 1.0,
+          "parent_occupancy_clearance": 0.02,
+          "parent_occupancy_reentry_count": 0,
+          "periodic_self_crossing_count": 0,
+          "required_sibling_curve_clearance": 0.0,
+          "support_contact_error": 0.0,
+          "unit_self_crossing_count": 0
+        },
+        "valid": true
+      },
+      "occupancy_tubes": [
+        {
+          "bounds": [
+            0.818144803,
+            0.137200128,
+            1.074832882,
+            0.359817111
+          ],
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004.L1",
+          "radius": 0.01
+        },
+        {
+          "bounds": [
+            0.901662722,
+            0.201294056,
+            1.054683539,
+            0.281174258
+          ],
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004.L2.1",
+          "radius": 0.01
+        }
+      ],
+      "parameter_stratum": "open_c",
+      "parent_graph": [
+        {
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004.L1",
+          "mount_fraction": null,
+          "parent_curve_id": null
+        },
+        {
+          "curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004.L2.1",
+          "mount_fraction": 0.37,
+          "parent_curve_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004.L1"
+        }
+      ],
+      "prototype_id": "proto_sw_1_3",
+      "random_provenance": {
+        "automatic_deletion_count": 0,
+        "automatic_repair_count": 0,
+        "candidate_index": 81,
+        "halton_quantiles": [
+          0.2890625,
+          0.33744856,
+          0.92,
+          0.486880466,
+          0.710743802,
+          0.177514793,
+          0.650519031,
+          0.825484765
+        ],
+        "method": "seeded_scrambled_halton_quantile_mapping",
+        "seed": 2731574336,
+        "silent_fallback_count": 0,
+        "validation_guided_resample_count": 0,
+        "validation_guided_retry_count": 0
+      },
+      "role": "primary_sweep",
+      "schema": "dynamic_branch_unit_candidate_v2",
+      "seed": 2731574336,
+      "source_lane_candidate_id": "l1_pool_r029_r_f_k2_q05",
+      "source_lane_id": "selected_l1_004",
+      "source_plan_digest": "8f95c8ba7c90b939abfaa10b0a6f66f0a91292faa69c1cfcfe7c4fe5c709f48b",
+      "source_plan_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple",
+      "turn_sign_variant": "context_opposed",
+      "visual_features": {
+        "hierarchy_density_class": "single_child",
+        "l1_signature": "learned_same_side_end",
+        "l2_shape_sequence": [
+          "C"
+        ],
+        "l2_sign_sequence": [
+          1
+        ],
+        "l2_turn_sign_candidate_coverage": "editor_bidirectional_single_child",
+        "length_sequence": [
+          0.320416948,
+          0.147855841
+        ],
+        "mount_sequence": [
+          0.37
+        ]
+      }
+    }
+  ],
+  "selection_digest": "b740bf61f8e67eba486101bf0115f42eae47b39f8136af3e8372317ef373ac92",
+  "selection_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__unit_candidates_v2__global_unit_selection_joint_h2b",
+  "solver_trace": {
+    "achieved_upgrade_count": 1,
+    "automatic_deletion_used": false,
+    "automatic_repair_used": false,
+    "backtrack_count": 59,
+    "best_of_n_visual_ranking_used": false,
+    "bounded_space_exhausted": true,
+    "candidate_order": [
+      "descending local objective gain",
+      "cross-unit hard conflict degree",
+      "unit-seed tie break"
+    ],
+    "composite_visual_score_used": false,
+    "feasible_composition_count": 28,
+    "global_optimum_claimed": false,
+    "hard_conflict_prune_count": 0,
+    "hierarchy_policy": "joint_sparse_local_l2_for_h2b",
+    "intent_upgrade_budget": 1,
+    "irreversible_lane_upgrade_order_used": false,
+    "lane_order": [
+      "selected_l1_001",
+      "selected_l1_002",
+      "selected_l1_003",
+      "selected_l1_004"
+    ],
+    "maximum_upgrade_lane_count": 1,
+    "method": "bounded_joint_branch_and_bound_over_complete_units",
+    "objective_bound_prune_count": 22,
+    "objective_weights": {
+      "extra_l2_child_penalty": 0.0,
+      "local_quality": 1.0,
+      "peak_parallel_penalty": 0.4,
+      "total_parallel_penalty": 0.65,
+      "upgraded_lane_reward": 0.18
+    },
+    "search_node_count": 171,
+    "search_node_limit": 300000,
+    "search_node_limit_reached": false,
+    "selected_l1_only_count": 3,
+    "selected_l2_count": 1,
+    "selected_l3_count": 0,
+    "selected_local_quality": {
+      "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__selected_l1_004__Y-C__open_c__context_opposed__sample_0081": {
+        "clearance_quality": 0.529384214,
+        "length_typicality": 0.999471564,
+        "opening_typicality": 0.996983998,
+        "score": 0.740426008
+      }
+    },
+    "selected_objective": {
+      "extra_l2_child_count": 0,
+      "local_quality_sum": 0.740426008,
+      "peak_parallel_penalty": 0.005457878,
+      "score": 0.914695236,
+      "total_l2_count": 1,
+      "total_parallel_penalty": 0.005457878,
+      "upgraded_lane_count": 1
+    },
+    "selection_basis": "best_feasible_composition_seen",
+    "silent_fallback_used": false,
+    "sparse_budget_prune_count": 112,
+    "upgrade_lane_ids": [
+      "selected_l1_004"
+    ],
+    "validation_guided_resample_used": false,
+    "validation_guided_retry_used": false,
+    "zero_l2_landed_is_legal": true
+  },
+  "source_conflict_graph_digest": "0b5cba382a96d70c0b3768ac49b13b956150adbe2362f9a9304cb6b509094e4f",
+  "source_inventory_digest": "92a5bd12d9d15e093903d340a3282aa785a3b6af1b92f61ff84623e89fdf07bf",
+  "source_inventory_id": "proto_sw_1_3__seed_3848763323__global_l1_flow_v3__density_simple__unit_candidates_v2",
+  "status": "h2b_joint_sparse_l2_pending_visual_review"
+}

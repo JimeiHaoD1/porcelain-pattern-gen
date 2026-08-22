@@ -1,0 +1,1807 @@
+{
+  "conflict_graph_digest": "4a6d7cc918a55db489aff0719ff0c5d2244cdd40393fab67e66284f187c58c0c",
+  "contract_id": "stage5e_joint_sparse_local_l2_selection_v2",
+  "edge_count": 2,
+  "edges": [
+    {
+      "conflict_kinds": [
+        "editor_parallel_co_travel_violation"
+      ],
+      "crossings": [],
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "maximum_parallel_co_travel_score": 0.494948499,
+      "minimum_descendant_clearance": 0.053385879,
+      "parallel_co_travel_curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "parallel_co_travel_score": 0.500741227,
+      "reason": "editor_parallel_co_travel_violation",
+      "required_descendant_clearance": 0.027768053,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0071",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "conflict_kinds": [
+        "editor_parallel_co_travel_violation"
+      ],
+      "crossings": [],
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "maximum_parallel_co_travel_score": 0.494948499,
+      "minimum_descendant_clearance": 0.053385879,
+      "parallel_co_travel_curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "parallel_co_travel_score": 0.500741227,
+      "reason": "editor_parallel_co_travel_violation",
+      "required_descendant_clearance": 0.027768053,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0071",
+      "second_lane_id": "selected_l1_003"
+    }
+  ],
+  "editor_l2_placement_prior_id": "saved_editor_l2_placement_20260809",
+  "eligible_node_count": 40,
+  "ineligible_node_count": 60,
+  "maximum_parallel_co_travel_score": 0.494948499,
+  "minimum_descendant_clearance": 0.027768053,
+  "node_count": 100,
+  "nodes": [
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__L1-Only__independent_l1__context_preferred__sample_0000",
+      "eligible": true,
+      "grammar_id": "L1-Only",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "independent_l1",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-C__compact_c__context_preferred__sample_0001",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "compact_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-C__compact_c__context_opposed__sample_0002",
+      "eligible": false,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy"
+      ],
+      "parameter_stratum": "compact_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-C__balanced_s__context_preferred__sample_0003",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "balanced_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-C__balanced_s__context_opposed__sample_0004",
+      "eligible": false,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy"
+      ],
+      "parameter_stratum": "balanced_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-C__open_c__context_preferred__sample_0005",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-C__open_c__context_opposed__sample_0006",
+      "eligible": false,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy"
+      ],
+      "parameter_stratum": "open_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__staggered_c__context_preferred__sample_0007",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__staggered_c__context_swapped__sample_0008",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__nested_s__context_preferred__sample_0009",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__nested_s__context_swapped__sample_0010",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__open_asymmetric__context_preferred__sample_0011",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__open_asymmetric__context_swapped__sample_0012",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__staggered_c__context_preferred__sample_0013",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__staggered_c__context_swapped__sample_0014",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__nested_s__context_preferred__sample_0015",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__nested_s__context_swapped__sample_0016",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__open_asymmetric__context_preferred__sample_0017",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__open_asymmetric__context_swapped__sample_0018",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__staggered_c__context_preferred__sample_0019",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__staggered_c__context_swapped__sample_0020",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__nested_s__context_preferred__sample_0021",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__nested_s__context_swapped__sample_0022",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__open_asymmetric__context_preferred__sample_0023",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_001__Y-2C__open_asymmetric__context_swapped__sample_0024",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_001"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "eligible": true,
+      "grammar_id": "L1-Only",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "independent_l1",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_preferred__sample_0026",
+      "eligible": false,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "compact_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "compact_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__balanced_s__context_preferred__sample_0028",
+      "eligible": false,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "balanced_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__balanced_s__context_opposed__sample_0029",
+      "eligible": false,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy"
+      ],
+      "parameter_stratum": "balanced_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__open_c__context_preferred__sample_0030",
+      "eligible": false,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "open_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__open_c__context_opposed__sample_0031",
+      "eligible": false,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy"
+      ],
+      "parameter_stratum": "open_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__staggered_c__context_preferred__sample_0032",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__staggered_c__context_swapped__sample_0033",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__nested_s__context_preferred__sample_0034",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__nested_s__context_swapped__sample_0035",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__open_asymmetric__context_preferred__sample_0036",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__open_asymmetric__context_swapped__sample_0037",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__staggered_c__context_preferred__sample_0038",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__staggered_c__context_swapped__sample_0039",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__nested_s__context_preferred__sample_0040",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__nested_s__context_swapped__sample_0041",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__open_asymmetric__context_preferred__sample_0042",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__open_asymmetric__context_swapped__sample_0043",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__staggered_c__context_preferred__sample_0044",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__staggered_c__context_swapped__sample_0045",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__nested_s__context_preferred__sample_0046",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__nested_s__context_swapped__sample_0047",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__open_asymmetric__context_preferred__sample_0048",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-2C__open_asymmetric__context_swapped__sample_0049",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_reenters_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_002"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__L1-Only__independent_l1__context_preferred__sample_0050",
+      "eligible": true,
+      "grammar_id": "L1-Only",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "independent_l1",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__compact_c__context_preferred__sample_0051",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "compact_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__compact_c__context_opposed__sample_0052",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "compact_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__balanced_s__context_preferred__sample_0053",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "balanced_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__balanced_s__context_opposed__sample_0054",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "balanced_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__open_c__context_preferred__sample_0055",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__open_c__context_opposed__sample_0056",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_preferred__sample_0057",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_swapped__sample_0058",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0059",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_swapped__sample_0060",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_preferred__sample_0061",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_swapped__sample_0062",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_preferred__sample_0063",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_swapped__sample_0064",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0065",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_swapped__sample_0066",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "child_does_not_clear_parent_occupancy",
+        "sibling_curves_below_occupancy_clearance"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_preferred__sample_0067",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_swapped__sample_0068",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_preferred__sample_0069",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_swapped__sample_0070",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0071",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_swapped__sample_0072",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_preferred__sample_0073",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_swapped__sample_0074",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_003"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__L1-Only__independent_l1__context_preferred__sample_0075",
+      "eligible": true,
+      "grammar_id": "L1-Only",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "independent_l1",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-C__compact_c__context_preferred__sample_0076",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "compact_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-C__compact_c__context_opposed__sample_0077",
+      "eligible": false,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "compact_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-C__balanced_s__context_preferred__sample_0078",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "balanced_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-C__balanced_s__context_opposed__sample_0079",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "balanced_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-C__open_c__context_preferred__sample_0080",
+      "eligible": true,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-C__open_c__context_opposed__sample_0081",
+      "eligible": false,
+      "grammar_id": "Y-C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "open_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__staggered_c__context_preferred__sample_0082",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing",
+        "unit_conflicts_with_frozen_flower_support"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__staggered_c__context_swapped__sample_0083",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__nested_s__context_preferred__sample_0084",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__nested_s__context_swapped__sample_0085",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing",
+        "descendant_enters_flower_reserve"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__open_asymmetric__context_preferred__sample_0086",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "unit_conflicts_with_frozen_flower_support"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__open_asymmetric__context_swapped__sample_0087",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing",
+        "descendant_enters_flower_reserve"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__staggered_c__context_preferred__sample_0088",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__staggered_c__context_swapped__sample_0089",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__nested_s__context_preferred__sample_0090",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__nested_s__context_swapped__sample_0091",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "descendant_enters_flower_reserve"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__open_asymmetric__context_preferred__sample_0092",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "unit_conflicts_with_frozen_flower_support"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__open_asymmetric__context_swapped__sample_0093",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__staggered_c__context_preferred__sample_0094",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "unit_conflicts_with_frozen_flower_support"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__staggered_c__context_swapped__sample_0095",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing",
+        "descendant_enters_flower_reserve"
+      ],
+      "parameter_stratum": "staggered_c",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__nested_s__context_preferred__sample_0096",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "unit_conflicts_with_frozen_flower_support"
+      ],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__nested_s__context_swapped__sample_0097",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "nested_s",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__open_asymmetric__context_preferred__sample_0098",
+      "eligible": true,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    },
+    {
+      "candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_004__Y-2C__open_asymmetric__context_swapped__sample_0099",
+      "eligible": false,
+      "grammar_id": "Y-2C",
+      "intrinsic_issue_codes": [
+        "non_root_backbone_crossing"
+      ],
+      "parameter_stratum": "open_asymmetric",
+      "role": "primary_sweep",
+      "source_lane_id": "selected_l1_004"
+    }
+  ],
+  "pair_penalties": [
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.263701574,
+      "parallel_co_travel_score": 0.138174512,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__compact_c__context_preferred__sample_0051",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.158966939,
+      "parallel_co_travel_score": 0.087425261,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__compact_c__context_opposed__sample_0052",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.450624776,
+      "parallel_co_travel_score": 0.228748298,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__balanced_s__context_preferred__sample_0053",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.083287907,
+      "parallel_co_travel_score": 0.050754927,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__balanced_s__context_opposed__sample_0054",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.213097616,
+      "parallel_co_travel_score": 0.113654324,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__open_c__context_preferred__sample_0055",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.144577181,
+      "parallel_co_travel_score": 0.080452693,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__open_c__context_opposed__sample_0056",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.627197271,
+      "parallel_co_travel_score": 0.314306641,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_preferred__sample_0057",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.2",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.361967977,
+      "parallel_co_travel_score": 0.185789576,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_swapped__sample_0058",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.991237109,
+      "parallel_co_travel_score": 0.490702433,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0059",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.881232541,
+      "parallel_co_travel_score": 0.437399632,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_preferred__sample_0061",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.379502269,
+      "parallel_co_travel_score": 0.194285831,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_swapped__sample_0062",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.407634301,
+      "parallel_co_travel_score": 0.207917229,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_preferred__sample_0063",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.327229072,
+      "parallel_co_travel_score": 0.168956812,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_swapped__sample_0064",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.945029024,
+      "parallel_co_travel_score": 0.468312269,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0065",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.742010033,
+      "parallel_co_travel_score": 0.369939256,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_preferred__sample_0067",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.376706183,
+      "parallel_co_travel_score": 0.192930985,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_swapped__sample_0068",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.630224623,
+      "parallel_co_travel_score": 0.315773546,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_preferred__sample_0069",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.220755319,
+      "parallel_co_travel_score": 0.11736487,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_swapped__sample_0070",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 1.011954841,
+      "parallel_co_travel_score": 0.500741227,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0071",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.2",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.152599524,
+      "parallel_co_travel_score": 0.084339926,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_swapped__sample_0072",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.996064211,
+      "parallel_co_travel_score": 0.493041409,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_preferred__sample_0073",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__L1-Only__independent_l1__context_preferred__sample_0025",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.362900183,
+      "parallel_co_travel_score": 0.186241277,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_swapped__sample_0074",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L2.1",
+        "first_level": "L2",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L1",
+        "second_level": "L1"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.194425078,
+      "parallel_co_travel_score": 0.104606531,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__L1-Only__independent_l1__context_preferred__sample_0050",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.263701574,
+      "parallel_co_travel_score": 0.138174512,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__compact_c__context_preferred__sample_0051",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L2.1",
+        "first_level": "L2",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L1",
+        "second_level": "L1"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.194425078,
+      "parallel_co_travel_score": 0.104606531,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__compact_c__context_opposed__sample_0052",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L2.1",
+        "first_level": "L2",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.522783255,
+      "parallel_co_travel_score": 0.263712746,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__balanced_s__context_preferred__sample_0053",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L2.1",
+        "first_level": "L2",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L1",
+        "second_level": "L1"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.194425078,
+      "parallel_co_travel_score": 0.104606531,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__balanced_s__context_opposed__sample_0054",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L2.1",
+        "first_level": "L2",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.215691021,
+      "parallel_co_travel_score": 0.114910961,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__open_c__context_preferred__sample_0055",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L2.1",
+        "first_level": "L2",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L1",
+        "second_level": "L1"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.194425078,
+      "parallel_co_travel_score": 0.104606531,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-C__open_c__context_opposed__sample_0056",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.627197271,
+      "parallel_co_travel_score": 0.314306641,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_preferred__sample_0057",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.2",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.361967977,
+      "parallel_co_travel_score": 0.185789576,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_swapped__sample_0058",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.991237109,
+      "parallel_co_travel_score": 0.490702433,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0059",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.881232541,
+      "parallel_co_travel_score": 0.437399632,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_preferred__sample_0061",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.379502269,
+      "parallel_co_travel_score": 0.194285831,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_swapped__sample_0062",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.407634301,
+      "parallel_co_travel_score": 0.207917229,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_preferred__sample_0063",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.327229072,
+      "parallel_co_travel_score": 0.168956812,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_swapped__sample_0064",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.945029024,
+      "parallel_co_travel_score": 0.468312269,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0065",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.742010033,
+      "parallel_co_travel_score": 0.369939256,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_preferred__sample_0067",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.376706183,
+      "parallel_co_travel_score": 0.192930985,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_swapped__sample_0068",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.630224623,
+      "parallel_co_travel_score": 0.315773546,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_preferred__sample_0069",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L2.1",
+        "first_level": "L2",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.2",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.224846279,
+      "parallel_co_travel_score": 0.119347148,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__staggered_c__context_swapped__sample_0070",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 1.011954841,
+      "parallel_co_travel_score": 0.500741227,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_preferred__sample_0071",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L2.1",
+        "first_level": "L2",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.2",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.281482203,
+      "parallel_co_travel_score": 0.14679013,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__nested_s__context_swapped__sample_0072",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.996064211,
+      "parallel_co_travel_score": 0.493041409,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_preferred__sample_0073",
+      "second_lane_id": "selected_l1_003"
+    },
+    {
+      "curve_pair": {
+        "first_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002.L1",
+        "first_level": "L1",
+        "second_curve_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003.L2.1",
+        "second_level": "L2"
+      },
+      "first_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_002__Y-C__compact_c__context_opposed__sample_0027",
+      "first_lane_id": "selected_l1_002",
+      "normalized_penalty": 0.362900183,
+      "parallel_co_travel_score": 0.186241277,
+      "second_candidate_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__selected_l1_003__Y-2C__open_asymmetric__context_swapped__sample_0074",
+      "second_lane_id": "selected_l1_003"
+    }
+  ],
+  "pair_penalty_count": 45,
+  "parallel_co_travel_editor_q95": 0.100095943,
+  "parallel_co_travel_soft_limit": 0.010397705,
+  "prototype_id": "proto_sw_1_1",
+  "prototype_strategy": {
+    "backbone_domain": {
+      "family_guard": "sw1_fixed_flower_valley_relation",
+      "flower_transport_policy": "fixed_geometry_in_5b",
+      "generator": "global_periodic_wave_v4",
+      "independent_flower_variation": "disabled",
+      "topology_policy": "preserve_peak_trough_sequence",
+      "variant_library": "prototype_combined_wave_variants_v1",
+      "variation_contract": "prototype_domain_global_periodic_wave_v4"
+    },
+    "branchunit_profile": {
+      "candidate_coverage_policy": "contract_weak_role_grammar_strata",
+      "complexity_domain": "dense_short",
+      "editor_l2_profile_key": "proto_sw_1_1"
+    },
+    "family_id": "SW-1_valley_filling",
+    "flower_layout": {
+      "mode": "fixed_prototype_relation",
+      "position_variation_enabled": false,
+      "seed_domain": "flower_seed"
+    },
+    "flower_mount": {
+      "binding": "trough_or_valley_flank_support",
+      "mechanism": "valley_flank_support",
+      "support_count_policy": "one_per_flower"
+    },
+    "global_selection_profile": {
+      "candidate_order_policy": "contract_class_cycle_seed_phase",
+      "class_cycle_phase_offset": 0,
+      "hierarchy_mix_policy": "contract_fraction_targets"
+    },
+    "invariants": {
+      "flower_count": 2,
+      "flower_position_policy": "fixed_prototype_relation",
+      "prototype_identity_locked": true,
+      "repeat_width": 1.0
+    },
+    "l1_profile": {
+      "curve_geometry_profile_key": "proto_sw_1_1",
+      "feedback_profile_key": "proto_sw_1_1",
+      "legacy_fixed_warp_visual_prior": false,
+      "ordinary_role_cycle": [
+        "frontier",
+        "primary_sweep",
+        "balance",
+        "primary_sweep"
+      ],
+      "random_namespace": "proto_sw_1_1",
+      "root_rhythm_profile_key": "proto_sw_1_1",
+      "side_rhythm": "near_balanced_frequent_alternation"
+    },
+    "prototype_id": "proto_sw_1_1",
+    "registry_id": "sw_prototype_domain_strategy_v1",
+    "route_signature": {
+      "flower_count": 2,
+      "flower_relation": "valley_support",
+      "style_intent": "dense"
+    },
+    "schema": "dynamic_branch_prototype_strategy_projection_v1",
+    "strategy_id": "strategy_proto_sw_1_1_v1"
+  },
+  "repeat_shifts_checked": [
+    -1.0,
+    0.0,
+    1.0
+  ],
+  "schema": "dynamic_branch_stage5_candidate_conflict_graph_v2",
+  "seed": 4054807205,
+  "source_inventory_digest": "f42fce1ae94876437b99f7dc27e32c8bc870719d2a5402f66e369e7b374e4c67",
+  "source_inventory_id": "proto_sw_1_1__seed_2781254137__global_l1_flow_v3__density_simple__unit_candidates_v2"
+}

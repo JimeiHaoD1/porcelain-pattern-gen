@@ -4,6 +4,8 @@
 
 本轮完成了 Paper A 第4章的正式实验执行、独立几何评估、结果汇总、论文案例整理和人工评价材料准备。正式方法保持冻结状态：`Ours` 对应 H2-B 联合 BranchUnit 组合；H2-A 仅作为普通 `density control`。本轮没有修改生产生成器，也没有在正式运行后针对失败案例补规则或替换种子。
 
+GitHub 网页端的结果总入口为 [artifacts/paper_a_chapter4_v1](https://github.com/JimeiHaoD1/porcelain-pattern-gen/tree/ds/artifacts/paper_a_chapter4_v1)。该目录的 [README.md](https://github.com/JimeiHaoD1/porcelain-pattern-gen/blob/ds/artifacts/paper_a_chapter4_v1/README.md) 提供 RQ1 至 RQ4 的直接结果链接。
+
 冻结协议共含 590 个案例：Matrix-A 450 个，Matrix-B 50 个，Matrix-C 90 个。实际得到 500 条 `Ours` 正式生成记录和 360 条四方法消融记录。所有计划案例均保留在分母中。
 
 当前可以直接用于论文第4章的内容包括 RQ1、RQ2、RQ3 的定量结果和图例，以及 RQ4 的描述性真实结构统计与完整盲评材料。RQ4 的正式真实参照检验和人工评分汇总仍需外部数据，因此没有生成虚构结果。

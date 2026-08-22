@@ -4,6 +4,8 @@
 
 完整的执行过程、指标解释与结果边界见 [实验操作总结与结果指引](https://github.com/JimeiHaoD1/porcelain-pattern-gen/blob/ds/experiments/branch_unit/paper_a_evaluation/CHAPTER4_EXPERIMENT_OPERATION_SUMMARY_AND_RESULTS_GUIDE_V1.md)。实验代码位于 [paper_a_evaluation](https://github.com/JimeiHaoD1/porcelain-pattern-gen/tree/ds/experiments/branch_unit/paper_a_evaluation)。
 
+需要交给网页版 GPT 核对论文时，直接提供 [网页版 GPT 第4章证据阅读指引](https://github.com/JimeiHaoD1/porcelain-pattern-gen/blob/ds/experiments/branch_unit/paper_a_evaluation/CHATGPT_WEB_CHAPTER4_RESULTS_READING_GUIDE_V1.md)。
+
 ## 最短查阅路径
 
 | 研究问题 | 首选结果 | 辅助材料 |

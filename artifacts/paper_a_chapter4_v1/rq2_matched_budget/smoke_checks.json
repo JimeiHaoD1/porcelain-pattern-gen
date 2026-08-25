@@ -1,0 +1,29 @@
+{
+  "all_passed": true,
+  "case_id": "C083",
+  "check_count": 4,
+  "checks": [
+    {
+      "check_id": "formal_parity_one_context",
+      "details": "{\"LocalGreedy\": {\"matched\": true, \"selected_candidate_count\": 7}, \"Ours\": {\"matched\": true, \"selected_candidate_count\": 7}}",
+      "passed": 1
+    },
+    {
+      "check_id": "mb_l2_geometry_semantics",
+      "details": "{\"single\": {\"B\": 1, \"U\": 1}, \"opposed\": {\"B\": 2, \"U\": 1}}",
+      "passed": 1
+    },
+    {
+      "check_id": "unreachable_budget_no_fallback",
+      "details": "{\"target\": 5, \"LocalGreedy@B\": \"budget_not_attained\", \"Ours@B\": \"budget_infeasible\", \"node_limited_Ours@B\": \"budget_indeterminate_node_limit\"}",
+      "passed": 1
+    },
+    {
+      "check_id": "independent_canonical_geometry_metrics",
+      "details": "{\"l2_count\": 2, \"mechanically_legal\": 1, \"parallel_cotravel_total\": 0.010702121798496854, \"parallel_cotravel_peak\": 0.002988754296462122}",
+      "passed": 1
+    }
+  ],
+  "schema": "paper_a_rq2_mb_l2_minimal_smoke_v1",
+  "visual_status": "VISUAL_REVIEW_PENDING"
+}
